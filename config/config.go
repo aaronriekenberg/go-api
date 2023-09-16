@@ -18,18 +18,19 @@ type Configuration struct {
 
 func ReadConfiguration(configFile string) *Configuration {
 
-	slog.Info("begin ReadConfiguration")
+	logger := slog.Default().With("configFile", configFile)
+
+	logger.Info("begin ReadConfiguration")
 
 	var config Configuration
 	_, err := toml.DecodeFile(configFile, &config)
 	if err != nil {
-		slog.Error("toml.DecodeFile error",
-			"configFile", configFile,
+		logger.Error("toml.DecodeFile error",
 			"error", err)
 		os.Exit(1)
 	}
 
-	slog.Info("end ReadConfiguration")
+	logger.Info("end ReadConfiguration")
 
 	return &config
 }
