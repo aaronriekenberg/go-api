@@ -1,11 +1,13 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 
+	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/requestinfo"
 )
 
@@ -18,9 +20,25 @@ import (
 // }
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	if len(os.Args) != 2 {
+		logger.Error("config file required as command line arument")
+	}
+
+	configFile := os.Args[1]
+
+	config := config.ReadConfiguration(configFile, logger)
+
+	logger.Info("read configuration",
+		"config", config)
+
 	router := httprouter.New()
 	router.GET("/request_info", requestinfo.CreateHandler())
 	// router.GET("/hello/:name", Hello)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	err := http.ListenAndServe(config.ServerConfiguration.ListenAddress, router)
+	logger.Error("http.ListenAndServe error",
+		"error", err)
+	os.Exit(1)
 }
