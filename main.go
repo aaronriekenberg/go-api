@@ -20,7 +20,7 @@ import (
 // }
 
 func main() {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	if len(os.Args) != 2 {
 		logger.Error("config file required as command line arument")
