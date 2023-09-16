@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aaronriekenberg/go-api/utils"
-
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/aaronriekenberg/go-api/utils"
 )
 
 type requestFields struct {

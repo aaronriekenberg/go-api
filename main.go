@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aaronriekenberg/go-api/requestinfo"
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/aaronriekenberg/go-api/requestinfo"
 )
 
 // func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
