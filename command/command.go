@@ -22,7 +22,7 @@ import (
 func CreateAllCommandsHandler(commandConfiguration config.CommandConfiguration) httprouter.Handle {
 	jsonBuffer, err := json.Marshal(commandConfiguration.Commands)
 	if err != nil {
-		slog.Error("getAllCommandsHandlerFunc json.Marhsal error",
+		slog.Error("getAllCommandsHandlerFunc json.Marshal error",
 			"error", err)
 		os.Exit(1)
 	}
@@ -56,8 +56,8 @@ func newRunCommandsHandler(commandConfiguration config.CommandConfiguration) *ru
 			"error", err)
 		os.Exit(1)
 	}
-	idToCommandInfo := make(map[string]config.CommandInfo)
 
+	idToCommandInfo := make(map[string]config.CommandInfo)
 	for _, commandInfo := range commandConfiguration.Commands {
 		idToCommandInfo[commandInfo.ID] = commandInfo
 	}
