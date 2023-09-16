@@ -1,2 +1,3 @@
 [ServerConfiguration]
+Network="tcp"
 ListenAddress=":8080"

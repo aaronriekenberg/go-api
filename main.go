@@ -2,13 +2,13 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
 	"os"
 
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/requestinfo"
+	"github.com/aaronriekenberg/go-api/server"
 )
 
 // func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -20,25 +20,22 @@ import (
 // }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
 	if len(os.Args) != 2 {
-		logger.Error("config file required as command line arument")
+		slog.Error("config file required as command line arument")
 	}
 
 	configFile := os.Args[1]
 
-	config := config.ReadConfiguration(configFile, logger)
+	config := config.ReadConfiguration(configFile)
 
-	logger.Info("read configuration",
+	slog.Info("read configuration",
 		"config", config)
 
 	router := httprouter.New()
 	router.GET("/request_info", requestinfo.CreateHandler())
 	// router.GET("/hello/:name", Hello)
 
-	err := http.ListenAndServe(config.ServerConfiguration.ListenAddress, router)
-	logger.Error("http.ListenAndServe error",
-		"error", err)
-	os.Exit(1)
+	server.Run(config.ServerConfiguration, router)
 }
