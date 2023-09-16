@@ -6,18 +6,20 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
+	"github.com/aaronriekenberg/go-api/command"
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/requestinfo"
 	"github.com/aaronriekenberg/go-api/server"
 )
 
-// func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-// 	fmt.Fprint(w, "Welcome!\n")
-// }
+func createRouter(config config.Configuration) *httprouter.Router {
+	router := httprouter.New()
+	router.GET("/commands", command.CreateAllCommandsHandler(config.CommandConfiguration))
+	router.GET("/commands/:id", command.CreateRunCommandsHandler(config.CommandConfiguration))
+	router.GET("/request_info", requestinfo.CreateHandler())
 
-// func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
-// }
+	return router
+}
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -33,9 +35,7 @@ func main() {
 	slog.Info("read configuration",
 		"config", config)
 
-	router := httprouter.New()
-	router.GET("/request_info", requestinfo.CreateHandler())
-	// router.GET("/hello/:name", Hello)
+	router := createRouter(config)
 
 	server.Run(config.ServerConfiguration, router)
 }

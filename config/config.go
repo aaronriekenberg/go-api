@@ -13,10 +13,10 @@ type ServerConfiguration struct {
 }
 
 type CommandInfo struct {
-	ID          string
-	Description string
-	Command     string
-	Args        []string
+	ID          string   `json:"id"`
+	Description string   `json:"description"`
+	Command     string   `json:"command"`
+	Args        []string `json:"args"`
 }
 
 type CommandConfiguration struct {
@@ -31,7 +31,7 @@ type Configuration struct {
 	CommandConfiguration CommandConfiguration
 }
 
-func ReadConfiguration(configFile string) *Configuration {
+func ReadConfiguration(configFile string) Configuration {
 
 	logger := slog.Default().With("configFile", configFile)
 
@@ -47,5 +47,5 @@ func ReadConfiguration(configFile string) *Configuration {
 
 	logger.Info("end ReadConfiguration")
 
-	return &config
+	return config
 }

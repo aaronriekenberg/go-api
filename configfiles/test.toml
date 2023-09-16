@@ -1,5 +1,9 @@
 [ServerConfiguration]
-Network="tcp"
-ListenAddress=":8080"
+Network = "tcp"
+ListenAddress = ":8080"
 
 [CommandConfiguration]
+MaxConcurrentCommands = 10
+RequestTimeoutDuration = "2s"
+SemaphoreAcquireTimeoutDuration = "200ms"
+Commands = [{ ID = "w", Description = "w", Command = "/usr/bin/w" }]
