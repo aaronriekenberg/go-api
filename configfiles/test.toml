@@ -6,4 +6,9 @@ ListenAddress = ":8080"
 MaxConcurrentCommands = 10
 RequestTimeoutDuration = "2s"
 SemaphoreAcquireTimeoutDuration = "200ms"
-Commands = [{ ID = "w", Description = "w", Command = "/usr/bin/w" }]
+Commands = [
+    { ID = "w", Description = "w", Command = "/usr/bin/w" },
+    { ID = "sleep", Description = "sleep .5", Command = "/bin/sleep", Args = [
+        "0.5",
+    ] },
+]
