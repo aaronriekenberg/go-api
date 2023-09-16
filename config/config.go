@@ -12,8 +12,23 @@ type ServerConfiguration struct {
 	ListenAddress string
 }
 
+type CommandInfo struct {
+	ID          string
+	Description string
+	Command     string
+	Args        []string
+}
+
+type CommandConfiguration struct {
+	MaxConcurrentCommands           int64
+	RequestTimeoutDuration          string
+	SemaphoreAcquireTimeoutDuration string
+	Commands                        []CommandInfo
+}
+
 type Configuration struct {
-	ServerConfiguration ServerConfiguration
+	ServerConfiguration  ServerConfiguration
+	CommandConfiguration CommandConfiguration
 }
 
 func ReadConfiguration(configFile string) *Configuration {
