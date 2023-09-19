@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/julienschmidt/httprouter"
-
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
@@ -38,8 +36,8 @@ func httpHeaderToRequestHeaders(headers http.Header) map[string]string {
 	return requestHeaders
 }
 
-func requestInfoHandlerFunc() httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func requestInfoHandlerFunc() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
 		var urlString string
 		if r.URL != nil {
@@ -73,6 +71,6 @@ func requestInfoHandlerFunc() httprouter.Handle {
 	}
 }
 
-func CreateHandler() httprouter.Handle {
+func NewHandler() http.Handler {
 	return requestInfoHandlerFunc()
 }

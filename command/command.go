@@ -19,7 +19,7 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
-func CreateAllCommandsHandler(commandConfiguration config.CommandConfiguration) httprouter.Handle {
+func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
 	jsonBuffer, err := json.Marshal(commandConfiguration.Commands)
 	if err != nil {
 		slog.Error("getAllCommandsHandlerFunc json.Marshal error",
@@ -27,10 +27,10 @@ func CreateAllCommandsHandler(commandConfiguration config.CommandConfiguration) 
 		os.Exit(1)
 	}
 
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add(utils.ContentTypeHeaderKey, utils.ContentTypeApplicationJSON)
 		io.Copy(w, bytes.NewReader(jsonBuffer))
-	}
+	})
 }
 
 type runCommandsHandler struct {
@@ -40,7 +40,7 @@ type runCommandsHandler struct {
 	idToCommandInfo         map[string]config.CommandInfo
 }
 
-func newRunCommandsHandler(commandConfiguration config.CommandConfiguration) *runCommandsHandler {
+func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
 	requestTimeout, err := time.ParseDuration(commandConfiguration.RequestTimeoutDuration)
 	if err != nil {
 		slog.Error("error parsing RequestTimeoutDuration",
@@ -72,22 +72,20 @@ func newRunCommandsHandler(commandConfiguration config.CommandConfiguration) *ru
 	return handler
 }
 
-func CreateRunCommandsHandler(commandConfiguration config.CommandConfiguration) httprouter.Handle {
-	runCommandsHandler := newRunCommandsHandler(commandConfiguration)
+func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
 
-	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		id := params.ByName("id")
-		commandInfo, ok := runCommandsHandler.idToCommandInfo[id]
+	id := params.ByName("id")
+	commandInfo, ok := runCommandsHandler.idToCommandInfo[id]
 
-		if !ok {
-			slog.Warn("RunCommandsHandler unable to find comand id",
-				"id", id)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-
-		runCommandsHandler.handleRunCommandRequest(commandInfo, w, r)
+	if !ok {
+		slog.Warn("RunCommandsHandler unable to find comand id",
+			"id", id)
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
 	}
+
+	runCommandsHandler.handleRunCommandRequest(commandInfo, w, r)
 }
 
 func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(

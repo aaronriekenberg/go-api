@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/julienschmidt/httprouter"
@@ -14,9 +15,11 @@ import (
 
 func createRouter(config config.Configuration) *httprouter.Router {
 	router := httprouter.New()
-	router.GET("/commands", command.CreateAllCommandsHandler(config.CommandConfiguration))
-	router.GET("/commands/:id", command.CreateRunCommandsHandler(config.CommandConfiguration))
-	router.GET("/request_info", requestinfo.CreateHandler())
+
+	router.Handler(http.MethodGet, "/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	router.Handler(http.MethodGet, "/commands/:id", command.NewRunCommandsHandler(config.CommandConfiguration))
+
+	router.Handler(http.MethodGet, "/request_info", requestinfo.NewHandler())
 
 	return router
 }
@@ -26,6 +29,7 @@ func main() {
 
 	if len(os.Args) != 2 {
 		slog.Error("config file required as command line arument")
+		os.Exit(1)
 	}
 
 	configFile := os.Args[1]
