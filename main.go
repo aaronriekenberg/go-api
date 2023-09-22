@@ -11,6 +11,7 @@ import (
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/requestinfo"
 	"github.com/aaronriekenberg/go-api/server"
+	"github.com/aaronriekenberg/go-api/versioninfo"
 )
 
 func createRouter(config config.Configuration) *httprouter.Router {
@@ -19,7 +20,9 @@ func createRouter(config config.Configuration) *httprouter.Router {
 	router.Handler(http.MethodGet, "/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
 	router.Handler(http.MethodGet, "/commands/:id", command.NewRunCommandsHandler(config.CommandConfiguration))
 
-	router.Handler(http.MethodGet, "/request_info", requestinfo.NewHandler())
+	router.Handler(http.MethodGet, "/request_info", requestinfo.NewRequestInfoHandler())
+
+	router.Handler(http.MethodGet, "/version_info", versioninfo.NewVersionInfoHandler())
 
 	return router
 }

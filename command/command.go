@@ -22,7 +22,7 @@ import (
 func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
 	jsonBuffer, err := json.Marshal(commandConfiguration.Commands)
 	if err != nil {
-		slog.Error("getAllCommandsHandlerFunc json.Marshal error",
+		slog.Error("NewAllCommandsHandler json.Marshal error",
 			"error", err)
 		os.Exit(1)
 	}

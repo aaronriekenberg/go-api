@@ -71,6 +71,6 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 	}
 }
 
-func NewHandler() http.Handler {
+func NewRequestInfoHandler() http.Handler {
 	return requestInfoHandlerFunc()
 }
