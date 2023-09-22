@@ -1,14 +1,14 @@
-[ServerConfiguration]
-Network = "tcp"
-ListenAddress = ":8080"
+[serverConfiguration]
+network = "tcp"
+listenAddress = ":8080"
 
-[CommandConfiguration]
-MaxConcurrentCommands = 10
-RequestTimeoutDuration = "2s"
-SemaphoreAcquireTimeoutDuration = "200ms"
-Commands = [
-    { ID = "w", Description = "w", Command = "/usr/bin/w" },
-    { ID = "sleep", Description = "sleep .5", Command = "/bin/sleep", Args = [
+[commandConfiguration]
+maxConcurrentCommands = 10
+requestTimeoutDuration = "2s"
+semaphoreAcquireTimeoutDuration = "200ms"
+commands = [
+    { id = "w", description = "w", command = "/usr/bin/w" },
+    { id = "sleep", description = "sleep .5", command = "/bin/sleep", Args = [
         "0.5",
     ] },
 ]
