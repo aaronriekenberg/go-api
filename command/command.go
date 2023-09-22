@@ -128,7 +128,9 @@ func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx contex
 
 	err = runCommandsHandler.commandSemaphore.Acquire(ctx, 1)
 	if err != nil {
-		err = fmt.Errorf("commandHandler.acquireCommandSemaphore error calling Acquire: %w", err)
+		slog.Warn("runCommandsHandler.acquireCommandSemaphore error calling Acquire",
+			"error", err)
+		err = fmt.Errorf("runCommandsHandler.acquireCommandSemaphore error calling Acquire: %w", err)
 	}
 	return
 }
