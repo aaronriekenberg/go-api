@@ -146,15 +146,14 @@ type commandAPIResponse struct {
 	CommandOutput               string          `json:"command_output"`
 }
 
-func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *commandInfoDTO) (response *commandAPIResponse) {
+func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *commandInfoDTO) commandAPIResponse {
 	err := runCommandsHandler.acquireCommandSemaphore(ctx)
 	if err != nil {
-		response = &commandAPIResponse{
+		return commandAPIResponse{
 			CommandInfo:   commandInfo,
 			Now:           utils.FormatTime(time.Now()),
 			CommandOutput: fmt.Sprintf("%v", err),
 		}
-		return
 	}
 	defer runCommandsHandler.releaseCommandSemaphore()
 
@@ -172,11 +171,10 @@ func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, co
 		commandOutput = string(rawCommandOutput)
 	}
 
-	response = &commandAPIResponse{
+	return commandAPIResponse{
 		CommandInfo:                 commandInfo,
 		Now:                         utils.FormatTime(commandEndTime),
 		CommandDurationMilliseconds: commandDuration.Milliseconds(),
 		CommandOutput:               commandOutput,
 	}
-	return
 }
