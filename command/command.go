@@ -33,11 +33,27 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 	})
 }
 
+type commandInfoDTO struct {
+	ID          string   `json:"id"`
+	Description string   `json:"description"`
+	Command     string   `json:"command"`
+	Args        []string `json:"args"`
+}
+
+func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
+	return commandInfoDTO{
+		ID:          commandInfo.ID,
+		Description: commandInfo.Description,
+		Command:     commandInfo.Command,
+		Args:        commandInfo.Args,
+	}
+}
+
 type runCommandsHandler struct {
 	commandSemaphore        *semaphore.Weighted
 	requestTimeout          time.Duration
 	semaphoreAcquireTimeout time.Duration
-	idToCommandInfo         map[string]config.CommandInfo
+	idToCommandInfo         map[string]commandInfoDTO
 }
 
 func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
@@ -57,9 +73,9 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 		os.Exit(1)
 	}
 
-	idToCommandInfo := make(map[string]config.CommandInfo)
+	idToCommandInfo := make(map[string]commandInfoDTO)
 	for _, commandInfo := range commandConfiguration.Commands {
-		idToCommandInfo[commandInfo.ID] = commandInfo
+		idToCommandInfo[commandInfo.ID] = commandInfoToDTO(commandInfo)
 	}
 
 	handler := &runCommandsHandler{
@@ -79,24 +95,24 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 	commandInfo, ok := runCommandsHandler.idToCommandInfo[id]
 
 	if !ok {
-		slog.Warn("RunCommandsHandler unable to find comand id",
+		slog.Warn("RunCommandsHandler unable to find comand",
 			"id", id)
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 
-	runCommandsHandler.handleRunCommandRequest(commandInfo, w, r)
+	runCommandsHandler.handleRunCommandRequest(&commandInfo, w, r)
 }
 
 func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
-	commandInfo config.CommandInfo,
+	commandInfo *commandInfoDTO,
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
 	ctx, cancel := context.WithTimeout(r.Context(), runCommandsHandler.requestTimeout)
 	defer cancel()
 
-	commandAPIResponse := runCommandsHandler.runCommand(ctx, &commandInfo)
+	commandAPIResponse := runCommandsHandler.runCommand(ctx, commandInfo)
 
 	jsonText, err := json.Marshal(commandAPIResponse)
 	if err != nil {
@@ -124,13 +140,13 @@ func (runCommandsHandler *runCommandsHandler) releaseCommandSemaphore() {
 }
 
 type commandAPIResponse struct {
-	CommandInfo                 *config.CommandInfo `json:"command_info"`
-	Now                         string              `json:"now"`
-	CommandDurationMilliseconds int64               `json:"command_duration_ms"`
-	CommandOutput               string              `json:"command_output"`
+	CommandInfo                 *commandInfoDTO `json:"command_info"`
+	Now                         string          `json:"now"`
+	CommandDurationMilliseconds int64           `json:"command_duration_ms"`
+	CommandOutput               string          `json:"command_output"`
 }
 
-func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *config.CommandInfo) (response *commandAPIResponse) {
+func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *commandInfoDTO) (response *commandAPIResponse) {
 	err := runCommandsHandler.acquireCommandSemaphore(ctx)
 	if err != nil {
 		response = &commandAPIResponse{

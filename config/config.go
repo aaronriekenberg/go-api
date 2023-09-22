@@ -13,10 +13,10 @@ type ServerConfiguration struct {
 }
 
 type CommandInfo struct {
-	ID          string   `json:"id"`
-	Description string   `json:"description"`
-	Command     string   `json:"command"`
-	Args        []string `json:"args"`
+	ID          string
+	Description string
+	Command     string
+	Args        []string
 }
 
 type CommandConfiguration struct {
