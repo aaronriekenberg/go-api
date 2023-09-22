@@ -78,14 +78,12 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 		idToCommandInfo[commandInfo.ID] = commandInfoToDTO(commandInfo)
 	}
 
-	handler := &runCommandsHandler{
+	return &runCommandsHandler{
 		commandSemaphore:        semaphore.NewWeighted(commandConfiguration.MaxConcurrentCommands),
 		requestTimeout:          requestTimeout,
 		semaphoreAcquireTimeout: semaphoreAcquireTimeout,
 		idToCommandInfo:         idToCommandInfo,
 	}
-
-	return handler
 }
 
 func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
