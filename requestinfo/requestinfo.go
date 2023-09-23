@@ -40,7 +40,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 		if r.URL != nil {
 			urlString = r.URL.String()
 		} else {
-			urlString = "(null)"
+			urlString = "(nil)"
 		}
 
 		response := &requestInfoData{
