@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"slices"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
@@ -19,20 +20,6 @@ import (
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/utils"
 )
-
-func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
-	jsonBuffer, err := json.Marshal(commandConfiguration.Commands)
-	if err != nil {
-		slog.Error("NewAllCommandsHandler json.Marshal error",
-			"error", err)
-		os.Exit(1)
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add(utils.ContentTypeHeaderKey, utils.ContentTypeApplicationJSON)
-		io.Copy(w, bytes.NewReader(jsonBuffer))
-	})
-}
 
 type commandInfoDTO struct {
 	ID          string   `json:"id"`
@@ -46,8 +33,27 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 		ID:          commandInfo.ID,
 		Description: commandInfo.Description,
 		Command:     commandInfo.Command,
-		Args:        commandInfo.Args,
+		Args:        slices.Clone(commandInfo.Args),
 	}
+}
+
+func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
+	var allCommandDTOs []commandInfoDTO
+	for _, command := range commandConfiguration.Commands {
+		allCommandDTOs = append(allCommandDTOs, commandInfoToDTO(command))
+	}
+
+	jsonBuffer, err := json.Marshal(allCommandDTOs)
+	if err != nil {
+		slog.Error("NewAllCommandsHandler json.Marshal error",
+			"error", err)
+		os.Exit(1)
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add(utils.ContentTypeHeaderKey, utils.ContentTypeApplicationJSON)
+		io.Copy(w, bytes.NewReader(jsonBuffer))
+	})
 }
 
 type runCommandsHandler struct {
