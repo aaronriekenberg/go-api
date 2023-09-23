@@ -1,9 +1,6 @@
 package requestinfo
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
 	"net/http"
 	"strings"
 
@@ -59,15 +56,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			RequestHeaders: httpHeaderToRequestHeaders(r.Header),
 		}
 
-		jsonText, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Add(utils.ContentTypeHeaderKey, utils.ContentTypeApplicationJSON)
-
-		io.Copy(w, bytes.NewReader(jsonText))
+		utils.RespondWithJSONDTO(response, w)
 	}
 }
 

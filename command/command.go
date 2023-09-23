@@ -1,12 +1,10 @@
 package command
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -43,17 +41,14 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 		allCommandDTOs = append(allCommandDTOs, commandInfoToDTO(command))
 	}
 
-	jsonBuffer, err := json.Marshal(allCommandDTOs)
+	jsonBytes, err := json.Marshal(allCommandDTOs)
 	if err != nil {
 		slog.Error("NewAllCommandsHandler json.Marshal error",
 			"error", err)
 		os.Exit(1)
 	}
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add(utils.ContentTypeHeaderKey, utils.ContentTypeApplicationJSON)
-		io.Copy(w, bytes.NewReader(jsonBuffer))
-	})
+	return utils.JSONBytesHandlerFunc(jsonBytes)
 }
 
 type runCommandsHandler struct {
@@ -128,14 +123,7 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 		return
 	}
 
-	jsonText, err := json.Marshal(commandAPIResponse)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Add(utils.ContentTypeHeaderKey, utils.ContentTypeApplicationJSON)
-	io.Copy(w, bytes.NewReader(jsonText))
+	utils.RespondWithJSONDTO(commandAPIResponse, w)
 }
 
 var errorAcquiringCommandSemaphore = errors.New("error acquiring command semaphore")
