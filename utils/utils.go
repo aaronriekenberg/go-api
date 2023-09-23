@@ -23,14 +23,14 @@ func RespondWithJSONDTO(
 	dto any,
 	w http.ResponseWriter,
 ) {
-	jsonText, err := json.Marshal(dto)
+	jsonBytes, err := json.Marshal(dto)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Add(ContentTypeHeaderKey, ContentTypeApplicationJSON)
-	io.Copy(w, bytes.NewReader(jsonText))
+	io.Copy(w, bytes.NewReader(jsonBytes))
 }
 
 func JSONBytesHandlerFunc(
