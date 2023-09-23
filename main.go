@@ -17,12 +17,12 @@ import (
 func createRouter(config config.Configuration) *httprouter.Router {
 	router := httprouter.New()
 
-	router.Handler(http.MethodGet, "/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
-	router.Handler(http.MethodGet, "/commands/:id", command.NewRunCommandsHandler(config.CommandConfiguration))
+	router.Handler(http.MethodGet, "/api/v1/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	router.Handler(http.MethodGet, "/api/v1/commands/:id", command.NewRunCommandsHandler(config.CommandConfiguration))
 
-	router.Handler(http.MethodGet, "/request_info", requestinfo.NewRequestInfoHandler())
+	router.Handler(http.MethodGet, "/api/v1/request_info", requestinfo.NewRequestInfoHandler())
 
-	router.Handler(http.MethodGet, "/version_info", versioninfo.NewVersionInfoHandler())
+	router.Handler(http.MethodGet, "/api/v1/version_info", versioninfo.NewVersionInfoHandler())
 
 	return router
 }
