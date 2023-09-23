@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -110,7 +111,16 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	ctx, cancel := context.WithTimeout(r.Context(), runCommandsHandler.requestTimeout)
 	defer cancel()
 
-	commandAPIResponse := runCommandsHandler.runCommand(ctx, commandInfo)
+	commandAPIResponse, err := runCommandsHandler.runCommand(ctx, commandInfo)
+
+	if err != nil {
+		if errors.Is(err, errorAcquiringCommandSemaphore) {
+			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	jsonText, err := json.Marshal(commandAPIResponse)
 	if err != nil {
@@ -122,17 +132,19 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	io.Copy(w, bytes.NewReader(jsonText))
 }
 
-func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx context.Context) (err error) {
+var errorAcquiringCommandSemaphore = errors.New("error acquiring command semaphore")
+
+func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, runCommandsHandler.semaphoreAcquireTimeout)
 	defer cancel()
 
-	err = runCommandsHandler.commandSemaphore.Acquire(ctx, 1)
+	err := runCommandsHandler.commandSemaphore.Acquire(ctx, 1)
 	if err != nil {
 		slog.Warn("runCommandsHandler.acquireCommandSemaphore error calling Acquire",
 			"error", err)
-		err = fmt.Errorf("runCommandsHandler.acquireCommandSemaphore error calling Acquire: %w", err)
+		return errorAcquiringCommandSemaphore
 	}
-	return
+	return nil
 }
 
 func (runCommandsHandler *runCommandsHandler) releaseCommandSemaphore() {
@@ -146,14 +158,10 @@ type commandAPIResponse struct {
 	CommandOutput               string          `json:"command_output"`
 }
 
-func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *commandInfoDTO) commandAPIResponse {
-	err := runCommandsHandler.acquireCommandSemaphore(ctx)
+func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *commandInfoDTO) (response *commandAPIResponse, err error) {
+	err = runCommandsHandler.acquireCommandSemaphore(ctx)
 	if err != nil {
-		return commandAPIResponse{
-			CommandInfo:   commandInfo,
-			Now:           utils.FormatTime(time.Now()),
-			CommandOutput: fmt.Sprintf("%v", err),
-		}
+		return
 	}
 	defer runCommandsHandler.releaseCommandSemaphore()
 
@@ -171,10 +179,12 @@ func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, co
 		commandOutput = string(rawCommandOutput)
 	}
 
-	return commandAPIResponse{
+	response = &commandAPIResponse{
 		CommandInfo:                 commandInfo,
 		Now:                         utils.FormatTime(commandEndTime),
 		CommandDurationMilliseconds: commandDuration.Milliseconds(),
 		CommandOutput:               commandOutput,
 	}
+	err = nil
+	return
 }
