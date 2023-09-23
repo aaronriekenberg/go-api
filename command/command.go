@@ -158,7 +158,10 @@ type commandAPIResponse struct {
 	CommandOutput               string          `json:"command_output"`
 }
 
-func (runCommandsHandler *runCommandsHandler) runCommand(ctx context.Context, commandInfo *commandInfoDTO) (response *commandAPIResponse, err error) {
+func (runCommandsHandler *runCommandsHandler) runCommand(
+	ctx context.Context,
+	commandInfo *commandInfoDTO,
+) (response *commandAPIResponse, err error) {
 	err = runCommandsHandler.acquireCommandSemaphore(ctx)
 	if err != nil {
 		return
