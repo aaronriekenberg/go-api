@@ -36,7 +36,7 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 }
 
 func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
-	var allCommandDTOs []commandInfoDTO
+	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 	for _, command := range commandConfiguration.Commands {
 		allCommandDTOs = append(allCommandDTOs, commandInfoToDTO(command))
 	}
@@ -89,7 +89,8 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 }
 
 func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	params := httprouter.ParamsFromContext(r.Context())
+	ctx := r.Context()
+	params := httprouter.ParamsFromContext(ctx)
 
 	id := params.ByName("id")
 	commandInfo, ok := runCommandsHandler.idToCommandInfo[id]
@@ -101,15 +102,15 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 		return
 	}
 
-	runCommandsHandler.handleRunCommandRequest(&commandInfo, w, r)
+	runCommandsHandler.handleRunCommandRequest(ctx, &commandInfo, w)
 }
 
 func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
+	ctx context.Context,
 	commandInfo *commandInfoDTO,
 	w http.ResponseWriter,
-	r *http.Request,
 ) {
-	ctx, cancel := context.WithTimeout(r.Context(), runCommandsHandler.requestTimeout)
+	ctx, cancel := context.WithTimeout(ctx, runCommandsHandler.requestTimeout)
 	defer cancel()
 
 	commandAPIResponse, err := runCommandsHandler.runCommand(ctx, commandInfo)
