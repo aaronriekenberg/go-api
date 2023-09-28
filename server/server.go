@@ -13,7 +13,12 @@ func Run(
 	config config.ServerConfiguration,
 	handler http.Handler,
 ) {
-	slog.Info("begin server.Run")
+	logger := slog.Default().With(slog.Group("server",
+		"network", config.Network,
+		"listenAddress", config.ListenAddress,
+	))
+
+	logger.Info("begin server.Run")
 
 	if config.Network == "unix" {
 		os.Remove(config.ListenAddress)
@@ -21,7 +26,7 @@ func Run(
 
 	listener, err := net.Listen(config.Network, config.ListenAddress)
 	if err != nil {
-		slog.Error("net.Listen error",
+		logger.Error("net.Listen error",
 			"error", err)
 		os.Exit(1)
 	}
@@ -32,7 +37,7 @@ func Run(
 
 	err = httpServer.Serve(listener)
 
-	slog.Error("http.ListenAndServe error",
+	logger.Error("http.ListenAndServe error",
 		"error", err)
 	os.Exit(1)
 }
