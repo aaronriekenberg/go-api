@@ -37,8 +37,8 @@ func ReadConfiguration(configFile string) (*Configuration, error) {
 
 	logger.Info("begin ReadConfiguration")
 
-	var config Configuration
-	_, err := toml.DecodeFile(configFile, &config)
+	var configuration Configuration
+	_, err := toml.DecodeFile(configFile, &configuration)
 	if err != nil {
 		logger.Error("toml.DecodeFile error",
 			"error", err,
@@ -46,9 +46,9 @@ func ReadConfiguration(configFile string) (*Configuration, error) {
 		return nil, fmt.Errorf("ReadConfiguration error: %w", err)
 	}
 
-	logger.Info("read configuration",
-		"config", config,
+	logger.Info("end ReadConfiguration",
+		"configuration", configuration,
 	)
 
-	return &config, nil
+	return &configuration, nil
 }
