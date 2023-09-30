@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 func Run(
 	config config.ServerConfiguration,
 	handler http.Handler,
-) {
+) error {
 	logger := slog.Default().With(slog.Group("server",
 		"network", config.Network,
 		"listenAddress", config.ListenAddress,
@@ -26,9 +27,10 @@ func Run(
 
 	listener, err := net.Listen(config.Network, config.ListenAddress)
 	if err != nil {
-		logger.Error("net.Listen error",
-			"error", err)
-		os.Exit(1)
+		logger.Error("server.Run net.Listen error",
+			"error", err,
+		)
+		return fmt.Errorf("server.Run net.Listen error: %w", err)
 	}
 
 	httpServer := &http.Server{
@@ -37,7 +39,8 @@ func Run(
 
 	err = httpServer.Serve(listener)
 
-	logger.Error("http.ListenAndServe error",
-		"error", err)
-	os.Exit(1)
+	logger.Error("server.Run http.ListenAndServe error",
+		"error", err,
+	)
+	return fmt.Errorf("server.Run http.ListenAndServe error: %w", err)
 }

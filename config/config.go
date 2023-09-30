@@ -1,8 +1,8 @@
 package config
 
 import (
+	"fmt"
 	"log/slog"
-	"os"
 
 	"github.com/BurntSushi/toml"
 )
@@ -31,7 +31,7 @@ type Configuration struct {
 	CommandConfiguration CommandConfiguration
 }
 
-func ReadConfiguration(configFile string) Configuration {
+func ReadConfiguration(configFile string) (*Configuration, error) {
 
 	logger := slog.Default().With("configFile", configFile)
 
@@ -42,10 +42,11 @@ func ReadConfiguration(configFile string) Configuration {
 	if err != nil {
 		logger.Error("toml.DecodeFile error",
 			"error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("ReadConfiguration error: %w", err)
 	}
 
-	logger.Info("end ReadConfiguration")
+	slog.Info("read configuration",
+		"config", config)
 
-	return config
+	return &config, nil
 }

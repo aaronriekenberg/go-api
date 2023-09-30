@@ -2,9 +2,9 @@ package versioninfo
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
 	"runtime/debug"
 	"strings"
 
@@ -26,17 +26,18 @@ func buildInfoMap() map[string]string {
 	return buildInfoMap
 }
 
-func versionInfoHandlerFunc() http.HandlerFunc {
+func versionInfoHandlerFunc() (http.HandlerFunc, error) {
 	jsonBytes, err := json.Marshal(buildInfoMap())
 	if err != nil {
 		slog.Error("versionInfoHandlerFunc json.Marshal error",
-			"error", err)
-		os.Exit(1)
+			"error", err,
+		)
+		return nil, fmt.Errorf("versionInfoHandlerFunc json.Marshal error: %w", err)
 	}
 
-	return utils.JSONBytesHandlerFunc(jsonBytes)
+	return utils.JSONBytesHandlerFunc(jsonBytes), nil
 }
 
-func NewVersionInfoHandler() http.Handler {
+func NewVersionInfoHandler() (http.Handler, error) {
 	return versionInfoHandlerFunc()
 }

@@ -9,22 +9,37 @@ import (
 	"github.com/aaronriekenberg/go-api/server"
 )
 
+func fatalError(
+	message string,
+	err error,
+) {
+	slog.Error(message,
+		"error", err,
+	)
+	os.Exit(1)
+}
+
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
 	if len(os.Args) != 2 {
-		slog.Error("config file required as command line arument")
-		os.Exit(1)
+		fatalError("config file required as command line arument", nil)
 	}
 
 	configFile := os.Args[1]
 
-	config := config.ReadConfiguration(configFile)
+	config, err := config.ReadConfiguration(configFile)
 
-	slog.Info("read configuration",
-		"config", config)
+	if err != nil {
+		fatalError("config.ReadConfiguration error", err)
+	}
 
-	handlers := handlers.CreateHandlers(config)
+	handlers, err := handlers.CreateHandlers(*config)
 
-	server.Run(config.ServerConfiguration, handlers)
+	if err != nil {
+		fatalError("handlers.CreateHandlers error", err)
+	}
+
+	err = server.Run(config.ServerConfiguration, handlers)
+	fatalError("server.Run error", err)
 }

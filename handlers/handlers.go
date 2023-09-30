@@ -12,15 +12,28 @@ import (
 
 func CreateHandlers(
 	config config.Configuration,
-) http.Handler {
+) (http.Handler, error) {
 	router := httprouter.New()
 
-	router.Handler(http.MethodGet, "/api/v1/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
-	router.Handler(http.MethodGet, "/api/v1/commands/:id", command.NewRunCommandsHandler(config.CommandConfiguration))
+	allCommandsHandler, err := command.NewAllCommandsHandler(config.CommandConfiguration)
+	if err != nil {
+		return nil, err
+	}
+	router.Handler(http.MethodGet, "/api/v1/commands", allCommandsHandler)
+
+	runCommandsHandler, err := command.NewRunCommandsHandler(config.CommandConfiguration)
+	if err != nil {
+		return nil, err
+	}
+	router.Handler(http.MethodGet, "/api/v1/commands/:id", runCommandsHandler)
 
 	router.Handler(http.MethodGet, "/api/v1/request_info", requestinfo.NewRequestInfoHandler())
 
-	router.Handler(http.MethodGet, "/api/v1/version_info", versioninfo.NewVersionInfoHandler())
+	versionInfoHandler, err := versioninfo.NewVersionInfoHandler()
+	if err != nil {
+		return nil, err
+	}
+	router.Handler(http.MethodGet, "/api/v1/version_info", versionInfoHandler)
 
-	return router
+	return router, nil
 }

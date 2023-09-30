@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
 	"os/exec"
 	"slices"
 	"time"
@@ -35,7 +34,7 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 	}
 }
 
-func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
+func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) (http.Handler, error) {
 	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 	for _, command := range commandConfiguration.Commands {
 		allCommandDTOs = append(allCommandDTOs, commandInfoToDTO(command))
@@ -44,11 +43,12 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 	jsonBytes, err := json.Marshal(allCommandDTOs)
 	if err != nil {
 		slog.Error("NewAllCommandsHandler json.Marshal error",
-			"error", err)
-		os.Exit(1)
+			"error", err,
+		)
+		return nil, fmt.Errorf("NewAllCommandsHandler json.Marshal error: %w", err)
 	}
 
-	return utils.JSONBytesHandlerFunc(jsonBytes)
+	return utils.JSONBytesHandlerFunc(jsonBytes), nil
 }
 
 type runCommandsHandler struct {
@@ -58,21 +58,21 @@ type runCommandsHandler struct {
 	idToCommandInfo         map[string]commandInfoDTO
 }
 
-func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
+func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) (http.Handler, error) {
 	requestTimeout, err := time.ParseDuration(commandConfiguration.RequestTimeoutDuration)
 	if err != nil {
-		slog.Error("error parsing RequestTimeoutDuration",
+		slog.Error("NewRunCommandsHandler error parsing RequestTimeoutDuration",
 			"RequestTimeoutDuration", commandConfiguration.RequestTimeoutDuration,
 			"error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("NewRunCommandsHandler error parsing RequestTimeoutDuration: %w", err)
 	}
 
 	semaphoreAcquireTimeout, err := time.ParseDuration(commandConfiguration.SemaphoreAcquireTimeoutDuration)
 	if err != nil {
-		slog.Error("error parsing SemaphoreAcquireTimeoutDuration",
+		slog.Error("NewRunCommandsHandler error parsing SemaphoreAcquireTimeoutDuration",
 			"SemaphoreAcquireTimeoutDuration", commandConfiguration.SemaphoreAcquireTimeoutDuration,
 			"error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("NewRunCommandsHandler error parsing SemaphoreAcquireTimeoutDuration: %w", err)
 	}
 
 	idToCommandInfo := make(map[string]commandInfoDTO)
@@ -85,7 +85,7 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 		requestTimeout:          requestTimeout,
 		semaphoreAcquireTimeout: semaphoreAcquireTimeout,
 		idToCommandInfo:         idToCommandInfo,
-	}
+	}, nil
 }
 
 func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
