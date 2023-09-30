@@ -18,25 +18,25 @@ func CreateHandlers(
 
 	router := httprouter.New()
 
-	allCommandsHandler, err := command.NewAllCommandsHandler(config.CommandConfiguration)
+	h, err := command.NewAllCommandsHandler(config.CommandConfiguration)
 	if err != nil {
 		return
 	}
-	router.Handler(get, "/api/v1/commands", allCommandsHandler)
+	router.Handler(get, "/api/v1/commands", h)
 
-	runCommandsHandler, err := command.NewRunCommandsHandler(config.CommandConfiguration)
+	h, err = command.NewRunCommandsHandler(config.CommandConfiguration)
 	if err != nil {
 		return
 	}
-	router.Handler(get, "/api/v1/commands/:id", runCommandsHandler)
+	router.Handler(get, "/api/v1/commands/:id", h)
 
 	router.Handler(get, "/api/v1/request_info", requestinfo.NewRequestInfoHandler())
 
-	versionInfoHandler, err := versioninfo.NewVersionInfoHandler()
+	h, err = versioninfo.NewVersionInfoHandler()
 	if err != nil {
 		return
 	}
-	router.Handler(get, "/api/v1/version_info", versionInfoHandler)
+	router.Handler(get, "/api/v1/version_info", h)
 
 	handler = router
 	return
