@@ -6,6 +6,7 @@ import (
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/handlers"
+	"github.com/aaronriekenberg/go-api/profiling"
 	"github.com/aaronriekenberg/go-api/server"
 )
 
@@ -33,6 +34,8 @@ func main() {
 	if err != nil {
 		fatalError("config.ReadConfiguration error", err)
 	}
+
+	profiling.Start(config.ProfilingConfiguration)
 
 	handlers, err := handlers.CreateHandlers(*config)
 

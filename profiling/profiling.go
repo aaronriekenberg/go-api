@@ -9,7 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/config"
 )
 
-func StartProfilingHandler(config config.ProfilingConfiguration) {
+func Start(config config.ProfilingConfiguration) {
 	if !config.Enabled {
 		return
 	}

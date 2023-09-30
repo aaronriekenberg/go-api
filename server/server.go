@@ -14,9 +14,9 @@ func Run(
 	config config.ServerConfiguration,
 	handler http.Handler,
 ) error {
-	logger := slog.Default().With(slog.Group("server",
-		"network", config.Network,
-		"listenAddress", config.ListenAddress,
+	logger := slog.Default().With(slog.Group("config",
+		"Network", config.Network,
+		"ListenAddress", config.ListenAddress,
 	))
 
 	logger.Info("begin server.Run")
