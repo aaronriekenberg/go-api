@@ -41,12 +41,14 @@ func ReadConfiguration(configFile string) (*Configuration, error) {
 	_, err := toml.DecodeFile(configFile, &config)
 	if err != nil {
 		logger.Error("toml.DecodeFile error",
-			"error", err)
+			"error", err,
+		)
 		return nil, fmt.Errorf("ReadConfiguration error: %w", err)
 	}
 
-	slog.Info("read configuration",
-		"config", config)
+	logger.Info("read configuration",
+		"config", config,
+	)
 
 	return &config, nil
 }
