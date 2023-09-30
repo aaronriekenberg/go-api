@@ -7,6 +7,7 @@ import (
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/handlers/command"
+	"github.com/aaronriekenberg/go-api/handlers/profiling"
 	"github.com/aaronriekenberg/go-api/handlers/requestinfo"
 	"github.com/aaronriekenberg/go-api/handlers/versioninfo"
 )
@@ -15,6 +16,8 @@ func CreateHandlers(
 	config config.Configuration,
 ) (handler http.Handler, err error) {
 	const get = http.MethodGet
+
+	profiling.StartProfilingHandler(config.ProfilingConfiguration)
 
 	router := httprouter.New()
 

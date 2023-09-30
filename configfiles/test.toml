@@ -2,6 +2,10 @@
 network = "tcp"
 listenAddress = ":8080"
 
+[profilingConfiguration]
+enabled = true
+listenAddress = ":8081"
+
 [commandConfiguration]
 maxConcurrentCommands = 10
 requestTimeoutDuration = "2s"

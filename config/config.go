@@ -12,6 +12,11 @@ type ServerConfiguration struct {
 	ListenAddress string
 }
 
+type ProfilingConfiguration struct {
+	Enabled       bool
+	ListenAddress string
+}
+
 type CommandInfo struct {
 	ID          string
 	Description string
@@ -27,8 +32,9 @@ type CommandConfiguration struct {
 }
 
 type Configuration struct {
-	ServerConfiguration  ServerConfiguration
-	CommandConfiguration CommandConfiguration
+	ServerConfiguration    ServerConfiguration
+	ProfilingConfiguration ProfilingConfiguration
+	CommandConfiguration   CommandConfiguration
 }
 
 func ReadConfiguration(configFile string) (*Configuration, error) {

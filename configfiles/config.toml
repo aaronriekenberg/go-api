@@ -2,6 +2,10 @@
 network = "unix"
 listenAddress = "/var/www/run/api/socket"
 
+[profilingConfiguration]
+enabled = true
+listenAddress = ":8081"
+
 [commandConfiguration]
 maxConcurrentCommands = 10
 requestTimeoutDuration = "2s"
