@@ -31,7 +31,7 @@ commands = [
         "-a",
         "-n",
     ] },
-    { id = "sensors", description = "sensors", command = "/usr/sbin/sensors" },
+    { id = "sensors", description = "sensors", command = "/usr/bin/sensors" },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
         "-n1",
