@@ -31,8 +31,7 @@ commands = [
         "-a",
         "-n",
     ] },
-    { id = "pitemp", description = "pitemp", command = "/home/aaron/repo/raspberrypi/pitemp.sh" },
-    { id = "pithrottle", description = "pithrottle", command = "/home/aaron/repo/raspberrypi/pithrottle.sh" },
+    { id = "sensors", description = "sensors", command = "/usr/sbin/sensors" },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
         "-n1",
