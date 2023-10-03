@@ -44,7 +44,7 @@ func Run(
 			logger.Error("listener.Accept error",
 				"error", err,
 			)
-			return err
+			return fmt.Errorf("listener.Accept error: %w", err)
 		}
 
 		go runConnectionHandler(logger, conn, handler, http2Server)
