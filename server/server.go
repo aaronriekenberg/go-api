@@ -89,13 +89,13 @@ func Run(
 	})
 
 	h2Server := &http2.Server{
-		IdleTimeout: 2 * time.Minute,
+		IdleTimeout: 5 * time.Minute,
 	}
 
 	httpServer := &http.Server{
-		IdleTimeout:  2 * time.Minute,
-		ReadTimeout:  2 * time.Minute,
-		WriteTimeout: 2 * time.Minute,
+		IdleTimeout:  5 * time.Minute,
+		ReadTimeout:  1 * time.Minute,
+		WriteTimeout: 1 * time.Minute,
 		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
 			connWrapper, ok := c.(*connWrapper)
 			if ok {
