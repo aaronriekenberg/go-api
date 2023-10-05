@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type ConnectionID int64
+type ConnectionID uint64
 
 type connectionIDContextKey struct {
 }
@@ -16,13 +16,13 @@ var ConnectionIDContextKey = &connectionIDContextKey{}
 type Connection interface {
 	ID() ConnectionID
 	CreationTime() time.Time
-	Requests() int64
+	Requests() uint64
 }
 
 type connection struct {
 	id           ConnectionID
 	creationTime time.Time
-	requests     atomic.Int64
+	requests     atomic.Uint64
 }
 
 func (c *connection) ID() ConnectionID {
@@ -33,7 +33,7 @@ func (c *connection) CreationTime() time.Time {
 	return c.creationTime
 }
 
-func (c *connection) Requests() int64 {
+func (c *connection) Requests() uint64 {
 	return c.requests.Load()
 }
 

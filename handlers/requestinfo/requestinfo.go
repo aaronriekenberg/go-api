@@ -49,7 +49,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 		connectionIDString := "(nil)"
 		connectionID, ok := r.Context().Value(connection.ConnectionIDContextKey).(connection.ConnectionID)
 		if ok {
-			connectionIDString = strconv.FormatInt(int64(connectionID), 10)
+			connectionIDString = strconv.FormatUint(uint64(connectionID), 10)
 		}
 
 		response := &requestInfoData{

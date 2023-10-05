@@ -11,10 +11,10 @@ import (
 )
 
 type connectionDTO struct {
-	ID           int64  `json:"id"`
+	ID           uint64 `json:"id"`
 	Age          string `json:"age"`
 	CreationTime string `json:"creation_time"`
-	Requests     int64  `json:"requests"`
+	Requests     uint64 `json:"requests"`
 }
 
 type connectionInfoResponse struct {
@@ -31,7 +31,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 
 		for _, connection := range connections {
 			cdto := &connectionDTO{
-				ID:           int64(connection.ID()),
+				ID:           uint64(connection.ID()),
 				Age:          time.Since(connection.CreationTime()).Truncate(time.Millisecond).String(),
 				CreationTime: utils.FormatTime(connection.CreationTime()),
 				Requests:     connection.Requests(),
