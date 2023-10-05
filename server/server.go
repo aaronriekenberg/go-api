@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/aaronriekenberg/go-api/config"
@@ -13,6 +14,43 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
+
+type connWrapper struct {
+	connectionID uint64
+	net.Conn
+}
+
+func (cw *connWrapper) Close() error {
+	slog.Info("connWrapper.Close",
+		"connectionID", cw.connectionID,
+	)
+
+	return cw.Conn.Close()
+}
+
+type listenerWrapper struct {
+	net.Listener
+	lastConnID atomic.Uint64
+}
+
+func (lw *listenerWrapper) Accept() (net.Conn, error) {
+	conn, err := lw.Listener.Accept()
+
+	if err != nil {
+		return conn, err
+	}
+
+	connectionID := lw.lastConnID.Add(1)
+
+	slog.Info("listenerWrapper.Accept got new connection",
+		"connectionID", connectionID,
+	)
+
+	return &connWrapper{
+		connectionID: connectionID,
+		Conn:         conn,
+	}, nil
+}
 
 func Run(
 	config config.ServerConfiguration,
@@ -50,7 +88,11 @@ func Run(
 		Handler:      h2c.NewHandler(handler, h2Server),
 	}
 
-	err = httpServer.Serve(listener)
+	listenerWrapper := &listenerWrapper{
+		Listener: listener,
+	}
+
+	err = httpServer.Serve(listenerWrapper)
 
 	logger.Error("httpServer.Serve error",
 		"error", err,
