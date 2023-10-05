@@ -2,12 +2,15 @@ package requestinfo
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/aaronriekenberg/go-api/connection"
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
 type requestFields struct {
+	ConnectionID  string `json:"connection_id"`
 	Close         bool   `json:"close"`
 	ContentLength int64  `json:"content_length"`
 	Host          string `json:"host"`
@@ -43,8 +46,15 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			urlString = "(nil)"
 		}
 
+		connectionIDString := "(nil)"
+		connectionID, ok := r.Context().Value(connection.ConnectionIDContextKey).(connection.ConnectionID)
+		if ok {
+			connectionIDString = strconv.FormatInt(int64(connectionID), 10)
+		}
+
 		response := &requestInfoData{
 			RequestFields: requestFields{
+				ConnectionID:  connectionIDString,
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Host:          r.Host,
