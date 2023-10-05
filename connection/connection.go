@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"log/slog"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -42,7 +43,7 @@ type ConnectionManager interface {
 
 	IncrementRequestsForConnection(connectionID ConnectionID)
 
-	RemoveConnection(id ConnectionID)
+	RemoveConnection(connectionID ConnectionID)
 
 	Connections() []Connection
 }
@@ -85,11 +86,19 @@ func (cm *connectionManager) IncrementRequestsForConnection(connectionID Connect
 	}
 }
 
-func (cm *connectionManager) RemoveConnection(id ConnectionID) {
+func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 
-	delete(cm.idToConnection, id)
+	connection := cm.idToConnection[connectionID]
+	if connection != nil {
+		slog.Info("connectionManager.RemoveConnection",
+			"connectionID", connectionID,
+			"requests", connection.Requests(),
+		)
+	}
+
+	delete(cm.idToConnection, connectionID)
 }
 
 func (cm *connectionManager) Connections() []Connection {
