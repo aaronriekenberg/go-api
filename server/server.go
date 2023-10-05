@@ -39,7 +39,9 @@ func Run(
 		return fmt.Errorf("net.Listen error: %w", err)
 	}
 
-	h2Server := &http2.Server{}
+	h2Server := &http2.Server{
+		IdleTimeout: 2 * time.Minute,
+	}
 
 	httpServer := &http.Server{
 		IdleTimeout:  2 * time.Minute,
