@@ -10,11 +10,14 @@ type connectionMetrics struct {
 	maxRequestsPerConnection uint64
 }
 
-func (cm connectionMetrics) updateForClosedConnection(
+func (cm *connectionMetrics) updateForClosedConnection(
 	closedConnection Connection,
 ) connectionMetrics {
+	if cm == nil {
+		cm = &connectionMetrics{}
+	}
 	return connectionMetrics{
-		maxConnectionAge:         max(cm.maxConnectionAge, time.Since(closedConnection.CreationTime())),
+		maxConnectionAge:         max(cm.maxConnectionAge, closedConnection.Age(time.Now())),
 		maxRequestsPerConnection: max(cm.maxRequestsPerConnection, closedConnection.Requests()),
 	}
 }
@@ -29,15 +32,17 @@ func newConnectionMetricsManager() *connectionMetricsManager {
 		updateForClosedConnectionChannel: make(chan Connection),
 	}
 
-	cmm.atomicConnectionMetrics.Store(&connectionMetrics{})
-
 	go cmm.runUpdateMetricsTask()
 
 	return cmm
 }
 
 func (cmm *connectionMetricsManager) connectionMetrics() connectionMetrics {
-	return *cmm.atomicConnectionMetrics.Load()
+	currentMetrics := cmm.atomicConnectionMetrics.Load()
+	if currentMetrics == nil {
+		return connectionMetrics{}
+	}
+	return *currentMetrics
 }
 
 func (cmm *connectionMetricsManager) runUpdateMetricsTask() {

@@ -36,7 +36,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 		for _, connection := range connectionManagerState.Connections {
 			cdto := &connectionDTO{
 				ID:           uint64(connection.ID()),
-				Age:          now.Sub(connection.CreationTime()).Truncate(time.Millisecond).String(),
+				Age:          connection.Age(now).Truncate(time.Millisecond).String(),
 				CreationTime: utils.FormatTime(connection.CreationTime()),
 				Requests:     connection.Requests(),
 			}

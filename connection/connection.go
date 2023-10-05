@@ -17,6 +17,7 @@ var ConnectionIDContextKey = &connectionIDContextKey{}
 type Connection interface {
 	ID() ConnectionID
 	CreationTime() time.Time
+	Age(now time.Time) time.Duration
 	Requests() uint64
 }
 
@@ -32,6 +33,10 @@ func (c *connection) ID() ConnectionID {
 
 func (c *connection) CreationTime() time.Time {
 	return c.creationTime
+}
+
+func (c *connection) Age(now time.Time) time.Duration {
+	return now.Sub(c.creationTime)
 }
 
 func (c *connection) Requests() uint64 {
@@ -135,7 +140,7 @@ func (cm *connectionManager) State() ConnectionManagerState {
 	now := time.Now()
 
 	for _, c := range connections {
-		maxConnectionAge = max(now.Sub(c.CreationTime()), maxConnectionAge)
+		maxConnectionAge = max(c.Age(now), maxConnectionAge)
 		maxRequestsPerConnection = max(c.Requests(), maxRequestsPerConnection)
 	}
 
