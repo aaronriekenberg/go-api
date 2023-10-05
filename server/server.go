@@ -67,6 +67,15 @@ func incrementRequestsForConnectionHandler(
 	}
 }
 
+func addConnectionIDToContext(ctx context.Context, c net.Conn) context.Context {
+	connWrapper, ok := c.(*connWrapper)
+	if ok {
+		connectionID := connWrapper.connectionID
+		return context.WithValue(ctx, connection.ConnectionIDContextKey, connectionID)
+	}
+	return ctx
+}
+
 func Run(
 	config config.ServerConfiguration,
 	handler http.Handler,
@@ -102,15 +111,8 @@ func Run(
 		IdleTimeout:  5 * time.Minute,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
-		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
-			connWrapper, ok := c.(*connWrapper)
-			if ok {
-				connectionID := connWrapper.connectionID
-				return context.WithValue(ctx, connection.ConnectionIDContextKey, connectionID)
-			}
-			return ctx
-		},
-		Handler: h2c.NewHandler(handler, h2Server),
+		ConnContext:  addConnectionIDToContext,
+		Handler:      h2c.NewHandler(handler, h2Server),
 	}
 
 	listenerWrapper := &listenerWrapper{
