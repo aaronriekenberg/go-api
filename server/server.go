@@ -55,6 +55,18 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 	}, nil
 }
 
+func incrementRequestsForConnectionHandler(
+	handler http.Handler,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		connectionID, ok := r.Context().Value(connection.ConnectionIDContextKey).(connection.ConnectionID)
+		if ok {
+			connection.ConnectionManagerInstance().IncrementRequestsForConnection(connectionID)
+		}
+		handler.ServeHTTP(w, r)
+	}
+}
+
 func Run(
 	config config.ServerConfiguration,
 	handler http.Handler,
@@ -80,13 +92,7 @@ func Run(
 		return fmt.Errorf("net.Listen error: %w", err)
 	}
 
-	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		connectionID, ok := r.Context().Value(connection.ConnectionIDContextKey).(connection.ConnectionID)
-		if ok {
-			connection.ConnectionManagerInstance().IncrementRequestsForConnection(connectionID)
-		}
-		handler.ServeHTTP(w, r)
-	})
+	handler = incrementRequestsForConnectionHandler(handler)
 
 	h2Server := &http2.Server{
 		IdleTimeout: 5 * time.Minute,
@@ -104,7 +110,7 @@ func Run(
 			}
 			return ctx
 		},
-		Handler: h2c.NewHandler(wrappedHandler, h2Server),
+		Handler: h2c.NewHandler(handler, h2Server),
 	}
 
 	listenerWrapper := &listenerWrapper{
