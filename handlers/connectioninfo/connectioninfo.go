@@ -18,21 +18,25 @@ type connectionDTO struct {
 }
 
 type connectionInfoResponse struct {
-	NumConnections int              `json:"num_connections"`
-	Connections    []*connectionDTO `json:"connections"`
+	NumCurrentConnections    int              `json:"num_current_connections"`
+	MaxConnectionAge         string           `json:"max_connection_age"`
+	MaxRequestsPerConnection uint64           `json:"max_requests_per_connection"`
+	Connections              []*connectionDTO `json:"connections"`
 }
 
 func connectionInfoHandlerFunc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		connections := connection.ConnectionManagerInstance().Connections()
+		connectionManagerState := connection.ConnectionManagerInstance().State()
 
-		connectionDTOs := make([]*connectionDTO, 0, len(connections))
+		connectionDTOs := make([]*connectionDTO, 0, len(connectionManagerState.Connections))
 
-		for _, connection := range connections {
+		now := time.Now()
+
+		for _, connection := range connectionManagerState.Connections {
 			cdto := &connectionDTO{
 				ID:           uint64(connection.ID()),
-				Age:          time.Since(connection.CreationTime()).Truncate(time.Millisecond).String(),
+				Age:          now.Sub(connection.CreationTime()).Truncate(time.Millisecond).String(),
 				CreationTime: utils.FormatTime(connection.CreationTime()),
 				Requests:     connection.Requests(),
 			}
@@ -41,12 +45,15 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 		}
 
 		slices.SortFunc(connectionDTOs, func(cdto1, cdto2 *connectionDTO) int {
-			return cmp.Compare(cdto1.ID, cdto2.ID)
+			// sort descending
+			return -cmp.Compare(cdto1.ID, cdto2.ID)
 		})
 
 		response := &connectionInfoResponse{
-			NumConnections: len(connectionDTOs),
-			Connections:    connectionDTOs,
+			NumCurrentConnections:    len(connectionDTOs),
+			MaxConnectionAge:         connectionManagerState.MaxConnectionAge.Truncate(time.Millisecond).String(),
+			MaxRequestsPerConnection: connectionManagerState.MaxRequestsPerConnection,
+			Connections:              connectionDTOs,
 		}
 
 		utils.RespondWithJSONDTO(response, w)

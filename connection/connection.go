@@ -38,6 +38,12 @@ func (c *connection) Requests() uint64 {
 	return c.requests.Load()
 }
 
+type ConnectionManagerState struct {
+	MaxConnectionAge         time.Duration
+	MaxRequestsPerConnection uint64
+	Connections              []Connection
+}
+
 type ConnectionManager interface {
 	AddConnection() ConnectionID
 
@@ -45,19 +51,21 @@ type ConnectionManager interface {
 
 	RemoveConnection(connectionID ConnectionID)
 
-	Connections() []Connection
+	State() ConnectionManagerState
 }
 
 type connectionManager struct {
 	mutex            sync.RWMutex
 	idToConnection   map[ConnectionID]*connection
 	nextConnectionID ConnectionID
+	metricsManager   *connectionMetricsManager
 }
 
 func newConnectionManager() connectionManager {
 	return connectionManager{
 		idToConnection:   make(map[ConnectionID]*connection),
 		nextConnectionID: 1,
+		metricsManager:   newConnectionMetricsManager(),
 	}
 }
 
@@ -96,12 +104,14 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 			"connectionID", connectionID,
 			"requests", connection.Requests(),
 		)
+
+		cm.metricsManager.updateForClosedConnection(connection)
 	}
 
 	delete(cm.idToConnection, connectionID)
 }
 
-func (cm *connectionManager) Connections() []Connection {
+func (cm *connectionManager) connections() []Connection {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()
 
@@ -112,6 +122,28 @@ func (cm *connectionManager) Connections() []Connection {
 	}
 
 	return connections
+}
+
+func (cm *connectionManager) State() ConnectionManagerState {
+	connections := cm.connections()
+
+	connectionMetrics := cm.metricsManager.connectionMetrics()
+
+	maxConnectionAge := connectionMetrics.maxConnectionAge
+	maxRequestsPerConnection := connectionMetrics.maxRequestsPerConnection
+
+	now := time.Now()
+
+	for _, c := range connections {
+		maxConnectionAge = max(now.Sub(c.CreationTime()), maxConnectionAge)
+		maxRequestsPerConnection = max(c.Requests(), maxRequestsPerConnection)
+	}
+
+	return ConnectionManagerState{
+		MaxConnectionAge:         maxConnectionAge,
+		MaxRequestsPerConnection: maxRequestsPerConnection,
+		Connections:              connections,
+	}
 }
 
 var connectionManagerInstance = newConnectionManager()
