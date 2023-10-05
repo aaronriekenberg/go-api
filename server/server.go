@@ -6,9 +6,12 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/aaronriekenberg/go-api/config"
+
 	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func Run(
@@ -36,37 +39,19 @@ func Run(
 		return fmt.Errorf("net.Listen error: %w", err)
 	}
 
-	http2Server := &http2.Server{}
+	h2Server := &http2.Server{}
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			logger.Error("listener.Accept error",
-				"error", err,
-			)
-			return fmt.Errorf("listener.Accept error: %w", err)
-		}
-
-		go runConnectionHandler(logger, conn, handler, http2Server)
+	httpServer := &http.Server{
+		IdleTimeout:  2 * time.Minute,
+		ReadTimeout:  2 * time.Minute,
+		WriteTimeout: 2 * time.Minute,
+		Handler:      h2c.NewHandler(handler, h2Server),
 	}
-}
 
-func runConnectionHandler(
-	logger *slog.Logger,
-	conn net.Conn,
-	handler http.Handler,
-	http2Server *http2.Server,
-) {
-	defer conn.Close()
+	err = httpServer.Serve(listener)
 
-	logger.Info("begin h2cserver.runConnectionHandler")
-
-	http2Server.ServeConn(
-		conn,
-		&http2.ServeConnOpts{
-			Handler: handler,
-		},
+	logger.Error("httpServer.Serve error",
+		"error", err,
 	)
-
-	logger.Info("end h2cserver.runConnectionHandler")
+	return fmt.Errorf("httpServer.Serve error: %w", err)
 }
