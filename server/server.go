@@ -1,22 +1,23 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
-	"sync/atomic"
 	"time"
 
 	"github.com/aaronriekenberg/go-api/config"
+	"github.com/aaronriekenberg/go-api/connection"
 
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
 type connWrapper struct {
-	connectionID uint64
+	connectionID connection.ConnectionID
 	net.Conn
 }
 
@@ -25,12 +26,14 @@ func (cw *connWrapper) Close() error {
 		"connectionID", cw.connectionID,
 	)
 
+	connection.ConnectionManagerInstance().RemoveConnection(
+		cw.connectionID)
+
 	return cw.Conn.Close()
 }
 
 type listenerWrapper struct {
 	net.Listener
-	lastConnID atomic.Uint64
 }
 
 func (lw *listenerWrapper) Accept() (net.Conn, error) {
@@ -40,7 +43,7 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 		return conn, err
 	}
 
-	connectionID := lw.lastConnID.Add(1)
+	connectionID := connection.ConnectionManagerInstance().AddConnection()
 
 	slog.Info("listenerWrapper.Accept got new connection",
 		"connectionID", connectionID,
@@ -77,6 +80,14 @@ func Run(
 		return fmt.Errorf("net.Listen error: %w", err)
 	}
 
+	wrappedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		connectionID, ok := r.Context().Value(connection.ConnectionIDContextKey).(connection.ConnectionID)
+		if ok {
+			connection.ConnectionManagerInstance().IncrementRequestsForConnection(connectionID)
+		}
+		handler.ServeHTTP(w, r)
+	})
+
 	h2Server := &http2.Server{
 		IdleTimeout: 2 * time.Minute,
 	}
@@ -85,7 +96,15 @@ func Run(
 		IdleTimeout:  2 * time.Minute,
 		ReadTimeout:  2 * time.Minute,
 		WriteTimeout: 2 * time.Minute,
-		Handler:      h2c.NewHandler(handler, h2Server),
+		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
+			connWrapper, ok := c.(*connWrapper)
+			if ok {
+				connectionID := connWrapper.connectionID
+				return context.WithValue(ctx, connection.ConnectionIDContextKey, connectionID)
+			}
+			return ctx
+		},
+		Handler: h2c.NewHandler(wrappedHandler, h2Server),
 	}
 
 	listenerWrapper := &listenerWrapper{
