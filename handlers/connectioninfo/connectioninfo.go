@@ -19,6 +19,7 @@ type connectionDTO struct {
 
 type connectionInfoResponse struct {
 	NumCurrentConnections    int              `json:"num_current_connections"`
+	MaxOpenConnections       int              `json:"max_open_connections"`
 	MaxConnectionAge         string           `json:"max_connection_age"`
 	MaxRequestsPerConnection uint64           `json:"max_requests_per_connection"`
 	Connections              []*connectionDTO `json:"connections"`
@@ -51,6 +52,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 
 		response := &connectionInfoResponse{
 			NumCurrentConnections:    len(connectionDTOs),
+			MaxOpenConnections:       connectionManagerState.MaxOpenConnections,
 			MaxConnectionAge:         connectionManagerState.MaxConnectionAge.Truncate(time.Millisecond).String(),
 			MaxRequestsPerConnection: connectionManagerState.MaxRequestsPerConnection,
 			Connections:              connectionDTOs,

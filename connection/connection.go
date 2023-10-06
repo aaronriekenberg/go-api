@@ -44,6 +44,7 @@ func (c *connection) Requests() uint64 {
 }
 
 type ConnectionManagerState struct {
+	MaxOpenConnections       int
 	MaxConnectionAge         time.Duration
 	MaxRequestsPerConnection uint64
 	Connections              []Connection
@@ -85,6 +86,9 @@ func (cm *connectionManager) AddConnection() ConnectionID {
 		id:           id,
 		creationTime: time.Now(),
 	}
+
+	numOpenConnections := len(cm.idToConnection)
+	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
 	return id
 }
@@ -145,6 +149,7 @@ func (cm *connectionManager) State() ConnectionManagerState {
 	}
 
 	return ConnectionManagerState{
+		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
 		MaxConnectionAge:         maxConnectionAge,
 		MaxRequestsPerConnection: maxRequestsPerConnection,
 		Connections:              connections,

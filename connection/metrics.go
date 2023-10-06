@@ -6,30 +6,24 @@ import (
 )
 
 type connectionMetrics struct {
+	maxOpenConnections       int
 	maxConnectionAge         time.Duration
 	maxRequestsPerConnection uint64
 }
 
-func (cm connectionMetrics) updateForClosedConnection(
-	closedConnection Connection,
-) connectionMetrics {
-	return connectionMetrics{
-		maxConnectionAge:         max(cm.maxConnectionAge, closedConnection.Age(time.Now())),
-		maxRequestsPerConnection: max(cm.maxRequestsPerConnection, closedConnection.Requests()),
-	}
-}
-
 type connectionMetricsManager struct {
 	atomicConnectionMetrics          atomic.Pointer[connectionMetrics]
+	updateForNewConnectionChannel    chan int
 	updateForClosedConnectionChannel chan Connection
 }
 
 func newConnectionMetricsManager() *connectionMetricsManager {
 	cmm := &connectionMetricsManager{
+		updateForNewConnectionChannel:    make(chan int),
 		updateForClosedConnectionChannel: make(chan Connection),
 	}
 
-	cmm.atomicConnectionMetrics.Store(&connectionMetrics{})
+	cmm.atomicConnectionMetrics.Store(new(connectionMetrics))
 
 	go cmm.runUpdateMetricsTask()
 
@@ -42,20 +36,37 @@ func (cmm *connectionMetricsManager) connectionMetrics() connectionMetrics {
 
 func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 	for {
-		closedConnection := <-cmm.updateForClosedConnectionChannel
+		select {
+		case openConnections := <-cmm.updateForNewConnectionChannel:
+			currentMetrics := cmm.connectionMetrics()
 
-		currentMetrics := cmm.connectionMetrics()
+			newMetrics := currentMetrics
 
-		newMetrics := currentMetrics.updateForClosedConnection(closedConnection)
+			newMetrics.maxOpenConnections = max(currentMetrics.maxOpenConnections, openConnections)
 
-		cmm.atomicConnectionMetrics.Store(&newMetrics)
+			cmm.atomicConnectionMetrics.Store(&newMetrics)
+
+		case closedConnection := <-cmm.updateForClosedConnectionChannel:
+			currentMetrics := cmm.connectionMetrics()
+
+			newMetrics := currentMetrics
+
+			newMetrics.maxConnectionAge = max(closedConnection.Age(time.Now()), currentMetrics.maxConnectionAge)
+			newMetrics.maxRequestsPerConnection = max(closedConnection.Requests(), currentMetrics.maxRequestsPerConnection)
+
+			cmm.atomicConnectionMetrics.Store(&newMetrics)
+		}
 	}
+}
+
+func (cmm *connectionMetricsManager) updateForNewConnection(
+	currentOpenConnections int,
+) {
+	cmm.updateForNewConnectionChannel <- currentOpenConnections
 }
 
 func (cmm *connectionMetricsManager) updateForClosedConnection(
 	closedConnection Connection,
 ) {
-	go func() {
-		cmm.updateForClosedConnectionChannel <- closedConnection
-	}()
+	cmm.updateForClosedConnectionChannel <- closedConnection
 }
