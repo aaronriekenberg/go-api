@@ -22,7 +22,7 @@ type connWrapper struct {
 }
 
 func (cw *connWrapper) Close() error {
-	slog.Info("connWrapper.Close",
+	slog.Debug("connWrapper.Close",
 		"connectionID", cw.connectionID,
 	)
 
@@ -45,7 +45,7 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 
 	connectionID := connection.ConnectionManagerInstance().AddConnection()
 
-	slog.Info("listenerWrapper.Accept got new connection",
+	slog.Debug("listenerWrapper.Accept got new connection",
 		"connectionID", connectionID,
 	)
 

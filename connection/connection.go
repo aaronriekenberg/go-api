@@ -79,18 +79,22 @@ func (cm *connectionManager) AddConnection() ConnectionID {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 
-	id := cm.nextConnectionID
+	connectionID := cm.nextConnectionID
 	cm.nextConnectionID++
 
-	cm.idToConnection[id] = &connection{
-		id:           id,
+	cm.idToConnection[connectionID] = &connection{
+		id:           connectionID,
 		creationTime: time.Now(),
 	}
+
+	slog.Info("connectionManager.AddConnection",
+		"connectionID", connectionID,
+	)
 
 	numOpenConnections := len(cm.idToConnection)
 	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
-	return id
+	return connectionID
 }
 
 func (cm *connectionManager) IncrementRequestsForConnection(connectionID ConnectionID) {
