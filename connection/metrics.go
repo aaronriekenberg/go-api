@@ -36,26 +36,21 @@ func (cmm *connectionMetricsManager) connectionMetrics() connectionMetrics {
 
 func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 	for {
-		var newMetrics *connectionMetrics
-
 		select {
 		case openConnections := <-cmm.updateForNewConnectionChannel:
-			newMetrics = new(connectionMetrics)
-			*newMetrics = cmm.connectionMetrics()
+			newMetrics := cmm.connectionMetrics()
 
 			newMetrics.maxOpenConnections = max(newMetrics.maxOpenConnections, openConnections)
 
-			cmm.atomicConnectionMetrics.Store(newMetrics)
-			newMetrics = nil
+			cmm.atomicConnectionMetrics.Store(&newMetrics)
+
 		case closedConnection := <-cmm.updateForClosedConnectionChannel:
-			newMetrics = new(connectionMetrics)
-			*newMetrics = cmm.connectionMetrics()
+			newMetrics := cmm.connectionMetrics()
 
 			newMetrics.maxConnectionAge = max(closedConnection.Age(time.Now()), newMetrics.maxConnectionAge)
 			newMetrics.maxRequestsPerConnection = max(closedConnection.Requests(), newMetrics.maxRequestsPerConnection)
 
-			cmm.atomicConnectionMetrics.Store(newMetrics)
-			newMetrics = nil
+			cmm.atomicConnectionMetrics.Store(&newMetrics)
 		}
 	}
 }
