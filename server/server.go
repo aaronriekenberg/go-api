@@ -55,6 +55,25 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 	}, nil
 }
 
+func createListener(
+	config config.ServerConfiguration,
+) (net.Listener, error) {
+	if config.Network == "unix" {
+		os.Remove(config.ListenAddress)
+	}
+
+	listener, err := net.Listen(config.Network, config.ListenAddress)
+	if err != nil {
+		return nil, fmt.Errorf("net.Listen error: %w", err)
+	}
+
+	listenerWrapper := &listenerWrapper{
+		Listener: listener,
+	}
+
+	return listenerWrapper, nil
+}
+
 func incrementRequestsForConnectionHandler(
 	handler http.Handler,
 ) http.HandlerFunc {
@@ -89,16 +108,14 @@ func Run(
 
 	logger.Info("begin server.Run")
 
-	if config.Network == "unix" {
-		os.Remove(config.ListenAddress)
-	}
-
-	listener, err := net.Listen(config.Network, config.ListenAddress)
+	listener, err := createListener(
+		config,
+	)
 	if err != nil {
-		logger.Error("net.Listen error",
+		logger.Error("createListener error",
 			"error", err,
 		)
-		return fmt.Errorf("net.Listen error: %w", err)
+		return fmt.Errorf("createListener error: %w", err)
 	}
 
 	handler = incrementRequestsForConnectionHandler(handler)
@@ -115,11 +132,7 @@ func Run(
 		Handler:      h2c.NewHandler(handler, h2Server),
 	}
 
-	listenerWrapper := &listenerWrapper{
-		Listener: listener,
-	}
-
-	err = httpServer.Serve(listenerWrapper)
+	err = httpServer.Serve(listener)
 
 	logger.Error("httpServer.Serve error",
 		"error", err,
