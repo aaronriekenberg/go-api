@@ -20,8 +20,33 @@ func fatalError(
 	os.Exit(1)
 }
 
+func setupSlog() {
+	level := slog.LevelInfo
+
+	if levelString, ok := os.LookupEnv("LOG_LEVEL"); ok {
+		err := level.UnmarshalText([]byte(levelString))
+		if err != nil {
+			fatalError("level.UnmarshalText error", err)
+		}
+	}
+
+	slog.SetDefault(
+		slog.New(
+			slog.NewJSONHandler(
+				os.Stdout, &slog.HandlerOptions{
+					Level: level,
+				},
+			),
+		),
+	)
+
+	slog.Info("setupSlog",
+		"configuredLevel", level,
+	)
+}
+
 func main() {
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+	setupSlog()
 
 	if len(os.Args) != 2 {
 		fatalError("config file required as command line arument", nil)
