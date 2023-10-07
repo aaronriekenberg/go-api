@@ -19,8 +19,8 @@ type connectionMetricsManager struct {
 
 func newConnectionMetricsManager() *connectionMetricsManager {
 	cmm := &connectionMetricsManager{
-		updateForNewConnectionChannel:    make(chan int),
-		updateForClosedConnectionChannel: make(chan Connection),
+		updateForNewConnectionChannel:    make(chan int, 10),
+		updateForClosedConnectionChannel: make(chan Connection, 10),
 	}
 
 	cmm.atomicConnectionMetrics.Store(new(connectionMetrics))
