@@ -27,6 +27,15 @@ type connection struct {
 	requests     atomic.Uint64
 }
 
+func newConnection(
+	id ConnectionID,
+) *connection {
+	return &connection{
+		id:           id,
+		creationTime: time.Now(),
+	}
+}
+
 func (c *connection) ID() ConnectionID {
 	return c.id
 }
@@ -82,10 +91,7 @@ func (cm *connectionManager) AddConnection() ConnectionID {
 	connectionID := cm.nextConnectionID
 	cm.nextConnectionID++
 
-	cm.idToConnection[connectionID] = &connection{
-		id:           connectionID,
-		creationTime: time.Now(),
-	}
+	cm.idToConnection[connectionID] = newConnection(connectionID)
 
 	slog.Info("connectionManager.AddConnection",
 		"connectionID", connectionID,
