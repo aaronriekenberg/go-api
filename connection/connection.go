@@ -104,10 +104,8 @@ func (cm *connectionManager) AddConnection() ConnectionID {
 }
 
 func (cm *connectionManager) IncrementRequestsForConnection(connectionID ConnectionID) {
-	cm.mutex.RLock()
-	defer cm.mutex.RUnlock()
+	connection := cm.connection(connectionID)
 
-	connection := cm.idToConnection[connectionID]
 	if connection != nil {
 		connection.requests.Add(1)
 	}
@@ -128,6 +126,13 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 	}
 
 	delete(cm.idToConnection, connectionID)
+}
+
+func (cm *connectionManager) connection(connectionID ConnectionID) *connection {
+	cm.mutex.RLock()
+	defer cm.mutex.RUnlock()
+
+	return cm.idToConnection[connectionID]
 }
 
 func (cm *connectionManager) connections() []Connection {
