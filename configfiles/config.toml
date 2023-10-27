@@ -29,7 +29,7 @@ commands = [
     { id = "pitemp", description = "pitemp", command = "/home/aaron/repo/raspberrypi/pitemp.sh" },
     { id = "pithrottle", description = "pithrottle", command = "/home/aaron/repo/raspberrypi/pithrottle.sh" },
     { id = "timedatectl_timesync_status", description = "timedatectl timesync-status", command = "/usr/bin/timedatectl", args = [
-        "timesync-status"
+        "timesync-status",
     ] },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
