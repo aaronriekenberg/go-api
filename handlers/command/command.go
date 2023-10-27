@@ -102,12 +102,12 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 		return
 	}
 
-	runCommandsHandler.handleRunCommandRequest(ctx, &commandInfo, w)
+	runCommandsHandler.handleRunCommandRequest(ctx, commandInfo, w)
 }
 
 func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	ctx context.Context,
-	commandInfo *commandInfoDTO,
+	commandInfo commandInfoDTO,
 	w http.ResponseWriter,
 ) {
 	ctx, cancel := context.WithTimeout(ctx, runCommandsHandler.requestTimeout)
@@ -147,16 +147,16 @@ func (runCommandsHandler *runCommandsHandler) releaseCommandSemaphore() {
 }
 
 type commandAPIResponse struct {
-	CommandInfo                 *commandInfoDTO `json:"command_info"`
-	Now                         string          `json:"now"`
-	CommandDurationMilliseconds int64           `json:"command_duration_ms"`
-	CommandOutput               string          `json:"command_output"`
+	CommandInfo                 commandInfoDTO `json:"command_info"`
+	Now                         string         `json:"now"`
+	CommandDurationMilliseconds int64          `json:"command_duration_ms"`
+	CommandOutput               string         `json:"command_output"`
 }
 
 func (runCommandsHandler *runCommandsHandler) runCommand(
 	ctx context.Context,
-	commandInfo *commandInfoDTO,
-) (response *commandAPIResponse, err error) {
+	commandInfo commandInfoDTO,
+) (response commandAPIResponse, err error) {
 	err = runCommandsHandler.acquireCommandSemaphore(ctx)
 	if err != nil {
 		return
@@ -177,7 +177,7 @@ func (runCommandsHandler *runCommandsHandler) runCommand(
 		commandOutput = string(rawCommandOutput)
 	}
 
-	response = &commandAPIResponse{
+	response = commandAPIResponse{
 		CommandInfo:                 commandInfo,
 		Now:                         utils.FormatTime(commandEndTime),
 		CommandDurationMilliseconds: commandDuration.Milliseconds(),
