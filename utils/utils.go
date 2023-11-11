@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -25,7 +26,10 @@ func RespondWithJSONDTO(
 ) {
 	jsonBytes, err := json.Marshal(dto)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		slog.Warn("RespondWithJSONDTO json.Marshal error",
+			"err", err,
+		)
+		HTTPErrorStatusCode(w, http.StatusInternalServerError)
 		return
 	}
 
@@ -40,4 +44,11 @@ func JSONBytesHandlerFunc(
 		w.Header().Add(ContentTypeHeaderKey, ContentTypeApplicationJSON)
 		io.Copy(w, bytes.NewReader(jsonBytes))
 	}
+}
+
+func HTTPErrorStatusCode(
+	w http.ResponseWriter,
+	statusCode int,
+) {
+	http.Error(w, http.StatusText(statusCode), statusCode)
 }

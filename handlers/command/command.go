@@ -98,7 +98,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 	if !ok {
 		slog.Warn("RunCommandsHandler unable to find comand",
 			"id", id)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		utils.HTTPErrorStatusCode(w, http.StatusNotFound)
 		return
 	}
 
@@ -118,9 +118,10 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	if err != nil {
 		switch {
 		case errors.Is(err, errorAcquiringCommandSemaphore):
-			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
+			utils.HTTPErrorStatusCode(w, http.StatusTooManyRequests)
+
 		default:
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			utils.HTTPErrorStatusCode(w, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -137,7 +138,8 @@ func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx contex
 	err := runCommandsHandler.commandSemaphore.Acquire(ctx, 1)
 	if err != nil {
 		slog.Warn("runCommandsHandler.acquireCommandSemaphore error calling Acquire",
-			"error", err)
+			"error", err,
+		)
 		return errorAcquiringCommandSemaphore
 	}
 	return nil
