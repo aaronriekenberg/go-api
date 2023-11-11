@@ -117,10 +117,10 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 
 	if err != nil {
 		if errors.Is(err, errorAcquiringCommandSemaphore) {
-			http.Error(w, err.Error(), http.StatusTooManyRequests)
+			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
