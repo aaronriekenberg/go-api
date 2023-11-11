@@ -116,11 +116,12 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	commandAPIResponse, err := runCommandsHandler.runCommand(ctx, commandInfo)
 
 	if err != nil {
-		if errors.Is(err, errorAcquiringCommandSemaphore) {
+		switch {
+		case errors.Is(err, errorAcquiringCommandSemaphore):
 			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
-			return
+		default:
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
