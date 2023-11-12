@@ -31,7 +31,7 @@ func runPprofServer(config config.ProfilingConfiguration) {
 	serveMux.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
 
 	err := http.ListenAndServe(config.ListenAddress, serveMux)
-	slog.Error("pprof server error",
+	slog.Error("runPprofServer: http.ListenAndServe returned error",
 		"error", err,
 	)
 	os.Exit(1)

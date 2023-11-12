@@ -112,10 +112,7 @@ func Run(
 		config,
 	)
 	if err != nil {
-		logger.Error("createListener error",
-			"error", err,
-		)
-		return fmt.Errorf("createListener error: %w", err)
+		return fmt.Errorf("server.Run: createListener error: %w", err)
 	}
 
 	handler = incrementRequestsForConnectionHandler(handler)
@@ -134,8 +131,5 @@ func Run(
 
 	err = httpServer.Serve(listener)
 
-	logger.Error("httpServer.Serve error",
-		"error", err,
-	)
-	return fmt.Errorf("httpServer.Serve error: %w", err)
+	return fmt.Errorf("server.Run: httpServer.Serve error: %w", err)
 }

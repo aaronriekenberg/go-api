@@ -42,9 +42,6 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) (ht
 
 	jsonBytes, err := json.Marshal(allCommandDTOs)
 	if err != nil {
-		slog.Error("NewAllCommandsHandler json.Marshal error",
-			"error", err,
-		)
 		return nil, fmt.Errorf("NewAllCommandsHandler json.Marshal error: %w", err)
 	}
 
@@ -61,17 +58,11 @@ type runCommandsHandler struct {
 func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) (http.Handler, error) {
 	requestTimeout, err := time.ParseDuration(commandConfiguration.RequestTimeoutDuration)
 	if err != nil {
-		slog.Error("NewRunCommandsHandler error parsing RequestTimeoutDuration",
-			"RequestTimeoutDuration", commandConfiguration.RequestTimeoutDuration,
-			"error", err)
 		return nil, fmt.Errorf("NewRunCommandsHandler error parsing RequestTimeoutDuration: %w", err)
 	}
 
 	semaphoreAcquireTimeout, err := time.ParseDuration(commandConfiguration.SemaphoreAcquireTimeoutDuration)
 	if err != nil {
-		slog.Error("NewRunCommandsHandler error parsing SemaphoreAcquireTimeoutDuration",
-			"SemaphoreAcquireTimeoutDuration", commandConfiguration.SemaphoreAcquireTimeoutDuration,
-			"error", err)
 		return nil, fmt.Errorf("NewRunCommandsHandler error parsing SemaphoreAcquireTimeoutDuration: %w", err)
 	}
 
@@ -116,7 +107,7 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	commandAPIResponse, err := runCommandsHandler.runCommand(ctx, commandInfo)
 
 	if err != nil {
-		slog.Warn("runCommandsHandler.runCommand returned error",
+		slog.Warn("RunCommandsHandler.runCommand returned error",
 			"error", err,
 		)
 		switch {

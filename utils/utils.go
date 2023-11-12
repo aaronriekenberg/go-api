@@ -26,8 +26,8 @@ func RespondWithJSONDTO(
 ) {
 	jsonBytes, err := json.Marshal(dto)
 	if err != nil {
-		slog.Warn("RespondWithJSONDTO json.Marshal error",
-			"err", err,
+		slog.Warn("utils.RespondWithJSONDTO: json.Marshal error",
+			"error", err,
 		)
 		HTTPErrorStatusCode(w, http.StatusInternalServerError)
 		return
