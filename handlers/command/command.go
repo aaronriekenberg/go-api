@@ -116,6 +116,9 @@ func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	commandAPIResponse, err := runCommandsHandler.runCommand(ctx, commandInfo)
 
 	if err != nil {
+		slog.Warn("runCommandsHandler.runCommand returned error",
+			"error", err,
+		)
 		switch {
 		case errors.Is(err, errorAcquiringCommandSemaphore):
 			utils.HTTPErrorStatusCode(w, http.StatusTooManyRequests)
@@ -137,10 +140,7 @@ func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx contex
 
 	err := runCommandsHandler.commandSemaphore.Acquire(ctx, 1)
 	if err != nil {
-		slog.Warn("runCommandsHandler.acquireCommandSemaphore error calling Acquire",
-			"error", err,
-		)
-		return errorAcquiringCommandSemaphore
+		return errors.Join(errorAcquiringCommandSemaphore, err)
 	}
 	return nil
 }
