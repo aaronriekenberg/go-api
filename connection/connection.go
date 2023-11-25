@@ -12,7 +12,7 @@ type ConnectionID uint64
 type connectionIDContextKey struct {
 }
 
-var ConnectionIDContextKey = &connectionIDContextKey{}
+var ConnectionIDContextKey = connectionIDContextKey{}
 
 type Connection interface {
 	ID() ConnectionID
