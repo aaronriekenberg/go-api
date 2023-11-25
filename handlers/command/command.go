@@ -88,7 +88,8 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 
 	if !ok {
 		slog.Warn("RunCommandsHandler unable to find comand",
-			"id", id)
+			"id", id,
+		)
 		utils.HTTPErrorStatusCode(w, http.StatusNotFound)
 		return
 	}
