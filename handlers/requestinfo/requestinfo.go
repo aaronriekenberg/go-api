@@ -39,6 +39,8 @@ func httpHeaderToRequestHeaders(headers http.Header) map[string]string {
 func requestInfoHandlerFunc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		ctx := r.Context()
+
 		var urlString string
 		if r.URL != nil {
 			urlString = r.URL.String()
@@ -47,9 +49,8 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 		}
 
 		connectionIDString := "(nil)"
-		connectionID, ok := r.Context().Value(connection.ConnectionIDContextKey).(connection.ConnectionID)
-		if ok {
-			connectionIDString = strconv.FormatUint(uint64(connectionID), 10)
+		if connectionID := connection.GetConnectionIDFromContext(ctx); connectionID != nil {
+			connectionIDString = strconv.FormatUint(uint64(*connectionID), 10)
 		}
 
 		response := &requestInfoData{

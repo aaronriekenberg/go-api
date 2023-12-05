@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"context"
 	"log/slog"
 	"sync"
 	"sync/atomic"
@@ -12,7 +13,23 @@ type ConnectionID uint64
 type connectionIDContextKey struct {
 }
 
-var ConnectionIDContextKey = connectionIDContextKey{}
+func AddConnectionIDToContext(
+	ctx context.Context,
+	connectionID ConnectionID,
+) context.Context {
+	key := connectionIDContextKey{}
+	value := &connectionID
+
+	return context.WithValue(ctx, key, value)
+}
+
+func GetConnectionIDFromContext(
+	ctx context.Context,
+) *ConnectionID {
+	key := connectionIDContextKey{}
+
+	return ctx.Value(key).(*ConnectionID)
+}
 
 type Connection interface {
 	ID() ConnectionID
