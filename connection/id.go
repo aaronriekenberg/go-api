@@ -22,5 +22,9 @@ func GetConnectionIDFromContext(
 ) *ConnectionID {
 	key := connectionIDContextKey{}
 
-	return ctx.Value(key).(*ConnectionID)
+	if value := ctx.Value(key); value != nil {
+		return value.(*ConnectionID)
+	}
+
+	return nil
 }
