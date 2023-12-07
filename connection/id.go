@@ -12,7 +12,7 @@ func AddConnectionIDToContext(
 	connectionID ConnectionID,
 ) context.Context {
 	key := connectionIDContextKey{}
-	value := &connectionID
+	value := connectionID
 
 	return context.WithValue(ctx, key, value)
 }
@@ -22,8 +22,8 @@ func GetConnectionIDFromContext(
 ) *ConnectionID {
 	key := connectionIDContextKey{}
 
-	if value := ctx.Value(key); value != nil {
-		return value.(*ConnectionID)
+	if value, ok := ctx.Value(key).(ConnectionID); ok {
+		return &value
 	}
 
 	return nil
