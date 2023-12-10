@@ -1,11 +1,21 @@
 package connection
 
-import "context"
+import (
+	"context"
+	"strconv"
+)
 
 type ConnectionID uint64
 
-type connectionIDContextKey struct {
+func (connectionID *ConnectionID) String() string {
+	if connectionID == nil {
+		return "(nil)"
+	}
+
+	return strconv.FormatUint(uint64(*connectionID), 10)
 }
+
+type connectionIDContextKey struct{}
 
 func AddConnectionIDToContext(
 	ctx context.Context,

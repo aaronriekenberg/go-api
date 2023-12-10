@@ -2,7 +2,6 @@ package requestinfo
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/aaronriekenberg/go-api/connection"
@@ -48,14 +47,9 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			urlString = "(nil)"
 		}
 
-		connectionIDString := "(nil)"
-		if connectionID := connection.GetConnectionIDFromContext(ctx); connectionID != nil {
-			connectionIDString = strconv.FormatUint(uint64(*connectionID), 10)
-		}
-
 		response := &requestInfoData{
 			RequestFields: requestFields{
-				ConnectionID:  connectionIDString,
+				ConnectionID:  connection.GetConnectionIDFromContext(ctx).String(),
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Host:          r.Host,
