@@ -49,7 +49,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 
 		response := &requestInfoData{
 			RequestFields: requestFields{
-				ConnectionID:  connection.GetConnectionIDFromContext(ctx).String(),
+				ConnectionID:  connection.ConnectionIDFromContext(ctx).String(),
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Host:          r.Host,

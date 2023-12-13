@@ -27,7 +27,7 @@ func AddConnectionIDToContext(
 	return context.WithValue(ctx, key, value)
 }
 
-func GetConnectionIDFromContext(
+func ConnectionIDFromContext(
 	ctx context.Context,
 ) *ConnectionID {
 	key := connectionIDContextKey{}
