@@ -79,7 +79,7 @@ func incrementRequestsForConnectionHandler(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		if connectionID := connection.GetConnectionIDFromContext(ctx); connectionID != nil {
+		if connectionID := connection.ConnectionIDFromContext(ctx); connectionID != nil {
 			connection.ConnectionManagerInstance().IncrementRequestsForConnection(*connectionID)
 		}
 		handler.ServeHTTP(w, r)
