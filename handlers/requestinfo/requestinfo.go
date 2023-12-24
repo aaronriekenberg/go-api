@@ -5,11 +5,13 @@ import (
 	"strings"
 
 	"github.com/aaronriekenberg/go-api/connection"
+	"github.com/aaronriekenberg/go-api/request"
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
 type requestFields struct {
 	ConnectionID  string `json:"connection_id"`
+	RequestID     string `json:"request_id"`
 	Close         bool   `json:"close"`
 	ContentLength int64  `json:"content_length"`
 	Host          string `json:"host"`
@@ -50,6 +52,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 		response := &requestInfoData{
 			RequestFields: requestFields{
 				ConnectionID:  connection.ConnectionIDFromContext(ctx).String(),
+				RequestID:     request.RequestIDFromContext(ctx).String(),
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Host:          r.Host,

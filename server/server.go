@@ -14,6 +14,7 @@ import (
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/connection"
+	"github.com/aaronriekenberg/go-api/request"
 )
 
 type connWrapper struct {
@@ -86,6 +87,21 @@ func incrementRequestsForConnectionHandler(
 	}
 }
 
+func addRequestIDToContextHandler(
+	handler http.Handler,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		requestID := request.NextRequestID()
+
+		ctx = request.AddRequestIDToContext(ctx, requestID)
+
+		r = r.WithContext(ctx)
+
+		handler.ServeHTTP(w, r)
+	}
+}
+
 func addConnectionIDToContext(ctx context.Context, c net.Conn) context.Context {
 	connWrapper, ok := c.(*connWrapper)
 	if ok {
@@ -116,6 +132,7 @@ func Run(
 	}
 
 	handler = incrementRequestsForConnectionHandler(handler)
+	handler = addRequestIDToContextHandler(handler)
 
 	h2Server := &http2.Server{
 		IdleTimeout: 5 * time.Minute,
