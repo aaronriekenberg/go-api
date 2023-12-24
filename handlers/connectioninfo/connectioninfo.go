@@ -17,6 +17,18 @@ type connectionDTO struct {
 	Requests     uint64 `json:"requests"`
 }
 
+func connectionToDTO(
+	connection connection.Connection,
+	now time.Time,
+) *connectionDTO {
+	return &connectionDTO{
+		ID:           uint64(connection.ID()),
+		Age:          connection.Age(now).Truncate(time.Millisecond).String(),
+		CreationTime: utils.FormatTime(connection.CreationTime()),
+		Requests:     connection.Requests(),
+	}
+}
+
 type connectionInfoResponse struct {
 	NumCurrentConnections    int              `json:"num_current_connections"`
 	MaxOpenConnections       int              `json:"max_open_connections"`
@@ -35,14 +47,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 		now := time.Now()
 
 		for _, connection := range connectionManagerState.Connections {
-			cdto := &connectionDTO{
-				ID:           uint64(connection.ID()),
-				Age:          connection.Age(now).Truncate(time.Millisecond).String(),
-				CreationTime: utils.FormatTime(connection.CreationTime()),
-				Requests:     connection.Requests(),
-			}
-
-			connectionDTOs = append(connectionDTOs, cdto)
+			connectionDTOs = append(connectionDTOs, connectionToDTO(connection, now))
 		}
 
 		slices.SortFunc(connectionDTOs, func(cdto1, cdto2 *connectionDTO) int {
