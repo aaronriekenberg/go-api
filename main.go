@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -10,23 +11,13 @@ import (
 	"github.com/aaronriekenberg/go-api/server"
 )
 
-func fatalError(
-	message string,
-	err error,
-) {
-	slog.Error(message,
-		"error", err,
-	)
-	os.Exit(1)
-}
-
 func setupSlog() {
 	level := slog.LevelInfo
 
 	if levelString, ok := os.LookupEnv("LOG_LEVEL"); ok {
 		err := level.UnmarshalText([]byte(levelString))
 		if err != nil {
-			fatalError("level.UnmarshalText error", err)
+			panic(fmt.Errorf("level.UnmarshalText error %w", err))
 		}
 	}
 
@@ -46,28 +37,32 @@ func setupSlog() {
 }
 
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			slog.Error("panic in main",
+				"error", err,
+			)
+			os.Exit(1)
+		}
+	}()
+
 	setupSlog()
 
 	if len(os.Args) != 2 {
-		fatalError("config file required as command line arument", nil)
+		panic("config file required as command line arument")
 	}
 
 	configFile := os.Args[1]
 
 	config, err := config.ReadConfiguration(configFile)
-
 	if err != nil {
-		fatalError("main: config.ReadConfiguration error", err)
+		panic(fmt.Errorf("main: config.ReadConfiguration error %w", err))
 	}
 
 	profiling.Start(config.ProfilingConfiguration)
 
-	handlers, err := handlers.CreateHandlers(*config)
-
-	if err != nil {
-		fatalError("main: handlers.CreateHandlers error", err)
-	}
+	handlers := handlers.CreateHandlers(*config)
 
 	err = server.Run(config.ServerConfiguration, handlers)
-	fatalError("main: server.Run returned error", err)
+	panic(fmt.Errorf("main: server.Run returned error %w", err))
 }

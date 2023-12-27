@@ -26,15 +26,15 @@ func buildInfoMap() map[string]string {
 	return buildInfoMap
 }
 
-func versionInfoHandlerFunc() (http.HandlerFunc, error) {
+func versionInfoHandlerFunc() http.HandlerFunc {
 	jsonBytes, err := json.Marshal(buildInfoMap())
 	if err != nil {
-		return nil, fmt.Errorf("versionInfoHandlerFunc json.Marshal error: %w", err)
+		panic(fmt.Errorf("versionInfoHandlerFunc json.Marshal error: %w", err))
 	}
 
-	return utils.JSONBytesHandlerFunc(jsonBytes), nil
+	return utils.JSONBytesHandlerFunc(jsonBytes)
 }
 
-func NewVersionInfoHandler() (http.Handler, error) {
+func NewVersionInfoHandler() http.Handler {
 	return versionInfoHandlerFunc()
 }

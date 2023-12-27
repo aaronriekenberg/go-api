@@ -14,33 +14,19 @@ import (
 
 func CreateHandlers(
 	config config.Configuration,
-) (handler http.Handler, err error) {
+) http.Handler {
 	const get = http.MethodGet
 
 	router := httprouter.New()
 
-	h, err := command.NewAllCommandsHandler(config.CommandConfiguration)
-	if err != nil {
-		return
-	}
-	router.Handler(get, "/api/v1/commands", h)
-
-	h, err = command.NewRunCommandsHandler(config.CommandConfiguration)
-	if err != nil {
-		return
-	}
-	router.Handler(get, "/api/v1/commands/:id", h)
+	router.Handler(get, "/api/v1/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	router.Handler(get, "/api/v1/commands/:id", command.NewRunCommandsHandler(config.CommandConfiguration))
 
 	router.Handler(get, "/api/v1/connection_info", connectioninfo.NewConnectionInfoHandler())
 
 	router.Handler(get, "/api/v1/request_info", requestinfo.NewRequestInfoHandler())
 
-	h, err = versioninfo.NewVersionInfoHandler()
-	if err != nil {
-		return
-	}
-	router.Handler(get, "/api/v1/version_info", h)
+	router.Handler(get, "/api/v1/version_info", versioninfo.NewVersionInfoHandler())
 
-	handler = router
-	return
+	return router
 }

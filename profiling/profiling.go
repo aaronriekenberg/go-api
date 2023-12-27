@@ -1,10 +1,10 @@
 package profiling
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/pprof"
-	"os"
 
 	"github.com/aaronriekenberg/go-api/config"
 )
@@ -31,8 +31,5 @@ func runPprofServer(config config.ProfilingConfiguration) {
 	serveMux.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
 
 	err := http.ListenAndServe(config.ListenAddress, serveMux)
-	slog.Error("runPprofServer: http.ListenAndServe returned error",
-		"error", err,
-	)
-	os.Exit(1)
+	panic(fmt.Errorf("runPprofServer: http.ListenAndServe returned error %w", err))
 }
