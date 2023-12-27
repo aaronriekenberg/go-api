@@ -75,33 +75,6 @@ func createListener(
 	return listenerWrapper, nil
 }
 
-func incrementRequestsForConnectionHandler(
-	handler http.Handler,
-) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		if connectionID := connection.ConnectionIDFromContext(ctx); connectionID != nil {
-			connection.ConnectionManagerInstance().IncrementRequestsForConnection(*connectionID)
-		}
-		handler.ServeHTTP(w, r)
-	}
-}
-
-func addRequestIDToContextHandler(
-	handler http.Handler,
-) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		requestID := request.NextRequestID()
-
-		ctx = request.AddRequestIDToContext(ctx, requestID)
-
-		r = r.WithContext(ctx)
-
-		handler.ServeHTTP(w, r)
-	}
-}
-
 func addConnectionIDToContext(ctx context.Context, c net.Conn) context.Context {
 	connWrapper, ok := c.(*connWrapper)
 	if ok {
@@ -109,6 +82,25 @@ func addConnectionIDToContext(ctx context.Context, c net.Conn) context.Context {
 		return connection.AddConnectionIDToContext(ctx, connectionID)
 	}
 	return ctx
+}
+
+func updateContextForRequestHandler(
+	handler http.Handler,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		requestID := request.NextRequestID()
+
+		if connectionID := connection.ConnectionIDFromContext(ctx); connectionID != nil {
+			connection.ConnectionManagerInstance().IncrementRequestsForConnection(*connectionID)
+		}
+
+		ctx = request.AddRequestIDToContext(ctx, requestID)
+
+		r = r.WithContext(ctx)
+
+		handler.ServeHTTP(w, r)
+	}
 }
 
 func Run(
@@ -131,8 +123,7 @@ func Run(
 		return fmt.Errorf("server.Run: createListener error: %w", err)
 	}
 
-	handler = incrementRequestsForConnectionHandler(handler)
-	handler = addRequestIDToContextHandler(handler)
+	handler = updateContextForRequestHandler(handler)
 
 	h2Server := &http2.Server{
 		IdleTimeout: 5 * time.Minute,
