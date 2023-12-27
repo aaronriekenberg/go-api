@@ -28,7 +28,7 @@ type requestInfoData struct {
 
 func httpHeaderToRequestHeaders(headers http.Header) map[string]string {
 
-	requestHeaders := make(map[string]string)
+	requestHeaders := make(map[string]string, len(headers))
 
 	for key, value := range headers {
 		requestHeaders[key] = strings.Join(value, "; ")
