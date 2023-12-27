@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/pprof"
+	"os"
 
 	"github.com/aaronriekenberg/go-api/config"
 )
@@ -18,6 +19,15 @@ func Start(config config.ProfilingConfiguration) {
 }
 
 func runPprofServer(config config.ProfilingConfiguration) {
+	defer func() {
+		if err := recover(); err != nil {
+			slog.Error("panic in runPprofServer",
+				"error", err,
+			)
+			os.Exit(1)
+		}
+	}()
+
 	slog.Info("begin runPprofServer",
 		"config", config,
 	)
