@@ -13,7 +13,7 @@ import (
 func buildInfoMap() map[string]string {
 	buildInfoMap := make(map[string]string)
 
-	if buildInfo, ok := debug.ReadBuildInfo(); ok {
+	if buildInfo, ok := debug.ReadBuildInfo(); ok && buildInfo != nil {
 		buildInfoMap["GoVersion"] = buildInfo.GoVersion
 		for _, setting := range buildInfo.Settings {
 			if strings.HasPrefix(setting.Key, "GO") ||
