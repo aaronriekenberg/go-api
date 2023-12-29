@@ -30,8 +30,8 @@ type connectionManager struct {
 	metricsManager   *connectionMetricsManager
 }
 
-func newConnectionManager() connectionManager {
-	return connectionManager{
+func newConnectionManager() *connectionManager {
+	return &connectionManager{
 		idToConnection:   make(map[ConnectionID]*connection),
 		nextConnectionID: 1,
 		metricsManager:   newConnectionMetricsManager(),
@@ -128,5 +128,5 @@ func (cm *connectionManager) State() ConnectionManagerState {
 var connectionManagerInstance = newConnectionManager()
 
 func ConnectionManagerInstance() ConnectionManager {
-	return &connectionManagerInstance
+	return connectionManagerInstance
 }
