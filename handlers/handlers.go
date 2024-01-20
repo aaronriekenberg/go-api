@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -30,6 +31,9 @@ func CreateHandlers(
 	router.Handler(get, "/api/v1/version_info", versioninfo.NewVersionInfoHandler())
 
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		slog.Warn("router NotFound handler",
+			"URL", r.URL.String(),
+		)
 		utils.HTTPErrorStatusCode(w, http.StatusNotFound)
 	})
 
