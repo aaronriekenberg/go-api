@@ -10,6 +10,7 @@ import (
 	"github.com/aaronriekenberg/go-api/handlers/connectioninfo"
 	"github.com/aaronriekenberg/go-api/handlers/requestinfo"
 	"github.com/aaronriekenberg/go-api/handlers/versioninfo"
+	"github.com/aaronriekenberg/go-api/utils"
 )
 
 func CreateHandlers(
@@ -27,6 +28,10 @@ func CreateHandlers(
 	router.Handler(get, "/api/v1/request_info", requestinfo.NewRequestInfoHandler())
 
 	router.Handler(get, "/api/v1/version_info", versioninfo.NewVersionInfoHandler())
+
+	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		utils.HTTPErrorStatusCode(w, http.StatusNotFound)
+	})
 
 	return router
 }
