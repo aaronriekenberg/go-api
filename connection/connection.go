@@ -42,3 +42,7 @@ func (c *connection) Age(now time.Time) time.Duration {
 func (c *connection) Requests() uint64 {
 	return c.requests.Load()
 }
+
+func (c *connection) incrementRequests() {
+	c.requests.Add(1)
+}

@@ -61,7 +61,7 @@ func (cm *connectionManager) IncrementRequestsForConnection(connectionID Connect
 	connection := cm.connection(connectionID)
 
 	if connection != nil {
-		connection.requests.Add(1)
+		connection.incrementRequests()
 	}
 }
 
