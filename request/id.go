@@ -2,19 +2,10 @@ package request
 
 import (
 	"context"
-	"strconv"
 	"sync/atomic"
 )
 
 type RequestID uint64
-
-func (requestID *RequestID) String() string {
-	if requestID == nil {
-		return "(nil)"
-	}
-
-	return strconv.FormatUint(uint64(*requestID), 10)
-}
 
 type requestIDContextKey struct{}
 
@@ -30,14 +21,11 @@ func AddRequestIDToContext(
 
 func RequestIDFromContext(
 	ctx context.Context,
-) *RequestID {
+) (requestID RequestID, ok bool) {
 	key := requestIDContextKey{}
 
-	if value, ok := ctx.Value(key).(RequestID); ok {
-		return &value
-	}
-
-	return nil
+	requestID, ok = ctx.Value(key).(RequestID)
+	return
 }
 
 var nextRequestID atomic.Uint64

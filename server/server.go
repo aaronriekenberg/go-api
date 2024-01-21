@@ -91,8 +91,8 @@ func updateContextForRequestHandler(
 		ctx := r.Context()
 		requestID := request.NextRequestID()
 
-		if connectionID := connection.ConnectionIDFromContext(ctx); connectionID != nil {
-			connection.ConnectionManagerInstance().IncrementRequestsForConnection(*connectionID)
+		if connectionID, ok := connection.ConnectionIDFromContext(ctx); ok {
+			connection.ConnectionManagerInstance().IncrementRequestsForConnection(connectionID)
 		}
 
 		ctx = request.AddRequestIDToContext(ctx, requestID)

@@ -10,8 +10,8 @@ import (
 )
 
 type requestFields struct {
-	ConnectionID  string `json:"connection_id"`
-	RequestID     string `json:"request_id"`
+	ConnectionID  uint64 `json:"connection_id"`
+	RequestID     uint64 `json:"request_id"`
 	Close         bool   `json:"close"`
 	ContentLength int64  `json:"content_length"`
 	Host          string `json:"host"`
@@ -49,10 +49,14 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			urlString = "(nil)"
 		}
 
+		connectionID, _ := connection.ConnectionIDFromContext(ctx)
+
+		requestID, _ := request.RequestIDFromContext(ctx)
+
 		response := &requestInfoData{
 			RequestFields: requestFields{
-				ConnectionID:  connection.ConnectionIDFromContext(ctx).String(),
-				RequestID:     request.RequestIDFromContext(ctx).String(),
+				ConnectionID:  uint64(connectionID),
+				RequestID:     uint64(requestID),
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Host:          r.Host,
