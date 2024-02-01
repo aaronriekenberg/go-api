@@ -30,25 +30,23 @@ func CreateHandlers(
 
 	router.Handler(get, "/api/v1/version_info", versioninfo.NewVersionInfoHandler())
 
-	router.MethodNotAllowed = http.HandlerFunc(methodNotAllowed)
+	router.MethodNotAllowed = createErrorHandler("MethodNotAllowed", http.StatusMethodNotAllowed)
 
-	router.NotFound = http.HandlerFunc(notFound)
+	router.NotFound = createErrorHandler("NotFound", http.StatusNotFound)
 
 	return router
 }
 
-func methodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	slog.Warn("router MethodNotAllowed handler",
-		"method", r.Method,
-		"url", r.URL.String(),
-	)
-	utils.HTTPErrorStatusCode(w, http.StatusMethodNotAllowed)
-}
-
-func notFound(w http.ResponseWriter, r *http.Request) {
-	slog.Warn("router NotFound handler",
-		"method", r.Method,
-		"url", r.URL.String(),
-	)
-	utils.HTTPErrorStatusCode(w, http.StatusNotFound)
+func createErrorHandler(
+	errorType string,
+	httpStatusCode int,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slog.Warn("router error handler",
+			"errorType", errorType,
+			"method", r.Method,
+			"url", r.URL.String(),
+		)
+		utils.HTTPErrorStatusCode(w, httpStatusCode)
+	}
 }
