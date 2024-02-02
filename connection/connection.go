@@ -54,5 +54,5 @@ func (c *connection) markClosed() {
 }
 
 func (c *connection) openDuration() time.Duration {
-	return c.Age(c.creationTime)
+	return c.Age(c.closeTime)
 }
