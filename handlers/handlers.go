@@ -44,6 +44,7 @@ func createErrorHandler(
 	return func(w http.ResponseWriter, r *http.Request) {
 		slog.Warn("router error handler",
 			"errorType", errorType,
+			"headers", r.Header,
 			"method", r.Method,
 			"url", r.URL.String(),
 		)
