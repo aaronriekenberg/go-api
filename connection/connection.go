@@ -10,12 +10,14 @@ type Connection interface {
 	CreationTime() time.Time
 	Age(now time.Time) time.Duration
 	Requests() uint64
+	openDuration() time.Duration
 }
 
 type connection struct {
 	id           ConnectionID
 	creationTime time.Time
 	requests     atomic.Uint64
+	closeTime    time.Time
 }
 
 func newConnection(
@@ -45,4 +47,12 @@ func (c *connection) Requests() uint64 {
 
 func (c *connection) incrementRequests() {
 	c.requests.Add(1)
+}
+
+func (c *connection) markClosed() {
+	c.closeTime = time.Now()
+}
+
+func (c *connection) openDuration() time.Duration {
+	return c.Age(c.creationTime)
 }

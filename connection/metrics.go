@@ -47,7 +47,7 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 		case closedConnection := <-cmm.updateForClosedConnectionChannel:
 			newMetrics := cmm.connectionMetrics()
 
-			newMetrics.maxConnectionAge = max(closedConnection.Age(time.Now()), newMetrics.maxConnectionAge)
+			newMetrics.maxConnectionAge = max(closedConnection.openDuration(), newMetrics.maxConnectionAge)
 			newMetrics.maxRequestsPerConnection = max(closedConnection.Requests(), newMetrics.maxRequestsPerConnection)
 
 			cmm.atomicConnectionMetrics.Store(&newMetrics)

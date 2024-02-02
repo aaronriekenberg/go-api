@@ -76,6 +76,8 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 			"requests", connection.Requests(),
 		)
 
+		connection.markClosed()
+
 		cm.metricsManager.updateForClosedConnection(connection)
 	}
 
