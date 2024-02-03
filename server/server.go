@@ -108,10 +108,7 @@ func Run(
 	handler http.Handler,
 ) error {
 	logger := slog.Default().With(
-		slog.Group("config",
-			"Network", config.Network,
-			"ListenAddress", config.ListenAddress,
-		),
+		"config", config,
 	)
 
 	logger.Info("begin server.Run")
@@ -125,8 +122,11 @@ func Run(
 
 	handler = updateContextForRequestHandler(handler)
 
-	h2Server := &http2.Server{
-		IdleTimeout: 5 * time.Minute,
+	if config.H2CEnabled {
+		h2Server := &http2.Server{
+			IdleTimeout: 5 * time.Minute,
+		}
+		handler = h2c.NewHandler(handler, h2Server)
 	}
 
 	httpServer := &http.Server{
@@ -134,7 +134,7 @@ func Run(
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
 		ConnContext:  addConnectionIDToContext,
-		Handler:      h2c.NewHandler(handler, h2Server),
+		Handler:      handler,
 	}
 
 	err = httpServer.Serve(listener)

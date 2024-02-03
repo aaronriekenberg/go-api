@@ -10,6 +10,7 @@ import (
 type ServerConfiguration struct {
 	Network       string
 	ListenAddress string
+	H2CEnabled    bool
 }
 
 type ProfilingConfiguration struct {

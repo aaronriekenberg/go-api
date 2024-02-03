@@ -1,6 +1,7 @@
 [serverConfiguration]
 network = "unix"
 listenAddress = "/var/www/run/api/socket"
+h2cEnabled = false
 
 [profilingConfiguration]
 enabled = false
