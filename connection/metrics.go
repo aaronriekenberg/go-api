@@ -14,13 +14,13 @@ type connectionMetrics struct {
 type connectionMetricsManager struct {
 	atomicConnectionMetrics          atomic.Pointer[connectionMetrics]
 	updateForNewConnectionChannel    chan int
-	updateForClosedConnectionChannel chan Connection
+	updateForClosedConnectionChannel chan *connection
 }
 
 func newConnectionMetricsManager() *connectionMetricsManager {
 	cmm := &connectionMetricsManager{
 		updateForNewConnectionChannel:    make(chan int, 10),
-		updateForClosedConnectionChannel: make(chan Connection, 10),
+		updateForClosedConnectionChannel: make(chan *connection, 10),
 	}
 
 	cmm.atomicConnectionMetrics.Store(new(connectionMetrics))
@@ -62,7 +62,7 @@ func (cmm *connectionMetricsManager) updateForNewConnection(
 }
 
 func (cmm *connectionMetricsManager) updateForClosedConnection(
-	closedConnection Connection,
+	closedConnection *connection,
 ) {
 	cmm.updateForClosedConnectionChannel <- closedConnection
 }

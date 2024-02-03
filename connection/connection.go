@@ -10,7 +10,6 @@ type Connection interface {
 	CreationTime() time.Time
 	Age(now time.Time) time.Duration
 	Requests() uint64
-	openDuration() time.Duration
 }
 
 type connection struct {
