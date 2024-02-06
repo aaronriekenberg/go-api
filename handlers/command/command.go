@@ -11,7 +11,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"golang.org/x/sync/semaphore"
 
 	"github.com/aaronriekenberg/go-api/config"
@@ -81,9 +80,8 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 
 func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	params := httprouter.ParamsFromContext(ctx)
 
-	id := params.ByName("id")
+	id := r.PathValue("id")
 	commandInfo, ok := runCommandsHandler.idToCommandInfo[id]
 
 	if !ok {
