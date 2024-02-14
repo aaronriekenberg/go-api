@@ -1,3 +1,3 @@
 # go-api
 
-Playing with [httprouter](https://github.com/julienschmidt/httprouter) and [slog](https://pkg.go.dev/log/slog@latest).
+Playing with [go 1.22 ServeMux](https://go.dev/blog/routing-enhancements) and [slog](https://pkg.go.dev/log/slog@latest).
