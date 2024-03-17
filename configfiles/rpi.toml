@@ -1,0 +1,43 @@
+[serverConfiguration]
+network = "tcp"
+listenAddress = ":8080"
+h2cEnabled = false
+
+[profilingConfiguration]
+enabled = true
+listenAddress = ":8081"
+
+[commandConfiguration]
+maxConcurrentCommands = 10
+requestTimeoutDuration = "2s"
+semaphoreAcquireTimeoutDuration = "200ms"
+commands = [
+
+    { id = "ntpq", description = "ntpq -pn", command = "/usr/sbin/ntpq", args = [
+        "-p",
+        "-n",
+    ] },
+    { id = "df", description = "df", command = "/usr/bin/df", args = [
+        "-h",
+    ] },
+    { id = "envstat", description = "envstat", command = "/usr/sbin/envstat" },
+    { id = "git_log", description = "git log", command = "/usr/bin/git", args = [
+        "log",
+        "-1",
+    ] },
+    { id = "ifconfig", description = "ifconfig", command = "/sbin/ifconfig" },
+    { id = "netstat_an", description = "netstat -an", command = "/usr/bin/netstat", args = [
+        "-a",
+        "-n",
+    ] },
+    { id = "sysctl_machdep", description = "sysctl machdep", command = "/sbin/sysctl", args = [
+        "machdep",
+    ] },
+    { id = "top", description = "top", command = "/usr/bin/top", args = [
+        "-b",
+        "-n1",
+    ] },
+    { id = "uptime", description = "uptime", command = "/usr/bin/uptime" },
+    { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
+    { id = "w", description = "w", command = "/usr/bin/w" },
+]
