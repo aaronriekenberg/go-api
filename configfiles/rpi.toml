@@ -28,9 +28,10 @@ commands = [
         "-a",
         "-n",
     ] },
-    { id = "ntpq", description = "ntpq -pn", command = "/usr/sbin/ntpq", args = [
+    { id = "ntpq", description = "ntpq -pnw", command = "/usr/sbin/ntpq", args = [
         "-p",
         "-n",
+        "-w",
     ] },
     { id = "sysctl_machdep", description = "sysctl machdep", command = "/sbin/sysctl", args = [
         "machdep",
