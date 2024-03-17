@@ -2,6 +2,7 @@
 network = "unix"
 listenAddress = "/var/www/run/api/socket"
 h2cEnabled = false
+context = "/api/v1"
 
 [profilingConfiguration]
 enabled = false

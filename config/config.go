@@ -11,6 +11,7 @@ type ServerConfiguration struct {
 	Network       string
 	ListenAddress string
 	H2CEnabled    bool
+	Context       string
 }
 
 type ProfilingConfiguration struct {

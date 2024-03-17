@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/aaronriekenberg/go-api/config"
@@ -15,15 +16,21 @@ func CreateHandlers(
 ) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /api/v1/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	context := config.ServerConfiguration.Context
 
-	mux.Handle("GET /api/v1/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
+	slog.Info("CreateHandlers",
+		"context", context,
+	)
 
-	mux.Handle("GET /api/v1/connection_info", connectioninfo.NewConnectionInfoHandler())
+	mux.Handle("GET "+context+"/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
 
-	mux.Handle("GET /api/v1/request_info", requestinfo.NewRequestInfoHandler())
+	mux.Handle("GET "+context+"/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
 
-	mux.Handle("GET /api/v1/version_info", versioninfo.NewVersionInfoHandler())
+	mux.Handle("GET "+context+"/connection_info", connectioninfo.NewConnectionInfoHandler())
+
+	mux.Handle("GET "+context+"/request_info", requestinfo.NewRequestInfoHandler())
+
+	mux.Handle("GET "+context+"/version_info", versioninfo.NewVersionInfoHandler())
 
 	return mux
 }
