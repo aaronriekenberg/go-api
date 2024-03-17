@@ -38,7 +38,11 @@ commands = [
     ] },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
-        "-n1",
+    ] },
+    { id = "top_ores", description = "top -o res", command = "/usr/bin/top", args = [
+        "-b",
+        "-o",
+        "res",
     ] },
     { id = "uptime", description = "uptime", command = "/usr/bin/uptime" },
     { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
