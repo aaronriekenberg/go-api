@@ -15,7 +15,7 @@ commands = [
     { id = "cpuinfo", description = "cpuinfo", command = "/bin/cat", args = [
         "/proc/cpuinfo",
     ] },
-    { id = "df", description = "df", command = "/usr/bin/df", args = [
+    { id = "df", description = "df", command = "/bin/df", args = [
         "-h",
     ] },
     { id = "envstat", description = "envstat", command = "/usr/sbin/envstat" },
