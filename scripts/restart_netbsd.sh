@@ -4,4 +4,4 @@ cd /home/aaron/go-api
 
 pkill go-api
 
-nohup ./go-api ./configfiles/rpi.toml > output 2>&1 &
+nohup ./go-api ./configfiles/rpi.toml 2>&1 | (cd logs && simplerotate) &
