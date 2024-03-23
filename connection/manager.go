@@ -10,8 +10,8 @@ import (
 
 type ConnectionManagerState struct {
 	MaxOpenConnections       int
-	MinConnectionAge         time.Duration
-	MaxConnectionAge         time.Duration
+	MinConnectionLifetime    time.Duration
+	MaxConnectionLifetime    time.Duration
 	MaxRequestsPerConnection uint64
 	Connections              []Connection
 }
@@ -114,28 +114,28 @@ func (cm *connectionManager) State() ConnectionManagerState {
 
 	connectionMetrics := cm.metricsManager.connectionMetrics()
 
-	var minConnectionAge time.Duration
-	if connectionMetrics.minConnectionAge != nil {
-		minConnectionAge = *connectionMetrics.minConnectionAge
+	var minConnectionLifetime time.Duration
+	if connectionMetrics.pastMinConnectionAge != nil {
+		minConnectionLifetime = *connectionMetrics.pastMinConnectionAge
 	} else if len(connections) > 0 {
 		minAgeConnection := slices.MinFunc(connections, func(c1, c2 Connection) int {
 			return cmp.Compare(c1.Age(now), c2.Age(now))
 		})
-		minConnectionAge = minAgeConnection.Age(now)
+		minConnectionLifetime = minAgeConnection.Age(now)
 	}
 
-	maxConnectionAge := connectionMetrics.maxConnectionAge
-	maxRequestsPerConnection := connectionMetrics.maxRequestsPerConnection
+	maxConnectionLifetime := connectionMetrics.pastMaxConnectionAge
+	maxRequestsPerConnection := connectionMetrics.pastMaxRequestsPerConnection
 
 	for _, c := range connections {
-		maxConnectionAge = max(c.Age(now), maxConnectionAge)
+		maxConnectionLifetime = max(c.Age(now), maxConnectionLifetime)
 		maxRequestsPerConnection = max(c.Requests(), maxRequestsPerConnection)
 	}
 
 	return ConnectionManagerState{
 		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
-		MinConnectionAge:         minConnectionAge,
-		MaxConnectionAge:         maxConnectionAge,
+		MinConnectionLifetime:    minConnectionLifetime,
+		MaxConnectionLifetime:    maxConnectionLifetime,
 		MaxRequestsPerConnection: maxRequestsPerConnection,
 		Connections:              connections,
 	}

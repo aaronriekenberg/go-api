@@ -6,10 +6,10 @@ import (
 )
 
 type connectionMetrics struct {
-	maxOpenConnections       int
-	minConnectionAge         *time.Duration
-	maxConnectionAge         time.Duration
-	maxRequestsPerConnection uint64
+	maxOpenConnections           int
+	pastMinConnectionAge         *time.Duration
+	pastMaxConnectionAge         time.Duration
+	pastMaxRequestsPerConnection uint64
 }
 
 type newConnectionMessage struct {
@@ -58,16 +58,16 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 
 			closedConnection := closedConnectionMessage.closedConnection
 
-			if newMetrics.minConnectionAge == nil {
-				minConnectionAge := closedConnection.openDuration()
-				newMetrics.minConnectionAge = &minConnectionAge
+			if newMetrics.pastMinConnectionAge == nil {
+				pastMinConnectionAge := closedConnection.openDuration()
+				newMetrics.pastMinConnectionAge = &pastMinConnectionAge
 			} else {
-				minConnectionAge := min(closedConnection.openDuration(), *newMetrics.minConnectionAge)
-				newMetrics.minConnectionAge = &minConnectionAge
+				pastMinConnectionAge := min(closedConnection.openDuration(), *newMetrics.pastMinConnectionAge)
+				newMetrics.pastMinConnectionAge = &pastMinConnectionAge
 			}
 
-			newMetrics.maxConnectionAge = max(closedConnection.openDuration(), newMetrics.maxConnectionAge)
-			newMetrics.maxRequestsPerConnection = max(closedConnection.Requests(), newMetrics.maxRequestsPerConnection)
+			newMetrics.pastMaxConnectionAge = max(closedConnection.openDuration(), newMetrics.pastMaxConnectionAge)
+			newMetrics.pastMaxRequestsPerConnection = max(closedConnection.Requests(), newMetrics.pastMaxRequestsPerConnection)
 
 			cmm.atomicConnectionMetrics.Store(&newMetrics)
 		}
