@@ -107,14 +107,11 @@ func (cm *connectionManager) connections() []Connection {
 	return connections
 }
 
-func (cm *connectionManager) State() ConnectionManagerState {
-	connections := cm.connections()
-
-	now := time.Now()
-
-	connectionMetrics := cm.metricsManager.connectionMetrics()
-
-	var minConnectionLifetime time.Duration
+func computeMinConnectionLifetime(
+	now time.Time,
+	connections []Connection,
+	connectionMetrics connectionMetrics,
+) (minConnectionLifetime time.Duration) {
 	if connectionMetrics.pastMinConnectionAge != nil {
 		minConnectionLifetime = *connectionMetrics.pastMinConnectionAge
 	} else if len(connections) > 0 {
@@ -123,6 +120,15 @@ func (cm *connectionManager) State() ConnectionManagerState {
 		})
 		minConnectionLifetime = minAgeConnection.Age(now)
 	}
+	return
+}
+
+func (cm *connectionManager) State() ConnectionManagerState {
+	connections := cm.connections()
+
+	now := time.Now()
+
+	connectionMetrics := cm.metricsManager.connectionMetrics()
 
 	maxConnectionLifetime := connectionMetrics.pastMaxConnectionAge
 	maxRequestsPerConnection := connectionMetrics.pastMaxRequestsPerConnection
@@ -134,7 +140,7 @@ func (cm *connectionManager) State() ConnectionManagerState {
 
 	return ConnectionManagerState{
 		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
-		MinConnectionLifetime:    minConnectionLifetime,
+		MinConnectionLifetime:    computeMinConnectionLifetime(now, connections, connectionMetrics),
 		MaxConnectionLifetime:    maxConnectionLifetime,
 		MaxRequestsPerConnection: maxRequestsPerConnection,
 		Connections:              connections,
