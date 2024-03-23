@@ -1,13 +1,16 @@
 package connection
 
 import (
+	"cmp"
 	"log/slog"
+	"slices"
 	"sync"
 	"time"
 )
 
 type ConnectionManagerState struct {
 	MaxOpenConnections       int
+	MinConnectionAge         time.Duration
 	MaxConnectionAge         time.Duration
 	MaxRequestsPerConnection uint64
 	Connections              []Connection
@@ -107,12 +110,22 @@ func (cm *connectionManager) connections() []Connection {
 func (cm *connectionManager) State() ConnectionManagerState {
 	connections := cm.connections()
 
+	now := time.Now()
+
 	connectionMetrics := cm.metricsManager.connectionMetrics()
+
+	var minConnectionAge time.Duration
+	if connectionMetrics.minConnectionAge != nil {
+		minConnectionAge = *connectionMetrics.minConnectionAge
+	} else if len(connections) > 0 {
+		minAgeConnection := slices.MinFunc(connections, func(c1, c2 Connection) int {
+			return cmp.Compare(c1.Age(now), c2.Age(now))
+		})
+		minConnectionAge = minAgeConnection.Age(now)
+	}
 
 	maxConnectionAge := connectionMetrics.maxConnectionAge
 	maxRequestsPerConnection := connectionMetrics.maxRequestsPerConnection
-
-	now := time.Now()
 
 	for _, c := range connections {
 		maxConnectionAge = max(c.Age(now), maxConnectionAge)
@@ -121,6 +134,7 @@ func (cm *connectionManager) State() ConnectionManagerState {
 
 	return ConnectionManagerState{
 		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
+		MinConnectionAge:         minConnectionAge,
 		MaxConnectionAge:         maxConnectionAge,
 		MaxRequestsPerConnection: maxRequestsPerConnection,
 		Connections:              connections,
