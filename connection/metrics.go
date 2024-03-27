@@ -47,28 +47,28 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 	for {
 		select {
 		case newConnectionMessage := <-cmm.updateForNewConnectionChannel:
-			newMetrics := cmm.connectionMetrics()
+			metricsCopy := cmm.connectionMetrics()
 
-			newMetrics.maxOpenConnections = max(newMetrics.maxOpenConnections, newConnectionMessage.currentOpenConnections)
+			metricsCopy.maxOpenConnections = max(metricsCopy.maxOpenConnections, newConnectionMessage.currentOpenConnections)
 
-			cmm.atomicConnectionMetrics.Store(&newMetrics)
+			cmm.atomicConnectionMetrics.Store(&metricsCopy)
 
 		case closedConnectionMessage := <-cmm.updateForClosedConnectionChannel:
-			newMetrics := cmm.connectionMetrics()
+			metricsCopy := cmm.connectionMetrics()
 
 			closedConnection := closedConnectionMessage.closedConnection
 
-			if newMetrics.pastMinConnectionAge == nil {
-				newMetrics.pastMinConnectionAge = new(time.Duration)
-				*newMetrics.pastMinConnectionAge = closedConnection.openDuration()
+			if metricsCopy.pastMinConnectionAge == nil {
+				metricsCopy.pastMinConnectionAge = new(time.Duration)
+				*metricsCopy.pastMinConnectionAge = closedConnection.openDuration()
 			} else {
-				*newMetrics.pastMinConnectionAge = min(closedConnection.openDuration(), *newMetrics.pastMinConnectionAge)
+				*metricsCopy.pastMinConnectionAge = min(closedConnection.openDuration(), *metricsCopy.pastMinConnectionAge)
 			}
 
-			newMetrics.pastMaxConnectionAge = max(closedConnection.openDuration(), newMetrics.pastMaxConnectionAge)
-			newMetrics.pastMaxRequestsPerConnection = max(closedConnection.Requests(), newMetrics.pastMaxRequestsPerConnection)
+			metricsCopy.pastMaxConnectionAge = max(closedConnection.openDuration(), metricsCopy.pastMaxConnectionAge)
+			metricsCopy.pastMaxRequestsPerConnection = max(closedConnection.Requests(), metricsCopy.pastMaxRequestsPerConnection)
 
-			cmm.atomicConnectionMetrics.Store(&newMetrics)
+			cmm.atomicConnectionMetrics.Store(&metricsCopy)
 		}
 	}
 }
