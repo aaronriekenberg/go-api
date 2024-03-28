@@ -23,7 +23,7 @@ func CreateHandlers(
 		"context", context,
 	)
 
-	mux.Handle("GET "+path.Join(context, "commands"), command.NewAllCommandsHandler(config.CommandConfiguration))
+	mux.Handle("GET "+path.Join(context, "/commands"), command.NewAllCommandsHandler(config.CommandConfiguration))
 
 	mux.Handle("GET "+path.Join(context, "/commands/{id}"), command.NewRunCommandsHandler(config.CommandConfiguration))
 
