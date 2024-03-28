@@ -3,6 +3,7 @@ package handlers
 import (
 	"log/slog"
 	"net/http"
+	"path"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/handlers/command"
@@ -22,15 +23,15 @@ func CreateHandlers(
 		"context", context,
 	)
 
-	mux.Handle("GET "+context+"/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	mux.Handle("GET "+path.Join(context, "commands"), command.NewAllCommandsHandler(config.CommandConfiguration))
 
-	mux.Handle("GET "+context+"/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
+	mux.Handle("GET "+path.Join(context, "/commands/{id}"), command.NewRunCommandsHandler(config.CommandConfiguration))
 
-	mux.Handle("GET "+context+"/connection_info", connectioninfo.NewConnectionInfoHandler())
+	mux.Handle("GET "+path.Join(context, "/connection_info"), connectioninfo.NewConnectionInfoHandler())
 
-	mux.Handle("GET "+context+"/request_info", requestinfo.NewRequestInfoHandler())
+	mux.Handle("GET "+path.Join(context, "/request_info"), requestinfo.NewRequestInfoHandler())
 
-	mux.Handle("GET "+context+"/version_info", versioninfo.NewVersionInfoHandler())
+	mux.Handle("GET "+path.Join(context+"/version_info"), versioninfo.NewVersionInfoHandler())
 
 	return mux
 }
