@@ -13,42 +13,39 @@ maxConcurrentCommands = 10
 requestTimeoutDuration = "2s"
 semaphoreAcquireTimeoutDuration = "200ms"
 commands = [
-    { id = "cpuinfo", description = "cpuinfo", command = "/bin/cat", args = [
-        "/proc/cpuinfo",
-    ] },
-    { id = "df", description = "df", command = "/bin/df", args = [
+    { id = "df", description = "df", command = "/usr/bin/df", args = [
         "-h",
     ] },
-    { id = "envstat", description = "envstat", command = "/usr/sbin/envstat" },
-    { id = "git_log", description = "git log", command = "/usr/pkg/bin/git", args = [
+    { id = "git_log", description = "git log", command = "/usr/bin/git", args = [
         "log",
         "-1",
     ] },
-    { id = "ifconfig", description = "ifconfig", command = "/sbin/ifconfig" },
+    { id = "ip_addr", description = "ip addr", command = "/usr/sbin/ip", args = [
+        "addr",
+    ] },
+    { id = "lscpu", description = "lscpu", command = "/usr/bin/lscpu" },
+    { id = "lscpu_e", description = "lscpu -e", command = "/usr/bin/lscpu", args = [
+        "-e",
+    ] },
     { id = "netstat_an", description = "netstat -an", command = "/usr/bin/netstat", args = [
         "-a",
         "-n",
     ] },
-    { id = "ntpq", description = "ntpq -pnw", command = "/usr/sbin/ntpq", args = [
-        "-p",
-        "-n",
-        "-w",
-    ] },
-    { id = "sysctl_hw", description = "sysctl hw", command = "/sbin/sysctl", args = [
-        "hw",
-    ] },
-    { id = "sysctl_machdep", description = "sysctl machdep", command = "/sbin/sysctl", args = [
-        "machdep",
-    ] },
+    { id = "sensors", description = "sensors", command = "/usr/bin/sensors" },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
+        "-n1",
     ] },
-    { id = "top_ores", description = "top -o res", command = "/usr/bin/top", args = [
+    { id = "top_ores", description = "top -o RES", command = "/usr/bin/top", args = [
         "-b",
+        "-n1",
         "-o",
-        "res",
+        "RES",
     ] },
     { id = "uptime", description = "uptime", command = "/usr/bin/uptime" },
     { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
     { id = "w", description = "w", command = "/usr/bin/w" },
+    { id = "timedatectl", description = "timedatectl timesync-status", command = "/usr/bin/timedatectl", args = [
+        "timesync-status",
+    ] },
 ]

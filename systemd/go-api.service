@@ -5,7 +5,7 @@ AssertPathExists=%h/go-api/go-api
 
 [Service]
 WorkingDirectory=%h/go-api
-ExecStart=%h/go-api/go-api ./configfiles/config.toml
+ExecStart=%h/go-api/go-api ./configfiles/rpi.toml
 Restart=always
 UMask=007
 
