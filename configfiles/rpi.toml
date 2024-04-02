@@ -32,6 +32,9 @@ commands = [
         "-n",
     ] },
     { id = "sensors", description = "sensors", command = "/usr/bin/sensors" },
+    { id = "timedatectl", description = "timedatectl timesync-status", command = "/usr/bin/timedatectl", args = [
+        "timesync-status",
+    ] },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
         "-n1",
@@ -45,7 +48,4 @@ commands = [
     { id = "uptime", description = "uptime", command = "/usr/bin/uptime" },
     { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
     { id = "w", description = "w", command = "/usr/bin/w" },
-    { id = "timedatectl", description = "timedatectl timesync-status", command = "/usr/bin/timedatectl", args = [
-        "timesync-status",
-    ] },
 ]
