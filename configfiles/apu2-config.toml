@@ -1,8 +1,8 @@
 [serverConfiguration]
-network = "unix"
-listenAddress = "/var/www/run/api/socket"
+network = "tcp"
+listenAddress = "[::1]:8080"
 h2cEnabled = false
-context = "/api/v1"
+context = "/apu_api/v1"
 
 [profilingConfiguration]
 enabled = false
@@ -18,8 +18,17 @@ commands = [
         "sources",
         "-v",
     ] },
+    { id = "chronyc_sourcestats", description = "chronyc sourcestats", command = "/usr/bin/chronyc", args = [
+        "-a",
+        "-n",
+        "sourcestats",
+        "-v",
+    ] },
     { id = "df", description = "df", command = "/usr/bin/df", args = [
         "-h",
+    ] },
+    { id = "edac-util", description = "edac-util -v", command = "/usr/bin/edac-util", args = [
+        "-v",
     ] },
     { id = "git_log", description = "git log", command = "/usr/bin/git", args = [
         "log",
