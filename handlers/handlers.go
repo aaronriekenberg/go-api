@@ -23,15 +23,22 @@ func CreateHandlers(
 		"context", context,
 	)
 
-	mux.Handle("GET "+path.Join(context, "/commands"), command.NewAllCommandsHandler(config.CommandConfiguration))
+	handleGET := func(
+		relativePath string,
+		handler http.Handler,
+	) {
+		mux.Handle("GET "+path.Join(context, relativePath), handler)
+	}
 
-	mux.Handle("GET "+path.Join(context, "/commands/{id}"), command.NewRunCommandsHandler(config.CommandConfiguration))
+	handleGET("/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
 
-	mux.Handle("GET "+path.Join(context, "/connection_info"), connectioninfo.NewConnectionInfoHandler())
+	handleGET("/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
 
-	mux.Handle("GET "+path.Join(context, "/request_info"), requestinfo.NewRequestInfoHandler())
+	handleGET("/connection_info", connectioninfo.NewConnectionInfoHandler())
 
-	mux.Handle("GET "+path.Join(context+"/version_info"), versioninfo.NewVersionInfoHandler())
+	handleGET("/request_info", requestinfo.NewRequestInfoHandler())
+
+	handleGET("/version_info", versioninfo.NewVersionInfoHandler())
 
 	return mux
 }
