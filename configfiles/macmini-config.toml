@@ -1,6 +1,6 @@
 [serverConfiguration]
-network = "tcp"
-listenAddress = "[::1]:8080"
+network = "unix"
+listenAddress = "/var/www/run/api/socket"
 h2cEnabled = true
 context = "/api/v1"
 
