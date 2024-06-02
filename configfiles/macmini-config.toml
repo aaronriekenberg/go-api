@@ -2,7 +2,7 @@
 network = "tcp"
 listenAddress = "[::1]:8080"
 h2cEnabled = true
-context = "/apu_api/v1"
+context = "/api/v1"
 
 [profilingConfiguration]
 enabled = false
