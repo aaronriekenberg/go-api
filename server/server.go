@@ -128,6 +128,7 @@ func runServerListener(
 	}
 
 	if serverConfig.H2CEnabled {
+		logger.Info("enabling h2c")
 		h2Server := &http2.Server{
 			IdleTimeout: 5 * time.Minute,
 		}
