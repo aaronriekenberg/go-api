@@ -1,12 +1,14 @@
 [serverConfiguration]
-network = "tcp"
-listenAddress = ":8080"
+listeners = [
+    { network = "tcp", listenAddress = ":8080" },
+    { network = "tcp", listenAddress = ":8081" },
+]
 h2cEnabled = false
 context = "/api/v1"
 
 [profilingConfiguration]
-enabled = true
-listenAddress = ":8081"
+enabled = false
+#listenAddress = ":8082"
 
 [commandConfiguration]
 maxConcurrentCommands = 10

@@ -57,7 +57,7 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 }
 
 func createListener(
-	config config.ServerConfiguration,
+	config config.ServerListenerConfiguration,
 ) (net.Listener, error) {
 	if config.Network == "unix" {
 		os.Remove(config.ListenAddress)
@@ -102,26 +102,30 @@ func updateContextForRequestHandler(
 	}
 }
 
-func Run(
-	config config.ServerConfiguration,
+func runServerListener(
+	listenerConfig config.ServerListenerConfiguration,
+	serverConfig config.ServerConfiguration,
 	handler http.Handler,
-) error {
+	errorChannel chan error,
+) {
 	logger := slog.Default().With(
-		"config", config,
+		"listenerConfig", listenerConfig,
 	)
 
-	logger.Info("begin server.Run")
+	logger.Info("begin runServerListener")
 
 	listener, err := createListener(
-		config,
+		listenerConfig,
 	)
 	if err != nil {
-		return fmt.Errorf("server.Run: createListener error: %w", err)
+		logger.Warn("server.runServerListener: createListener error",
+			"error", err,
+		)
+		errorChannel <- fmt.Errorf("server.runServerListener: createListener error: %w", err)
+		return
 	}
 
-	handler = updateContextForRequestHandler(handler)
-
-	if config.H2CEnabled {
+	if serverConfig.H2CEnabled {
 		h2Server := &http2.Server{
 			IdleTimeout: 5 * time.Minute,
 		}
@@ -138,5 +142,32 @@ func Run(
 
 	err = httpServer.Serve(listener)
 
-	return fmt.Errorf("server.Run: httpServer.Serve error: %w", err)
+	logger.Warn("server.runServerListener: httpServer.serve error",
+		"error", err,
+	)
+	errorChannel <- fmt.Errorf("server.runServerListener: httpServer.Serve error: %w", err)
+}
+
+func Run(
+	config config.ServerConfiguration,
+	handler http.Handler,
+) error {
+
+	slog.Info("begin server.Run")
+
+	handler = updateContextForRequestHandler(handler)
+
+	errorChannel := make(chan error, len(config.Listeners))
+
+	for _, listenerConfig := range config.Listeners {
+		go runServerListener(
+			listenerConfig,
+			config,
+			handler,
+			errorChannel,
+		)
+	}
+
+	error := <-errorChannel
+	return fmt.Errorf("server.Run: listener error: %w", error)
 }

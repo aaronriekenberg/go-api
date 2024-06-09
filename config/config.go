@@ -7,11 +7,15 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type ServerConfiguration struct {
+type ServerListenerConfiguration struct {
 	Network       string
 	ListenAddress string
-	H2CEnabled    bool
-	Context       string
+}
+
+type ServerConfiguration struct {
+	Listeners  []ServerListenerConfiguration
+	H2CEnabled bool
+	Context    string
 }
 
 type ProfilingConfiguration struct {
