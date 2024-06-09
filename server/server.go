@@ -149,7 +149,7 @@ func runServerListener(
 }
 
 func Run(
-	config config.ServerConfiguration,
+	serverConfig config.ServerConfiguration,
 	handler http.Handler,
 ) error {
 
@@ -157,12 +157,12 @@ func Run(
 
 	handler = updateContextForRequestHandler(handler)
 
-	errorChannel := make(chan error, len(config.Listeners))
+	errorChannel := make(chan error, len(serverConfig.Listeners))
 
-	for _, listenerConfig := range config.Listeners {
+	for _, listenerConfig := range serverConfig.Listeners {
 		go runServerListener(
 			listenerConfig,
-			config,
+			serverConfig,
 			handler,
 			errorChannel,
 		)
