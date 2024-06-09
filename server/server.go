@@ -114,6 +114,8 @@ func runServerListener(
 
 	logger.Info("begin runServerListener")
 
+	handler = updateContextForRequestHandler(handler)
+
 	listener, err := createListener(
 		listenerConfig,
 	)
@@ -154,8 +156,6 @@ func Run(
 ) error {
 
 	slog.Info("begin server.Run")
-
-	handler = updateContextForRequestHandler(handler)
 
 	errorChannel := make(chan error, len(serverConfig.Listeners))
 
