@@ -106,7 +106,7 @@ func runServerListener(
 	listenerConfig config.ServerListenerConfiguration,
 	serverConfig config.ServerConfiguration,
 	handler http.Handler,
-	errorChannel chan error,
+	errorChannel chan<- error,
 ) {
 	logger := slog.Default().With(
 		"listenerConfig", listenerConfig,
@@ -168,6 +168,6 @@ func Run(
 		)
 	}
 
-	error := <-errorChannel
-	return fmt.Errorf("server.Run: listener error: %w", error)
+	err := <-errorChannel
+	return fmt.Errorf("server.Run: listener error: %w", err)
 }
