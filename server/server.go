@@ -76,8 +76,7 @@ func createListener(
 }
 
 func addConnectionIDToContext(ctx context.Context, c net.Conn) context.Context {
-	connWrapper, ok := c.(*connWrapper)
-	if ok {
+	if connWrapper, ok := c.(*connWrapper); ok {
 		connectionID := connWrapper.connectionID
 		return connection.AddConnectionIDToContext(ctx, connectionID)
 	}
