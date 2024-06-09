@@ -1,5 +1,10 @@
 [serverConfiguration]
-listeners = [{ network = "unix", listenAddress = "/var/www/run/api/socket" }]
+listeners = [
+    { network = "unix", listenAddress = "/var/www/run/api/socket1" },
+    { network = "unix", listenAddress = "/var/www/run/api/socket2" },
+    { network = "unix", listenAddress = "/var/www/run/api/socket3" },
+    { network = "unix", listenAddress = "/var/www/run/api/socket4" },
+    ]
 h2cEnabled = true
 context = "/api/v1"
 
