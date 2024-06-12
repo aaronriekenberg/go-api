@@ -158,6 +158,10 @@ func Run(
 
 	slog.Info("begin server.Run")
 
+	if len(serverConfig.Listeners) < 1 {
+		return fmt.Errorf("no server configured")
+	}
+
 	errorChannel := make(chan error, len(serverConfig.Listeners))
 
 	for _, listenerConfig := range serverConfig.Listeners {

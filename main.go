@@ -56,7 +56,7 @@ func main() {
 
 	config, err := config.ReadConfiguration(configFile)
 	if err != nil {
-		panic(fmt.Errorf("main: config.ReadConfiguration error %w", err))
+		panic(fmt.Errorf("main: config.ReadConfiguration error: %w", err))
 	}
 
 	profiling.Start(config.ProfilingConfiguration)
@@ -64,5 +64,5 @@ func main() {
 	handlers := handlers.CreateHandlers(*config)
 
 	err = server.Run(config.ServerConfiguration, handlers)
-	panic(fmt.Errorf("main: server.Run returned error %w", err))
+	panic(fmt.Errorf("main: server.Run error: %w", err))
 }
