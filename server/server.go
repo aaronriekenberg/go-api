@@ -114,8 +114,6 @@ func runServerListener(
 
 	logger.Info("begin server.runServerListener")
 
-	handler = updateContextForRequestHandler(handler)
-
 	listener, err := createListener(
 		listenerConfig,
 	)
@@ -126,6 +124,8 @@ func runServerListener(
 		errorChannel <- fmt.Errorf("server.createListener error: %w", err)
 		return
 	}
+
+	handler = updateContextForRequestHandler(handler)
 
 	if serverConfig.H2CEnabled {
 		logger.Info("server.runServerListener enabling h2c")
