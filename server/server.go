@@ -120,10 +120,10 @@ func runServerListener(
 		listenerConfig,
 	)
 	if err != nil {
-		logger.Warn("server.runServerListener: createListener error",
+		logger.Warn("server.createListener error",
 			"error", err,
 		)
-		errorChannel <- fmt.Errorf("server.runServerListener: createListener error: %w", err)
+		errorChannel <- fmt.Errorf("server.createListener error: %w", err)
 		return
 	}
 
@@ -145,10 +145,10 @@ func runServerListener(
 
 	err = httpServer.Serve(listener)
 
-	logger.Warn("server.runServerListener: httpServer.serve error",
+	logger.Warn("httpServer.serve error",
 		"error", err,
 	)
-	errorChannel <- fmt.Errorf("server.runServerListener: httpServer.Serve error: %w", err)
+	errorChannel <- fmt.Errorf("httpServer.Serve error: %w", err)
 }
 
 func Run(
@@ -174,5 +174,5 @@ func Run(
 	}
 
 	err := <-errorChannel
-	return fmt.Errorf("server.Run: listener error: %w", err)
+	return fmt.Errorf("server.runServerListener error: %w", err)
 }
