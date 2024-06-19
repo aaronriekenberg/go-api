@@ -9,6 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/handlers"
 	"github.com/aaronriekenberg/go-api/profiling"
 	"github.com/aaronriekenberg/go-api/server"
+	"github.com/aaronriekenberg/go-api/version"
 )
 
 func setupSlog() {
@@ -47,6 +48,10 @@ func main() {
 	}()
 
 	setupSlog()
+
+	slog.Info("begin main",
+		"buildInfoMap", version.BuildInfoMap(),
+	)
 
 	if len(os.Args) != 2 {
 		panic("config file required as command line arument")
