@@ -1,6 +1,6 @@
 [serverConfiguration]
 listeners = [{ network = "unix", listenAddress = "/var/www/run/api/socket" }]
-h2cEnabled = false
+h2cEnabled = true
 context = "/api/v1"
 
 [profilingConfiguration]
