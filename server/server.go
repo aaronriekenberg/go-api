@@ -102,7 +102,7 @@ func updateContextForRequestHandler(
 	}
 }
 
-func runServerListener(
+func runListener(
 	listenerConfig config.ServerListenerConfiguration,
 	serverConfig config.ServerConfiguration,
 	handler http.Handler,
@@ -112,7 +112,7 @@ func runServerListener(
 		"listenerConfig", listenerConfig,
 	)
 
-	logger.Info("begin server.runServerListener")
+	logger.Info("begin server.runListener")
 
 	listener, err := createListener(
 		listenerConfig,
@@ -128,7 +128,7 @@ func runServerListener(
 	handler = updateContextForRequestHandler(handler)
 
 	if serverConfig.H2CEnabled {
-		logger.Info("server.runServerListener enabling h2c")
+		logger.Info("server.runListener enabling h2c")
 		h2Server := &http2.Server{
 			IdleTimeout: 5 * time.Minute,
 		}
@@ -165,7 +165,7 @@ func Run(
 	errorChannel := make(chan error, len(serverConfig.Listeners))
 
 	for _, listenerConfig := range serverConfig.Listeners {
-		go runServerListener(
+		go runListener(
 			listenerConfig,
 			serverConfig,
 			handler,
@@ -174,5 +174,5 @@ func Run(
 	}
 
 	err := <-errorChannel
-	return fmt.Errorf("server.runServerListener error: %w", err)
+	return fmt.Errorf("server.runListener error: %w", err)
 }
