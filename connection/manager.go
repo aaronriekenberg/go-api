@@ -111,16 +111,19 @@ func computeMinConnectionLifetime(
 	now time.Time,
 	connections []Connection,
 	connectionMetrics connectionMetrics,
-) (minConnectionLifetime time.Duration) {
+) time.Duration {
 	if connectionMetrics.pastMinConnectionAge != nil {
-		minConnectionLifetime = *connectionMetrics.pastMinConnectionAge
-	} else if len(connections) > 0 {
+		return *connectionMetrics.pastMinConnectionAge
+	}
+
+	if len(connections) > 0 {
 		minAgeConnection := slices.MinFunc(connections, func(c1, c2 Connection) int {
 			return cmp.Compare(c1.Age(now), c2.Age(now))
 		})
-		minConnectionLifetime = minAgeConnection.Age(now)
+		return minAgeConnection.Age(now)
 	}
-	return
+
+	return 0
 }
 
 func (cm *connectionManager) State() ConnectionManagerState {
