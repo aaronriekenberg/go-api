@@ -25,7 +25,8 @@ func setupSlog() {
 	slog.SetDefault(
 		slog.New(
 			slog.NewJSONHandler(
-				os.Stdout, &slog.HandlerOptions{
+				os.Stdout,
+				&slog.HandlerOptions{
 					Level: level,
 				},
 			),
