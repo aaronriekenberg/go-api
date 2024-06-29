@@ -4,8 +4,10 @@ import (
 	"cmp"
 	"log/slog"
 	"slices"
-	"sync"
+	"sync/atomic"
 	"time"
+
+	"github.com/puzpuzpuz/xsync/v3"
 )
 
 type ConnectionManagerState struct {
@@ -27,53 +29,47 @@ type ConnectionManager interface {
 }
 
 type connectionManager struct {
-	mutex            sync.RWMutex
-	idToConnection   map[ConnectionID]*connection
-	nextConnectionID ConnectionID
+	idToConnection   *xsync.MapOf[ConnectionID, *connection]
+	nextConnectionID atomic.Uint64
 	metricsManager   *connectionMetricsManager
 }
 
 func newConnectionManager() *connectionManager {
 	return &connectionManager{
-		idToConnection:   make(map[ConnectionID]*connection),
-		nextConnectionID: 1,
-		metricsManager:   newConnectionMetricsManager(),
+		idToConnection: xsync.NewMapOf[ConnectionID, *connection](
+			xsync.WithPresize(100),
+			xsync.WithGrowOnly(),
+		),
+		metricsManager: newConnectionMetricsManager(),
 	}
 }
 
 func (cm *connectionManager) AddConnection() ConnectionID {
-	cm.mutex.Lock()
-	defer cm.mutex.Unlock()
+	connectionID := ConnectionID(cm.nextConnectionID.Add(1))
 
-	connectionID := cm.nextConnectionID
-	cm.nextConnectionID++
-
-	cm.idToConnection[connectionID] = newConnection(connectionID)
+	cm.idToConnection.Store(
+		connectionID,
+		newConnection(connectionID),
+	)
 
 	slog.Info("connectionManager.AddConnection",
 		"connectionID", connectionID,
 	)
 
-	numOpenConnections := len(cm.idToConnection)
+	numOpenConnections := cm.idToConnection.Size()
 	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
 	return connectionID
 }
 
 func (cm *connectionManager) IncrementRequestsForConnection(connectionID ConnectionID) {
-	connection := cm.connection(connectionID)
-
-	if connection != nil {
+	if connection, loaded := cm.connection(connectionID); loaded {
 		connection.incrementRequests()
 	}
 }
 
 func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
-	cm.mutex.Lock()
-	defer cm.mutex.Unlock()
-
-	connection := cm.idToConnection[connectionID]
-	if connection != nil {
+	if connection, loaded := cm.idToConnection.LoadAndDelete(connectionID); loaded {
 		slog.Info("connectionManager.RemoveConnection",
 			"connectionID", connectionID,
 			"requests", connection.Requests(),
@@ -83,26 +79,20 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 
 		cm.metricsManager.updateForClosedConnection(connection)
 	}
-
-	delete(cm.idToConnection, connectionID)
 }
 
-func (cm *connectionManager) connection(connectionID ConnectionID) *connection {
-	cm.mutex.RLock()
-	defer cm.mutex.RUnlock()
-
-	return cm.idToConnection[connectionID]
+func (cm *connectionManager) connection(connectionID ConnectionID) (*connection, bool) {
+	return cm.idToConnection.Load(connectionID)
 }
 
 func (cm *connectionManager) connections() []Connection {
-	cm.mutex.RLock()
-	defer cm.mutex.RUnlock()
+	connections := make([]Connection, 0, cm.idToConnection.Size())
 
-	connections := make([]Connection, 0, len(cm.idToConnection))
-
-	for _, connection := range cm.idToConnection {
-		connections = append(connections, connection)
-	}
+	cm.idToConnection.Range(
+		func(key ConnectionID, value *connection) bool {
+			connections = append(connections, value)
+			return true
+		})
 
 	return connections
 }
