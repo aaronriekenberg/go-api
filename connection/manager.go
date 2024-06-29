@@ -63,7 +63,7 @@ func (cm *connectionManager) AddConnection() ConnectionID {
 }
 
 func (cm *connectionManager) IncrementRequestsForConnection(connectionID ConnectionID) {
-	if connection, loaded := cm.connection(connectionID); loaded {
+	if connection, loaded := cm.idToConnection.Load(connectionID); loaded {
 		connection.incrementRequests()
 	}
 }
@@ -79,10 +79,6 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 
 		cm.metricsManager.updateForClosedConnection(connection)
 	}
-}
-
-func (cm *connectionManager) connection(connectionID ConnectionID) (*connection, bool) {
-	return cm.idToConnection.Load(connectionID)
 }
 
 func (cm *connectionManager) connections() []Connection {
