@@ -69,16 +69,20 @@ func (cm *connectionManager) IncrementRequestsForConnection(connectionID Connect
 }
 
 func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
-	if connection, loaded := cm.idToConnection.LoadAndDelete(connectionID); loaded {
-		slog.Info("connectionManager.RemoveConnection",
-			"connectionID", connectionID,
-			"requests", connection.Requests(),
-		)
-
-		connection.markClosed()
-
-		cm.metricsManager.updateForClosedConnection(connection)
+	connection, loaded := cm.idToConnection.LoadAndDelete(connectionID)
+	if !loaded {
+		return
 	}
+
+	slog.Info("connectionManager.RemoveConnection",
+		"connectionID", connectionID,
+		"requests", connection.Requests(),
+	)
+
+	connection.markClosed()
+
+	cm.metricsManager.updateForClosedConnection(connection)
+
 }
 
 func (cm *connectionManager) connections() []Connection {
