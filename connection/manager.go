@@ -92,7 +92,8 @@ func (cm *connectionManager) connections() []Connection {
 		func(key ConnectionID, value *connection) bool {
 			connections = append(connections, value)
 			return true
-		})
+		},
+	)
 
 	return connections
 }
