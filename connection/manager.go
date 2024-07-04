@@ -29,9 +29,9 @@ type ConnectionManager interface {
 }
 
 type connectionManager struct {
-	idToConnection   *xsync.MapOf[ConnectionID, *connection]
-	nextConnectionID atomic.Uint64
-	metricsManager   *connectionMetricsManager
+	idToConnection       *xsync.MapOf[ConnectionID, *connection]
+	previousConnectionID atomic.Uint64
+	metricsManager       *connectionMetricsManager
 }
 
 func newConnectionManager() *connectionManager {
@@ -45,7 +45,7 @@ func newConnectionManager() *connectionManager {
 }
 
 func (cm *connectionManager) AddConnection() ConnectionID {
-	connectionID := ConnectionID(cm.nextConnectionID.Add(1))
+	connectionID := ConnectionID(cm.previousConnectionID.Add(1))
 
 	cm.idToConnection.Store(
 		connectionID,

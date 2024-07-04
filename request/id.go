@@ -28,9 +28,9 @@ func RequestIDFromContext(
 	return
 }
 
-var nextRequestID atomic.Uint64
+var previousRequestID atomic.Uint64
 
 func NextRequestID() RequestID {
-	id := nextRequestID.Add(1)
+	id := previousRequestID.Add(1)
 	return RequestID(id)
 }
