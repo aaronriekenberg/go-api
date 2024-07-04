@@ -44,8 +44,12 @@ func newConnectionManager() *connectionManager {
 	}
 }
 
+func (cm *connectionManager) nextConnectionID() ConnectionID {
+	return ConnectionID(cm.previousConnectionID.Add(1))
+}
+
 func (cm *connectionManager) AddConnection() ConnectionID {
-	connectionID := ConnectionID(cm.previousConnectionID.Add(1))
+	connectionID := cm.nextConnectionID()
 
 	cm.idToConnection.Store(
 		connectionID,
