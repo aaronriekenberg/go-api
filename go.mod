@@ -4,8 +4,8 @@ go 1.22.5
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/puzpuzpuz/xsync/v3 v3.2.0
-	golang.org/x/net v0.26.0
+	github.com/puzpuzpuz/xsync/v3 v3.3.0
+	golang.org/x/net v0.27.0
 	golang.org/x/sync v0.7.0
 )
 
