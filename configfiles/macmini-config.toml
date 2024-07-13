@@ -1,5 +1,8 @@
 [serverConfiguration]
-listeners = [{ network = "unix", listenAddress = "/var/www/run/api/socket" }]
+listeners = [
+    { network = "unix", listenAddress = "/home/aaron/go-api/socket" },
+    { network = "tcp", listenAddress = ":80" },
+]
 h2cEnabled = false
 context = "/api/v1"
 
@@ -56,3 +59,7 @@ commands = [
     { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
     { id = "w", description = "w", command = "/usr/bin/w" },
 ]
+
+
+[staticFileConfiguration]
+rootPath = "/home/aaron/aaronr.digital"

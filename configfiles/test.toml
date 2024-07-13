@@ -20,3 +20,6 @@ commands = [
         "5",
     ] },
 ]
+
+[staticFileConfiguration]
+rootPath = "/Users/aaron/vscode/aaronr.digital"

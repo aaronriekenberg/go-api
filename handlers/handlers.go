@@ -9,6 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/handlers/command"
 	"github.com/aaronriekenberg/go-api/handlers/connectioninfo"
 	"github.com/aaronriekenberg/go-api/handlers/requestinfo"
+	"github.com/aaronriekenberg/go-api/handlers/staticfile"
 	"github.com/aaronriekenberg/go-api/handlers/versioninfo"
 )
 
@@ -39,6 +40,8 @@ func CreateHandlers(
 	handleGET("/request_info", requestinfo.NewRequestInfoHandler())
 
 	handleGET("/version_info", versioninfo.NewVersionInfoHandler())
+
+	mux.Handle("GET /", staticfile.StaticFileHandler(config.StaticFileConfiguration))
 
 	return mux
 }

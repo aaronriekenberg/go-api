@@ -37,10 +37,15 @@ type CommandConfiguration struct {
 	Commands                        []CommandInfo
 }
 
+type StaticFileConfiguration struct {
+	RootPath string
+}
+
 type Configuration struct {
-	ServerConfiguration    ServerConfiguration
-	ProfilingConfiguration ProfilingConfiguration
-	CommandConfiguration   CommandConfiguration
+	ServerConfiguration     ServerConfiguration
+	ProfilingConfiguration  ProfilingConfiguration
+	CommandConfiguration    CommandConfiguration
+	StaticFileConfiguration StaticFileConfiguration
 }
 
 func ReadConfiguration(configFile string) (*Configuration, error) {
