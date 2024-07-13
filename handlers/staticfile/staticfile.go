@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/aaronriekenberg/go-api/config"
+	"github.com/aaronriekenberg/go-api/utils"
 )
 
 // containsDotFile reports whether name contains a path element starting with a period.
@@ -63,8 +64,6 @@ func (fsys dotFileHidingFileSystem) Open(name string) (http.File, error) {
 	return dotFileHidingFile{file}, err
 }
 
-const CacheControl = "Cache-Control"
-
 func StaticFileHandler(
 	staticFileConfiguraton config.StaticFileConfiguration,
 ) http.Handler {
@@ -90,15 +89,15 @@ func StaticFileHandler(
 		switch {
 		case vnstatPNGRegex.MatchString(r.URL.Path):
 			logger.Debug("vnstatPNGRegex matches")
-			w.Header().Set(CacheControl, "public, max-age=60")
+			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=60")
 
 		case aaronrHostRegex.MatchString(r.Host):
 			logger.Debug("aaronrHostRegex matches")
-			w.Header().Set(CacheControl, "public, max-age=60")
+			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=60")
 
 		default:
 			logger.Debug("default case")
-			w.Header().Set(CacheControl, "public, no-cache")
+			w.Header().Set(utils.CacheControlHeaderKey, utils.CacheControlNoCache)
 		}
 
 		fileServer.ServeHTTP(w, r)

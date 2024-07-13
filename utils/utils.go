@@ -10,6 +10,9 @@ import (
 )
 
 const (
+	CacheControlHeaderKey = "Cache-Control"
+	CacheControlNoCache   = "public, no-cache"
+
 	ContentTypeHeaderKey       = "Content-Type"
 	ContentTypeApplicationJSON = "application/json"
 )
@@ -33,7 +36,8 @@ func RespondWithJSONDTO(
 		return
 	}
 
-	w.Header().Add(ContentTypeHeaderKey, ContentTypeApplicationJSON)
+	w.Header().Set(CacheControlHeaderKey, CacheControlNoCache)
+	w.Header().Set(ContentTypeHeaderKey, ContentTypeApplicationJSON)
 	io.Copy(w, bytes.NewReader(jsonBytes))
 }
 
@@ -41,7 +45,8 @@ func JSONBytesHandlerFunc(
 	jsonBytes []byte,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add(ContentTypeHeaderKey, ContentTypeApplicationJSON)
+		w.Header().Set(CacheControlHeaderKey, CacheControlNoCache)
+		w.Header().Set(ContentTypeHeaderKey, ContentTypeApplicationJSON)
 		io.Copy(w, bytes.NewReader(jsonBytes))
 	}
 }
