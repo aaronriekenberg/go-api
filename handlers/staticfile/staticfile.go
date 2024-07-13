@@ -89,11 +89,11 @@ func StaticFileHandler(
 		switch {
 		case vnstatPNGRegex.MatchString(r.URL.Path):
 			logger.Debug("vnstatPNGRegex matches")
-			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=60")
+			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=150")
 
 		case aaronrHostRegex.MatchString(r.Host):
 			logger.Debug("aaronrHostRegex matches")
-			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=60")
+			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=3600")
 
 		default:
 			logger.Debug("default case")
