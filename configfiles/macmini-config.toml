@@ -60,6 +60,5 @@ commands = [
     { id = "w", description = "w", command = "/usr/bin/w" },
 ]
 
-
 [staticFileConfiguration]
 rootPath = "/home/aaron/aaronr.digital"
