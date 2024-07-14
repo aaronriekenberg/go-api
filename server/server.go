@@ -35,6 +35,7 @@ func (cw *connWrapper) Close() error {
 
 type listenerWrapper struct {
 	net.Listener
+	network string
 }
 
 func (lw *listenerWrapper) Accept() (net.Conn, error) {
@@ -44,7 +45,7 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 		return conn, err
 	}
 
-	connectionID := connection.ConnectionManagerInstance().AddConnection()
+	connectionID := connection.ConnectionManagerInstance().AddConnection(lw.network)
 
 	slog.Debug("listenerWrapper.Accept got new connection",
 		"connectionID", connectionID,
@@ -70,6 +71,7 @@ func createListener(
 
 	listenerWrapper := &listenerWrapper{
 		Listener: listener,
+		network:  config.Network,
 	}
 
 	return listenerWrapper, nil

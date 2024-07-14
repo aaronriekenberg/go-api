@@ -7,6 +7,7 @@ import (
 
 type Connection interface {
 	ID() ConnectionID
+	Network() string
 	CreationTime() time.Time
 	Age(now time.Time) time.Duration
 	Requests() uint64
@@ -14,6 +15,7 @@ type Connection interface {
 
 type connection struct {
 	id           ConnectionID
+	network      string
 	creationTime time.Time
 	requests     atomic.Uint64
 	closeTime    time.Time
@@ -21,15 +23,21 @@ type connection struct {
 
 func newConnection(
 	id ConnectionID,
+	network string,
 ) *connection {
 	return &connection{
 		id:           id,
+		network:      network,
 		creationTime: time.Now(),
 	}
 }
 
 func (c *connection) ID() ConnectionID {
 	return c.id
+}
+
+func (c *connection) Network() string {
+	return c.network
 }
 
 func (c *connection) CreationTime() time.Time {

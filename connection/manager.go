@@ -19,7 +19,7 @@ type ConnectionManagerState struct {
 }
 
 type ConnectionManager interface {
-	AddConnection() ConnectionID
+	AddConnection(network string) ConnectionID
 
 	IncrementRequestsForConnection(connectionID ConnectionID)
 
@@ -48,16 +48,19 @@ func (cm *connectionManager) nextConnectionID() ConnectionID {
 	return ConnectionID(cm.previousConnectionID.Add(1))
 }
 
-func (cm *connectionManager) AddConnection() ConnectionID {
+func (cm *connectionManager) AddConnection(
+	network string,
+) ConnectionID {
 	connectionID := cm.nextConnectionID()
 
 	cm.idToConnection.Store(
 		connectionID,
-		newConnection(connectionID),
+		newConnection(connectionID, network),
 	)
 
 	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
+		"network", network,
 	)
 
 	numOpenConnections := cm.idToConnection.Size()
