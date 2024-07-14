@@ -38,7 +38,7 @@ func NewStaticFileHandler(
 
 		case aaronrHostRegex.MatchString(r.Host):
 			logger.Debug("aaronrHostRegex matches")
-			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=3600")
+			w.Header().Set(utils.CacheControlHeaderKey, "public, max-age=86400")
 
 		default:
 			logger.Debug("default case")
