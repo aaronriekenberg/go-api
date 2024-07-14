@@ -28,8 +28,8 @@ type connectionMetricsManager struct {
 
 func newConnectionMetricsManager() *connectionMetricsManager {
 	cmm := &connectionMetricsManager{
-		updateForNewConnectionChannel:    make(chan newConnectionMessage, 10),
-		updateForClosedConnectionChannel: make(chan closedConnectionMessage, 10),
+		updateForNewConnectionChannel:    make(chan newConnectionMessage, maxConnections),
+		updateForClosedConnectionChannel: make(chan closedConnectionMessage, maxConnections),
 	}
 
 	cmm.atomicConnectionMetrics.Store(new(connectionMetrics))

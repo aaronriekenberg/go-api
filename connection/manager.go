@@ -37,7 +37,7 @@ type connectionManager struct {
 func newConnectionManager() *connectionManager {
 	return &connectionManager{
 		idToConnection: xsync.NewMapOf[ConnectionID, *connection](
-			xsync.WithPresize(200),
+			xsync.WithPresize(maxConnections),
 			xsync.WithGrowOnly(),
 		),
 		metricsManager: newConnectionMetricsManager(),
