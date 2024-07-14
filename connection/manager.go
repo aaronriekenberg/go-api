@@ -56,7 +56,7 @@ func (cm *connectionManager) AddConnection() ConnectionID {
 		newConnection(connectionID),
 	)
 
-	slog.Info("connectionManager.AddConnection",
+	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
 	)
 
@@ -78,7 +78,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 		return
 	}
 
-	slog.Info("connectionManager.RemoveConnection",
+	slog.Debug("connectionManager.RemoveConnection",
 		"connectionID", connectionID,
 		"requests", connection.Requests(),
 	)
