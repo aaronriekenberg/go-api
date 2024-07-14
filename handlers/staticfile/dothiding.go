@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// dot hiding from example: https://pkg.go.dev/net/http@latest#example-FileServer-DotFileHiding
+
 // containsDotFile reports whether name contains a path element starting with a period.
 // The name is assumed to be a delimited by forward slashes, as guaranteed
 // by the http.FileSystem interface.
