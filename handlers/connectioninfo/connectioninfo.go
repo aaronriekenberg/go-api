@@ -32,12 +32,13 @@ func connectionToDTO(
 }
 
 type connectionInfoResponse struct {
-	NumCurrentConnections    int              `json:"num_current_connections"`
-	MaxOpenConnections       int              `json:"max_open_connections"`
-	MinConnectionLifetime    string           `json:"min_connection_lifetime"`
-	MaxConnectionLifetime    string           `json:"max_connection_lifetime"`
-	MaxRequestsPerConnection uint64           `json:"max_requests_per_connection"`
-	Connections              []*connectionDTO `json:"connections"`
+	NumCurrentConnections          int              `json:"num_current_connections"`
+	NumCurrentConnectionsByNetwork map[string]int   `json:"num_current_connections_by_network"`
+	MaxOpenConnections             int              `json:"max_open_connections"`
+	MinConnectionLifetime          string           `json:"min_connection_lifetime"`
+	MaxConnectionLifetime          string           `json:"max_connection_lifetime"`
+	MaxRequestsPerConnection       uint64           `json:"max_requests_per_connection"`
+	Connections                    []*connectionDTO `json:"connections"`
 }
 
 func connectionInfoHandlerFunc() http.HandlerFunc {
@@ -47,10 +48,14 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 
 		connectionDTOs := make([]*connectionDTO, 0, len(connectionManagerState.Connections))
 
+		numCurrentConnectionsByNetwork := make(map[string]int)
+
 		now := time.Now()
 
 		for _, connection := range connectionManagerState.Connections {
-			connectionDTOs = append(connectionDTOs, connectionToDTO(connection, now))
+			connectionDTO := connectionToDTO(connection, now)
+			numCurrentConnectionsByNetwork[connectionDTO.Network]++
+			connectionDTOs = append(connectionDTOs, connectionDTO)
 		}
 
 		slices.SortFunc(connectionDTOs, func(cdto1, cdto2 *connectionDTO) int {
@@ -59,12 +64,13 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 		})
 
 		response := &connectionInfoResponse{
-			NumCurrentConnections:    len(connectionDTOs),
-			MaxOpenConnections:       connectionManagerState.MaxOpenConnections,
-			MinConnectionLifetime:    connectionManagerState.MinConnectionLifetime.Truncate(time.Millisecond).String(),
-			MaxConnectionLifetime:    connectionManagerState.MaxConnectionLifetime.Truncate(time.Millisecond).String(),
-			MaxRequestsPerConnection: connectionManagerState.MaxRequestsPerConnection,
-			Connections:              connectionDTOs,
+			NumCurrentConnections:          len(connectionDTOs),
+			NumCurrentConnectionsByNetwork: numCurrentConnectionsByNetwork,
+			MaxOpenConnections:             connectionManagerState.MaxOpenConnections,
+			MinConnectionLifetime:          connectionManagerState.MinConnectionLifetime.Truncate(time.Millisecond).String(),
+			MaxConnectionLifetime:          connectionManagerState.MaxConnectionLifetime.Truncate(time.Millisecond).String(),
+			MaxRequestsPerConnection:       connectionManagerState.MaxRequestsPerConnection,
+			Connections:                    connectionDTOs,
 		}
 
 		utils.RespondWithJSONDTO(response, w)
