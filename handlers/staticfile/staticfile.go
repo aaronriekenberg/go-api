@@ -9,7 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
-func StaticFileHandler(
+func NewStaticFileHandler(
 	staticFileConfiguraton config.StaticFileConfiguration,
 ) http.Handler {
 

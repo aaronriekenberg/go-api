@@ -41,7 +41,7 @@ func CreateHandlers(
 
 	handleAPIGET("/version_info", versioninfo.NewVersionInfoHandler())
 
-	mux.Handle("GET /", staticfile.StaticFileHandler(config.StaticFileConfiguration))
+	mux.Handle("GET /", staticfile.NewStaticFileHandler(config.StaticFileConfiguration))
 
 	return mux
 }
