@@ -4,11 +4,14 @@ listeners = [
     { network = "tcp", listenAddress = ":80" },
 ]
 h2cEnabled = false
-context = "/api/v1"
+apiContext = "/api/v1"
 
 [profilingConfiguration]
 enabled = false
 #listenAddress = ":8081"
+
+[staticFileConfiguration]
+rootPath = "/home/aaron/aaronr.digital"
 
 [commandConfiguration]
 maxConcurrentCommands = 10
@@ -59,6 +62,3 @@ commands = [
     { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
     { id = "w", description = "w", command = "/usr/bin/w" },
 ]
-
-[staticFileConfiguration]
-rootPath = "/home/aaron/aaronr.digital"

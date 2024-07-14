@@ -15,7 +15,7 @@ type ServerListenerConfiguration struct {
 type ServerConfiguration struct {
 	Listeners  []ServerListenerConfiguration
 	H2CEnabled bool
-	Context    string
+	APIContext string
 }
 
 type ProfilingConfiguration struct {
@@ -30,6 +30,10 @@ type CommandInfo struct {
 	Args        []string
 }
 
+type StaticFileConfiguration struct {
+	RootPath string
+}
+
 type CommandConfiguration struct {
 	MaxConcurrentCommands           int64
 	RequestTimeoutDuration          string
@@ -37,15 +41,11 @@ type CommandConfiguration struct {
 	Commands                        []CommandInfo
 }
 
-type StaticFileConfiguration struct {
-	RootPath string
-}
-
 type Configuration struct {
 	ServerConfiguration     ServerConfiguration
 	ProfilingConfiguration  ProfilingConfiguration
-	CommandConfiguration    CommandConfiguration
 	StaticFileConfiguration StaticFileConfiguration
+	CommandConfiguration    CommandConfiguration
 }
 
 func ReadConfiguration(configFile string) (*Configuration, error) {

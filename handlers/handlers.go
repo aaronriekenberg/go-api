@@ -18,28 +18,28 @@ func CreateHandlers(
 ) http.Handler {
 	mux := http.NewServeMux()
 
-	context := config.ServerConfiguration.Context
+	apiContext := config.ServerConfiguration.APIContext
 
 	slog.Info("CreateHandlers",
-		"context", context,
+		"apiContext", apiContext,
 	)
 
-	handleGET := func(
+	handleAPIGET := func(
 		relativePath string,
 		handler http.Handler,
 	) {
-		mux.Handle("GET "+path.Join(context, relativePath), handler)
+		mux.Handle("GET "+path.Join(apiContext, relativePath), handler)
 	}
 
-	handleGET("/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	handleAPIGET("/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
 
-	handleGET("/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
+	handleAPIGET("/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
 
-	handleGET("/connection_info", connectioninfo.NewConnectionInfoHandler())
+	handleAPIGET("/connection_info", connectioninfo.NewConnectionInfoHandler())
 
-	handleGET("/request_info", requestinfo.NewRequestInfoHandler())
+	handleAPIGET("/request_info", requestinfo.NewRequestInfoHandler())
 
-	handleGET("/version_info", versioninfo.NewVersionInfoHandler())
+	handleAPIGET("/version_info", versioninfo.NewVersionInfoHandler())
 
 	mux.Handle("GET /", staticfile.StaticFileHandler(config.StaticFileConfiguration))
 

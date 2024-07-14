@@ -4,11 +4,14 @@ listeners = [
     { network = "tcp", listenAddress = ":8081" },
 ]
 h2cEnabled = false
-context = "/api/v1"
+apiContext = "/api/v1"
 
 [profilingConfiguration]
 enabled = false
 #listenAddress = ":8082"
+
+[staticFileConfiguration]
+rootPath = "/Users/aaron/vscode/aaronr.digital"
 
 [commandConfiguration]
 maxConcurrentCommands = 10
@@ -20,6 +23,3 @@ commands = [
         "5",
     ] },
 ]
-
-[staticFileConfiguration]
-rootPath = "/Users/aaron/vscode/aaronr.digital"
