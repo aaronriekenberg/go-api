@@ -9,7 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
-type requestFields struct {
+type requestFieldsDTO struct {
 	ConnectionID  uint64 `json:"connection_id"`
 	RequestID     uint64 `json:"request_id"`
 	Close         bool   `json:"close"`
@@ -21,8 +21,8 @@ type requestFields struct {
 	URL           string `json:"url"`
 }
 
-type requestInfoData struct {
-	RequestFields  requestFields     `json:"request_fields"`
+type requestInfoDTO struct {
+	RequestFields  requestFieldsDTO  `json:"request_fields"`
 	RequestHeaders map[string]string `json:"request_headers"`
 }
 
@@ -56,8 +56,8 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 
 		requestID, _ := request.RequestIDFromContext(ctx)
 
-		response := &requestInfoData{
-			RequestFields: requestFields{
+		response := requestInfoDTO{
+			RequestFields: requestFieldsDTO{
 				ConnectionID:  uint64(connectionID),
 				RequestID:     uint64(requestID),
 				Close:         r.Close,
@@ -71,7 +71,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			RequestHeaders: httpHeaderToRequestHeaders(r.Header),
 		}
 
-		utils.RespondWithJSONDTO(response, w)
+		utils.RespondWithJSONDTO(&response, w)
 	}
 }
 
