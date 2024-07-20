@@ -31,18 +31,18 @@ func connectionToDTO(
 	}
 }
 
-type currentConnectionsResponse struct {
+type currentConnectionsDTO struct {
 	Total     int            `json:"total"`
 	ByNetwork map[string]int `json:"by_network"`
 }
 
-type connectionInfoResponse struct {
-	CurrentConnections       currentConnectionsResponse `json:"current_connections"`
-	MaxOpenConnections       int                        `json:"max_open_connections"`
-	MinConnectionLifetime    string                     `json:"min_connection_lifetime"`
-	MaxConnectionLifetime    string                     `json:"max_connection_lifetime"`
-	MaxRequestsPerConnection uint64                     `json:"max_requests_per_connection"`
-	Connections              []*connectionDTO           `json:"connections"`
+type connectionInfoDTO struct {
+	CurrentConnections       currentConnectionsDTO `json:"current_connections"`
+	MaxOpenConnections       int                   `json:"max_open_connections"`
+	MinConnectionLifetime    string                `json:"min_connection_lifetime"`
+	MaxConnectionLifetime    string                `json:"max_connection_lifetime"`
+	MaxRequestsPerConnection uint64                `json:"max_requests_per_connection"`
+	Connections              []*connectionDTO      `json:"connections"`
 }
 
 func connectionInfoHandlerFunc() http.HandlerFunc {
@@ -67,8 +67,8 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 			return -cmp.Compare(cdto1.ID, cdto2.ID)
 		})
 
-		response := &connectionInfoResponse{
-			CurrentConnections: currentConnectionsResponse{
+		response := &connectionInfoDTO{
+			CurrentConnections: currentConnectionsDTO{
 				Total:     len(connectionDTOs),
 				ByNetwork: numCurrentConnectionsByNetwork,
 			},
