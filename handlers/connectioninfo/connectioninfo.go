@@ -21,8 +21,8 @@ type connectionDTO struct {
 func connectionInfoToDTO(
 	connectionInfo connection.ConnectionInfo,
 	now time.Time,
-) *connectionDTO {
-	return &connectionDTO{
+) connectionDTO {
+	return connectionDTO{
 		ID:           uint64(connectionInfo.ID()),
 		Network:      connectionInfo.Network(),
 		Age:          connectionInfo.Age(now).Truncate(time.Millisecond).String(),
@@ -42,7 +42,7 @@ type connectionInfoDTO struct {
 	MinConnectionLifetime    string                `json:"min_connection_lifetime"`
 	MaxConnectionLifetime    string                `json:"max_connection_lifetime"`
 	MaxRequestsPerConnection uint64                `json:"max_requests_per_connection"`
-	Connections              []*connectionDTO      `json:"connections"`
+	Connections              []connectionDTO       `json:"connections"`
 }
 
 func connectionInfoHandlerFunc() http.HandlerFunc {
@@ -50,7 +50,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 
 		connectionManagerState := connection.ConnectionManagerInstance().State()
 
-		connectionDTOs := make([]*connectionDTO, 0, len(connectionManagerState.Connections))
+		connectionDTOs := make([]connectionDTO, 0, len(connectionManagerState.Connections))
 
 		numCurrentConnectionsByNetwork := make(map[string]int)
 
@@ -62,7 +62,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 			connectionDTOs = append(connectionDTOs, connectionDTO)
 		}
 
-		slices.SortFunc(connectionDTOs, func(cdto1, cdto2 *connectionDTO) int {
+		slices.SortFunc(connectionDTOs, func(cdto1, cdto2 connectionDTO) int {
 			// sort descending
 			return -cmp.Compare(cdto1.ID, cdto2.ID)
 		})
