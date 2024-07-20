@@ -18,17 +18,18 @@ import (
 )
 
 type connWrapper struct {
-	connectionID connection.ConnectionID
 	net.Conn
+	connectionInfo connection.ConnectionInfo
 }
 
 func (cw *connWrapper) Close() error {
 	slog.Debug("connWrapper.Close",
-		"connectionID", cw.connectionID,
+		"connectionID", cw.connectionInfo.ID(),
 	)
 
 	connection.ConnectionManagerInstance().RemoveConnection(
-		cw.connectionID)
+		cw.connectionInfo.ID(),
+	)
 
 	return cw.Conn.Close()
 }
@@ -45,15 +46,15 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 		return conn, err
 	}
 
-	connectionID := connection.ConnectionManagerInstance().AddConnection(lw.network)
+	connectionInfo := connection.ConnectionManagerInstance().AddConnection(lw.network)
 
 	slog.Debug("listenerWrapper.Accept got new connection",
-		"connectionID", connectionID,
+		"connectionID", connectionInfo.ID(),
 	)
 
 	return &connWrapper{
-		connectionID: connectionID,
-		Conn:         conn,
+		Conn:           conn,
+		connectionInfo: connectionInfo,
 	}, nil
 }
 
@@ -77,10 +78,10 @@ func createListener(
 	return listenerWrapper, nil
 }
 
-func addConnectionIDToContext(ctx context.Context, c net.Conn) context.Context {
+func addConnectionInfoToContext(ctx context.Context, c net.Conn) context.Context {
 	if connWrapper, ok := c.(*connWrapper); ok {
-		connectionID := connWrapper.connectionID
-		return connection.AddConnectionIDToContext(ctx, connectionID)
+		connectionInfo := connWrapper.connectionInfo
+		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
 	}
 	return ctx
 }
@@ -92,8 +93,8 @@ func updateContextForRequestHandler(
 		ctx := r.Context()
 		requestID := request.NextRequestID()
 
-		if connectionID, ok := connection.ConnectionIDFromContext(ctx); ok {
-			connection.ConnectionManagerInstance().IncrementRequestsForConnection(connectionID)
+		if connectionInfo, ok := connection.ConnectionInfoFromContext(ctx); ok {
+			connectionInfo.IncrementRequests()
 		}
 
 		ctx = request.AddRequestIDToContext(ctx, requestID)
@@ -141,7 +142,7 @@ func runListener(
 		IdleTimeout:  5 * time.Minute,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
-		ConnContext:  addConnectionIDToContext,
+		ConnContext:  addConnectionInfoToContext,
 		Handler:      handler,
 	}
 

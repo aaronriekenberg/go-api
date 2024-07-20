@@ -15,13 +15,11 @@ type ConnectionManagerState struct {
 	MinConnectionLifetime    time.Duration
 	MaxConnectionLifetime    time.Duration
 	MaxRequestsPerConnection uint64
-	Connections              []Connection
+	Connections              []ConnectionInfo
 }
 
 type ConnectionManager interface {
-	AddConnection(network string) ConnectionID
-
-	IncrementRequestsForConnection(connectionID ConnectionID)
+	AddConnection(network string) ConnectionInfo
 
 	RemoveConnection(connectionID ConnectionID)
 
@@ -29,14 +27,14 @@ type ConnectionManager interface {
 }
 
 type connectionManager struct {
-	idToConnection       *xsync.MapOf[ConnectionID, *connection]
+	idToConnection       *xsync.MapOf[ConnectionID, *connectionInfo]
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
 }
 
 func newConnectionManager() *connectionManager {
 	return &connectionManager{
-		idToConnection: xsync.NewMapOf[ConnectionID, *connection](
+		idToConnection: xsync.NewMapOf[ConnectionID, *connectionInfo](
 			xsync.WithPresize(maxConnections),
 			xsync.WithGrowOnly(),
 		),
@@ -50,12 +48,13 @@ func (cm *connectionManager) nextConnectionID() ConnectionID {
 
 func (cm *connectionManager) AddConnection(
 	network string,
-) ConnectionID {
+) ConnectionInfo {
 	connectionID := cm.nextConnectionID()
+	connectionInfo := newConnection(connectionID, network)
 
 	cm.idToConnection.Store(
 		connectionID,
-		newConnection(connectionID, network),
+		connectionInfo,
 	)
 
 	slog.Debug("connectionManager.AddConnection",
@@ -66,13 +65,7 @@ func (cm *connectionManager) AddConnection(
 	numOpenConnections := cm.idToConnection.Size()
 	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
-	return connectionID
-}
-
-func (cm *connectionManager) IncrementRequestsForConnection(connectionID ConnectionID) {
-	if connection, loaded := cm.idToConnection.Load(connectionID); loaded {
-		connection.incrementRequests()
-	}
+	return connectionInfo
 }
 
 func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
@@ -92,11 +85,11 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 
 }
 
-func (cm *connectionManager) connections() []Connection {
-	connections := make([]Connection, 0, cm.idToConnection.Size())
+func (cm *connectionManager) connections() []ConnectionInfo {
+	connections := make([]ConnectionInfo, 0, cm.idToConnection.Size())
 
 	cm.idToConnection.Range(
-		func(key ConnectionID, value *connection) bool {
+		func(key ConnectionID, value *connectionInfo) bool {
 			connections = append(connections, value)
 			return true
 		},
@@ -107,7 +100,7 @@ func (cm *connectionManager) connections() []Connection {
 
 func computeMinConnectionLifetime(
 	now time.Time,
-	connections []Connection,
+	connections []ConnectionInfo,
 	connectionMetrics connectionMetrics,
 ) time.Duration {
 	if connectionMetrics.pastMinConnectionAge != nil {
@@ -115,7 +108,7 @@ func computeMinConnectionLifetime(
 	}
 
 	if len(connections) > 0 {
-		minAgeConnection := slices.MinFunc(connections, func(c1, c2 Connection) int {
+		minAgeConnection := slices.MinFunc(connections, func(c1, c2 ConnectionInfo) int {
 			return cmp.Compare(c1.Age(now), c2.Age(now))
 		})
 		return minAgeConnection.Age(now)

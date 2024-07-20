@@ -18,16 +18,16 @@ type connectionDTO struct {
 	Requests     uint64 `json:"requests"`
 }
 
-func connectionToDTO(
-	connection connection.Connection,
+func connectionInfoToDTO(
+	connectionInfo connection.ConnectionInfo,
 	now time.Time,
 ) *connectionDTO {
 	return &connectionDTO{
-		ID:           uint64(connection.ID()),
-		Network:      connection.Network(),
-		Age:          connection.Age(now).Truncate(time.Millisecond).String(),
-		CreationTime: utils.FormatTime(connection.CreationTime()),
-		Requests:     connection.Requests(),
+		ID:           uint64(connectionInfo.ID()),
+		Network:      connectionInfo.Network(),
+		Age:          connectionInfo.Age(now).Truncate(time.Millisecond).String(),
+		CreationTime: utils.FormatTime(connectionInfo.CreationTime()),
+		Requests:     connectionInfo.Requests(),
 	}
 }
 
@@ -57,7 +57,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 		now := time.Now()
 
 		for _, connection := range connectionManagerState.Connections {
-			connectionDTO := connectionToDTO(connection, now)
+			connectionDTO := connectionInfoToDTO(connection, now)
 			numCurrentConnectionsByNetwork[connectionDTO.Network]++
 			connectionDTOs = append(connectionDTOs, connectionDTO)
 		}
