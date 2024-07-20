@@ -78,7 +78,10 @@ func createListener(
 	return listenerWrapper, nil
 }
 
-func addConnectionInfoToContext(ctx context.Context, c net.Conn) context.Context {
+func addConnectionInfoToContext(
+	ctx context.Context,
+	c net.Conn,
+) context.Context {
 	if connWrapper, ok := c.(*connWrapper); ok {
 		connectionInfo := connWrapper.connectionInfo
 		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
