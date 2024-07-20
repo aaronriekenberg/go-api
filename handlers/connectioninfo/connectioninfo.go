@@ -67,7 +67,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 			return -cmp.Compare(cdto1.ID, cdto2.ID)
 		})
 
-		response := &connectionInfoDTO{
+		response := connectionInfoDTO{
 			CurrentConnections: currentConnectionsDTO{
 				Total:     len(connectionDTOs),
 				ByNetwork: numCurrentConnectionsByNetwork,
@@ -79,7 +79,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 			Connections:              connectionDTOs,
 		}
 
-		utils.RespondWithJSONDTO(response, w)
+		utils.RespondWithJSONDTO(&response, w)
 	}
 }
 
