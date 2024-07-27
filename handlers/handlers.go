@@ -45,10 +45,10 @@ func CreateHandlers(
 
 	mux.Handle("GET /", staticfile.NewStaticFileHandler(config.StaticFileConfiguration))
 
-	return maxBodyLengthHandler(mux)
+	return maxRequestBodyLengthHandler(mux)
 }
 
-func maxBodyLengthHandler(
+func maxRequestBodyLengthHandler(
 	nextHandler http.Handler,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
