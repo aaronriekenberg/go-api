@@ -15,8 +15,7 @@ func maxRequestBodyLengthHandler(
 
 		bodyReader := http.MaxBytesReader(w, r.Body, 0)
 
-		_, err := io.ReadAll(bodyReader)
-		if err != nil {
+		if _, err := io.ReadAll(bodyReader); err != nil {
 			slog.Warn("request body read error",
 				"error", err,
 				"url", r.URL.String(),
@@ -24,25 +23,12 @@ func maxRequestBodyLengthHandler(
 				"proto", r.Proto,
 				"header", r.Header,
 				"remote_addr", r.RemoteAddr,
+				"content_length", r.ContentLength,
 			)
 			utils.HTTPErrorStatusCode(w, http.StatusBadRequest)
 			return
 		}
 
-		r2 := *r
-
-		r2.Body = noopReader{}
-
-		nextHandler.ServeHTTP(w, &r2)
+		nextHandler.ServeHTTP(w, r)
 	})
-}
-
-type noopReader struct{}
-
-func (noopReader noopReader) Read(p []byte) (n int, err error) {
-	return 0, io.EOF
-}
-
-func (noopReader noopReader) Close() error {
-	return nil
 }
