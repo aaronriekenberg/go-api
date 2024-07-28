@@ -24,10 +24,6 @@ func maxRequestBodyLengthHandler(
 		)
 
 		switch {
-		case r.Body == nil:
-			logger.Debug("r.body is nil")
-			err = nil
-
 		case r.Body == http.NoBody:
 			logger.Debug("r.body is http.NoBody")
 			err = nil
