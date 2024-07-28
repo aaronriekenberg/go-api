@@ -26,7 +26,7 @@ func NewStaticFileHandler(
 
 	cacheControlHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger := slog.Default().With(
-			"handler", "staticFileHandler",
+			"handler", "staticfile",
 			"urlPath", r.URL.Path,
 		)
 

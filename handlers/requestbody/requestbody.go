@@ -1,4 +1,4 @@
-package handlers
+package requestbody
 
 import (
 	"errors"
@@ -9,13 +9,13 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
-func maxRequestBodyLengthHandler(
+func EmptyRequestBodyHandler(
 	nextHandler http.Handler,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		logger := slog.Default().With(
-			"handler", "maxRequestBodyLengthHandler",
+			"handler", "emptyrequestbody",
 			"urlPath", r.URL.Path,
 			"method", r.Method,
 			"content_length", r.ContentLength,
