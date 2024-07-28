@@ -61,7 +61,7 @@ func setupSlog() {
 	}
 
 	logToStdout := false
-	if logToStdoutString, ok := os.LookupEnv("LOG_TO_STDOUT"); ok {
+	if logToStdoutString, ok := os.LookupEnv("DEFAULT_LOG_TO_STDOUT"); ok {
 		if strings.ToLower(logToStdoutString) == "true" {
 			logToStdout = true
 		}
