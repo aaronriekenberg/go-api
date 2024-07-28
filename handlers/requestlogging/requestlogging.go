@@ -41,6 +41,44 @@ func (requestLogger *requestLogger) WrapHttpHandler(
 	return newLoggingHandler(requestLogger, handler)
 }
 
+func NewRequestLogger(
+	requestLoggerConfig config.RequestLoggingConfiguration,
+) RequestLogger {
+
+	if !requestLoggerConfig.Enabled {
+		return (*requestLogger)(nil)
+	}
+
+	writer := &lumberjack.Logger{
+		Filename:   requestLoggerConfig.RequestLogFile,
+		MaxSize:    requestLoggerConfig.MaxSizeMegabytes,
+		MaxBackups: requestLoggerConfig.MaxBackups,
+	}
+
+	channel := make(chan []byte, writeChannelCapacity)
+
+	requestLogger := &requestLogger{
+		writeChannel: channel,
+	}
+
+	go runAsyncWriter(
+		writer,
+		channel,
+	)
+
+	return requestLogger
+}
+
+func runAsyncWriter(
+	writer io.Writer,
+	channel <-chan []byte,
+) {
+	for {
+		buffer := <-channel
+		writer.Write(buffer)
+	}
+}
+
 type requestLogDTO struct {
 	ConnectionID  uint64      `json:"connection_id"`
 	RequestID     uint64      `json:"request_id"`
@@ -117,42 +155,4 @@ func newLoggingHandler(
 
 		writer.Write(byteBuffer)
 	})
-}
-
-func NewRequestLogger(
-	requestLoggerConfig config.RequestLoggingConfiguration,
-) RequestLogger {
-
-	if !requestLoggerConfig.Enabled {
-		return (*requestLogger)(nil)
-	}
-
-	writer := &lumberjack.Logger{
-		Filename:   requestLoggerConfig.RequestLogFile,
-		MaxSize:    requestLoggerConfig.MaxSizeMegabytes,
-		MaxBackups: requestLoggerConfig.MaxBackups,
-	}
-
-	channel := make(chan []byte, writeChannelCapacity)
-
-	requestLogger := &requestLogger{
-		writeChannel: channel,
-	}
-
-	go runAsyncWriter(
-		writer,
-		channel,
-	)
-
-	return requestLogger
-}
-
-func runAsyncWriter(
-	writer io.Writer,
-	channel <-chan []byte,
-) {
-	for {
-		buffer := <-channel
-		writer.Write(buffer)
-	}
 }
