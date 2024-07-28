@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/felixge/httpsnoop"
@@ -19,12 +20,46 @@ const writeChannelCapacity = 1_000
 
 type channelWriter struct {
 	writeChannel chan<- []byte
+	numLogDrops  atomic.Uint64
 }
 
 func (channelWriter *channelWriter) Write(p []byte) (n int, err error) {
 	bufferLength := len(p)
-	channelWriter.writeChannel <- p
+
+	select {
+	case channelWriter.writeChannel <- p:
+
+	default:
+		channelWriter.numLogDrops.Add(1)
+	}
+
 	return bufferLength, nil
+}
+
+func (channelWriter *channelWriter) runLogDropMonitor() {
+	ticker := time.NewTicker(5 * time.Second)
+
+	var previousLogDrops uint64 = 0
+
+	for {
+		<-ticker.C
+
+		currentLogDrops := channelWriter.numLogDrops.Load()
+
+		if previousLogDrops != currentLogDrops {
+			slog.Warn("log drops increased",
+				"previousLogDrops", previousLogDrops,
+				"currentLogDrops", currentLogDrops,
+			)
+			previousLogDrops = currentLogDrops
+		} else {
+			slog.Debug("no change in log drops",
+				"previousLogDrops", previousLogDrops,
+				"currentLogDrops", currentLogDrops,
+			)
+		}
+	}
+
 }
 
 type RequestLogger interface {
@@ -71,6 +106,8 @@ func NewRequestLogger(
 		writer,
 		channel,
 	)
+
+	go requestLogger.channelWriter.runLogDropMonitor()
 
 	return requestLogger
 }
