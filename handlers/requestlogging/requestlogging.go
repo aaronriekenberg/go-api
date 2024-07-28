@@ -114,6 +114,7 @@ func newLoggingHandler(
 				"error", err,
 			)
 		}
+		byteBuffer = append(byteBuffer, '\n')
 
 		writer.Write(byteBuffer)
 	})
