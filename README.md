@@ -9,5 +9,5 @@ Playing with:
 Handy command for log file viewing:
 
 ```
-tail -F logs/request.log  | jq '"\(.request.host) \(.request.method) \(.request.url) \(.response.code) \(.duration)"'
+tail -F logs/request.log  | jq '"\(.timestamp) \(.request.host) \(.request.method) \(.request.url) \(.response.code) \(.duration)"'
 ```
