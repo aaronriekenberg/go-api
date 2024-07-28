@@ -1,3 +1,2 @@
 go-api
-logs/output*
-logs/lock
+logs/request*
