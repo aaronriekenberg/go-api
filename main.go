@@ -72,7 +72,7 @@ func setupSlog() {
 		writer = os.Stdout
 	} else {
 		writer = &lumberjack.Logger{
-			Filename:   "logs/server.log",
+			Filename:   "logs/default.log",
 			MaxSize:    1,
 			MaxBackups: 10,
 		}
