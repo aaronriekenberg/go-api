@@ -17,7 +17,7 @@ type RequestLogger interface {
 }
 
 type requestLogger struct {
-	writeChannel chan []byte
+	writeChannel chan<- []byte
 }
 
 func (requestLogger *requestLogger) Write(p []byte) (n int, err error) {
@@ -26,16 +26,9 @@ func (requestLogger *requestLogger) Write(p []byte) (n int, err error) {
 	return bufferLength, nil
 }
 
-func (requestLogger *requestLogger) runAsyncWriter(
-	writer io.Writer,
-) {
-	for {
-		buffer := <-requestLogger.writeChannel
-		writer.Write(buffer)
-	}
-}
-
-func (requestLogger *requestLogger) WrapHttpHandler(handler http.Handler) http.Handler {
+func (requestLogger *requestLogger) WrapHttpHandler(
+	handler http.Handler,
+) http.Handler {
 	if requestLogger == nil {
 		return handler
 	}
@@ -57,11 +50,25 @@ func NewRequestLogger(
 		MaxBackups: requestLoggerConfig.MaxBackups,
 	}
 
+	channel := make(chan []byte, writeChannelCapacity)
+
 	requestLogger := &requestLogger{
-		writeChannel: make(chan []byte, writeChannelCapacity),
+		writeChannel: channel,
 	}
 
-	go requestLogger.runAsyncWriter(writer)
+	go runAsyncWriter(
+		writer,
+		channel,
+	)
 
 	return requestLogger
+}
+func runAsyncWriter(
+	writer io.Writer,
+	channel <-chan []byte,
+) {
+	for {
+		buffer := <-channel
+		writer.Write(buffer)
+	}
 }
