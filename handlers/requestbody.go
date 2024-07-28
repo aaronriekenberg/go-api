@@ -48,7 +48,7 @@ func maxRequestBodyLengthHandler(
 			"url", r.URL.String(),
 			"proto", r.Proto,
 			"header", r.Header,
-			"remote_addr", r.RemoteAddr,
+			"remoteAddr", r.RemoteAddr,
 		)
 
 		var maxBytesError *http.MaxBytesError
