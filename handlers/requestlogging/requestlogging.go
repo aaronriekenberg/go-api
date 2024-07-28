@@ -38,7 +38,6 @@ func (requestLogger *requestLogger) WrapHttpHandler(
 		return handler
 	}
 
-	// return gorillaHandlers.CombinedLoggingHandler(requestLogger, handler)
 	return newLoggingHandler(requestLogger, handler)
 }
 
