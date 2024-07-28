@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/felixge/httpsnoop"
 	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/connection"
 	"github.com/aaronriekenberg/go-api/request"
-	"github.com/felixge/httpsnoop"
 )
 
 const writeChannelCapacity = 1_000
