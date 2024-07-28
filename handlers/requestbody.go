@@ -14,14 +14,14 @@ func maxRequestBodyLengthHandler(
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		var err error
-
 		logger := slog.Default().With(
 			"handler", "maxRequestBodyLengthHandler",
 			"urlPath", r.URL.Path,
 			"method", r.Method,
 			"content_length", r.ContentLength,
 		)
+
+		var err error
 
 		switch {
 		case r.Body == http.NoBody:
