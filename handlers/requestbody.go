@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -13,22 +14,57 @@ func maxRequestBodyLengthHandler(
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		bodyReader := http.MaxBytesReader(w, r.Body, 0)
+		var err error
 
-		if _, err := io.ReadAll(bodyReader); err != nil {
-			slog.Warn("request body read error",
-				"error", err,
-				"url", r.URL.String(),
-				"method", r.Method,
-				"proto", r.Proto,
-				"header", r.Header,
-				"remote_addr", r.RemoteAddr,
-				"content_length", r.ContentLength,
-			)
-			utils.HTTPErrorStatusCode(w, http.StatusBadRequest)
+		logger := slog.Default().With(
+			"handler", "maxRequestBodyLengthHandler",
+			"urlPath", r.URL.Path,
+			"method", r.Method,
+			"content_length", r.ContentLength,
+		)
+
+		switch {
+		case r.Body == nil:
+			logger.Debug("r.body is nil")
+			err = nil
+
+		case r.Body == http.NoBody:
+			logger.Debug("r.body is http.NoBody")
+			err = nil
+
+		default:
+			logger.Debug("reading r.body")
+			bodyReader := http.MaxBytesReader(w, r.Body, 0)
+			_, err = io.ReadAll(bodyReader)
+		}
+
+		if err == nil {
+			nextHandler.ServeHTTP(w, r)
 			return
 		}
 
-		nextHandler.ServeHTTP(w, r)
+		logger.Warn("request body read error",
+			"error", err,
+			"url", r.URL.String(),
+			"proto", r.Proto,
+			"header", r.Header,
+			"remote_addr", r.RemoteAddr,
+		)
+
+		var maxBytesError *http.MaxBytesError
+		switch {
+		case errors.As(err, &maxBytesError):
+			logger.Debug("got maxBytesError",
+				"maxBytesError", maxBytesError,
+				"limit", maxBytesError.Limit,
+			)
+			utils.HTTPErrorStatusCode(w, http.StatusRequestEntityTooLarge)
+
+		default:
+			logger.Debug("got other error",
+				"err", err,
+			)
+			utils.HTTPErrorStatusCode(w, http.StatusBadRequest)
+		}
 	})
 }

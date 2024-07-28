@@ -26,10 +26,9 @@ func NewStaticFileHandler(
 
 	cacheControlHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger := slog.Default().With(
+			"handler", "staticFileHandler",
 			"urlPath", r.URL.Path,
 		)
-
-		logger.Debug("in cacheControlHandler")
 
 		switch {
 		case vnstatPNGRegex.MatchString(r.URL.Path):
