@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/handlers"
@@ -58,11 +60,22 @@ func setupSlog() {
 		}
 	}
 
-	// TOOD: make configurable?
-	writer := &lumberjack.Logger{
-		Filename:   "logs/server.log",
-		MaxSize:    1,
-		MaxBackups: 10,
+	logToStdout := false
+	if logToStdoutString, ok := os.LookupEnv("LOG_TO_STDOUT"); ok {
+		if strings.ToLower(logToStdoutString) == "true" {
+			logToStdout = true
+		}
+	}
+
+	var writer io.Writer
+	if logToStdout {
+		writer = os.Stdout
+	} else {
+		writer = &lumberjack.Logger{
+			Filename:   "logs/server.log",
+			MaxSize:    1,
+			MaxBackups: 10,
+		}
 	}
 
 	slog.SetDefault(
