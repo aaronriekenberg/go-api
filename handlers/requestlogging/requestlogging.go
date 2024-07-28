@@ -58,13 +58,13 @@ type responseLogDTO struct {
 	Headers      http.Header `json:"headers"`
 	BytesWritten int64       `json:"bytes_written"`
 	Code         int         `json:"code"`
-	Duration     string      `json:"duration"`
 }
 
 type logDTO struct {
 	Timestamp      string         `json:"timestamp"`
 	RequestLogDTO  requestLogDTO  `json:"request"`
 	ResponseLogDTO responseLogDTO `json:"response"`
+	Duration       string         `json:"duration"`
 }
 
 func newLoggingHandler(
@@ -103,8 +103,8 @@ func newLoggingHandler(
 				Headers:      w.Header(),
 				BytesWritten: metrics.Written,
 				Code:         metrics.Code,
-				Duration:     metrics.Duration.String(),
 			},
+			Duration: metrics.Duration.String(),
 		}
 
 		byteBuffer, err := json.Marshal(&logDTO)
