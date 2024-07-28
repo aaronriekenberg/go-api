@@ -17,18 +17,22 @@ import (
 
 const writeChannelCapacity = 1_000
 
+type channelWriter struct {
+	writeChannel chan<- []byte
+}
+
+func (channelWriter *channelWriter) Write(p []byte) (n int, err error) {
+	bufferLength := len(p)
+	channelWriter.writeChannel <- p
+	return bufferLength, nil
+}
+
 type RequestLogger interface {
 	WrapHttpHandler(handler http.Handler) http.Handler
 }
 
 type requestLogger struct {
-	writeChannel chan<- []byte
-}
-
-func (requestLogger *requestLogger) Write(p []byte) (n int, err error) {
-	bufferLength := len(p)
-	requestLogger.writeChannel <- p
-	return bufferLength, nil
+	channelWriter channelWriter
 }
 
 func (requestLogger *requestLogger) WrapHttpHandler(
@@ -38,7 +42,7 @@ func (requestLogger *requestLogger) WrapHttpHandler(
 		return handler
 	}
 
-	return newLoggingHandler(requestLogger, handler)
+	return newLoggingHandler(&requestLogger.channelWriter, handler)
 }
 
 func NewRequestLogger(
@@ -58,7 +62,9 @@ func NewRequestLogger(
 	channel := make(chan []byte, writeChannelCapacity)
 
 	requestLogger := &requestLogger{
-		writeChannel: channel,
+		channelWriter: channelWriter{
+			writeChannel: channel,
+		},
 	}
 
 	go runAsyncWriter(
