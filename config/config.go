@@ -28,7 +28,6 @@ type RequestLoggingConfiguration struct {
 	RequestLogFile   string
 	MaxSizeMegabytes int
 	MaxBackups       int
-	LogToStdout      bool
 }
 
 type CommandInfo struct {

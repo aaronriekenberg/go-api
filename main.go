@@ -10,33 +10,8 @@ import (
 	"github.com/aaronriekenberg/go-api/profiling"
 	"github.com/aaronriekenberg/go-api/server"
 	"github.com/aaronriekenberg/go-api/version"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
-
-func setupSlog() {
-	level := slog.LevelInfo
-
-	if levelString, ok := os.LookupEnv("LOG_LEVEL"); ok {
-		err := level.UnmarshalText([]byte(levelString))
-		if err != nil {
-			panic(fmt.Errorf("level.UnmarshalText error %w", err))
-		}
-	}
-
-	slog.SetDefault(
-		slog.New(
-			slog.NewJSONHandler(
-				os.Stdout,
-				&slog.HandlerOptions{
-					Level: level,
-				},
-			),
-		),
-	)
-
-	slog.Info("setupSlog",
-		"configuredLevel", level,
-	)
-}
 
 func main() {
 	defer func() {
@@ -71,4 +46,37 @@ func main() {
 
 	err = server.Run(config.ServerConfiguration, handlers)
 	panic(fmt.Errorf("main: server.Run error: %w", err))
+}
+
+func setupSlog() {
+	level := slog.LevelInfo
+
+	if levelString, ok := os.LookupEnv("LOG_LEVEL"); ok {
+		err := level.UnmarshalText([]byte(levelString))
+		if err != nil {
+			panic(fmt.Errorf("level.UnmarshalText error %w", err))
+		}
+	}
+
+	// TOOD: make configurable?
+	writer := &lumberjack.Logger{
+		Filename:   "logs/server.log",
+		MaxSize:    1,
+		MaxBackups: 10,
+	}
+
+	slog.SetDefault(
+		slog.New(
+			slog.NewJSONHandler(
+				writer,
+				&slog.HandlerOptions{
+					Level: level,
+				},
+			),
+		),
+	)
+
+	slog.Info("setupSlog",
+		"configuredLevel", level,
+	)
 }
