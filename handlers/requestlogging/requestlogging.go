@@ -85,7 +85,7 @@ func runAsyncWriter(
 	}
 }
 
-type requestLogDTO struct {
+type requestLogData struct {
 	ConnectionID  uint64      `json:"connection_id"`
 	RequestID     uint64      `json:"request_id"`
 	Close         bool        `json:"close"`
@@ -98,17 +98,17 @@ type requestLogDTO struct {
 	URL           string      `json:"url"`
 }
 
-type responseLogDTO struct {
+type responseLogData struct {
 	Headers      http.Header `json:"headers"`
 	BytesWritten int64       `json:"bytes_written"`
 	Code         int         `json:"code"`
 }
 
-type logDTO struct {
-	Timestamp      string         `json:"timestamp"`
-	RequestLogDTO  requestLogDTO  `json:"request"`
-	ResponseLogDTO responseLogDTO `json:"response"`
-	Duration       string         `json:"duration"`
+type logData struct {
+	Timestamp       string          `json:"timestamp"`
+	RequestLogData  requestLogData  `json:"request"`
+	ResponseLogData responseLogData `json:"response"`
+	Duration        string          `json:"duration"`
 }
 
 func newLoggingHandler(
@@ -129,9 +129,9 @@ func newLoggingHandler(
 
 		requestID, _ := request.RequestIDFromContext(ctx)
 
-		logDTO := logDTO{
+		logData := logData{
 			Timestamp: requestTime.Format("02/Jan/2006:15:04:05.000 -0700"),
-			RequestLogDTO: requestLogDTO{
+			RequestLogData: requestLogData{
 				ConnectionID:  uint64(connectionID),
 				RequestID:     uint64(requestID),
 				Close:         r.Close,
@@ -143,7 +143,7 @@ func newLoggingHandler(
 				RemoteAddress: r.RemoteAddr,
 				URL:           r.URL.String(),
 			},
-			ResponseLogDTO: responseLogDTO{
+			ResponseLogData: responseLogData{
 				Headers:      w.Header(),
 				BytesWritten: metrics.Written,
 				Code:         metrics.Code,
@@ -151,11 +151,12 @@ func newLoggingHandler(
 			Duration: metrics.Duration.String(),
 		}
 
-		byteBuffer, err := json.Marshal(&logDTO)
+		byteBuffer, err := json.Marshal(&logData)
 		if err != nil {
 			slog.Warn("logDTO json.Marshal error",
 				"error", err,
 			)
+			return
 		}
 		byteBuffer = append(byteBuffer, '\n')
 
