@@ -23,6 +23,14 @@ type ProfilingConfiguration struct {
 	ListenAddress string
 }
 
+type RequestLoggingConfiguration struct {
+	Enabled          bool
+	RequestLogFile   string
+	MaxSizeMegabytes int
+	MaxBackups       int
+	LogToStdout      bool
+}
+
 type CommandInfo struct {
 	ID          string
 	Description string
@@ -42,10 +50,11 @@ type CommandConfiguration struct {
 }
 
 type Configuration struct {
-	ServerConfiguration     ServerConfiguration
-	ProfilingConfiguration  ProfilingConfiguration
-	StaticFileConfiguration StaticFileConfiguration
-	CommandConfiguration    CommandConfiguration
+	ServerConfiguration         ServerConfiguration
+	ProfilingConfiguration      ProfilingConfiguration
+	RequestLoggingConfiguration RequestLoggingConfiguration
+	StaticFileConfiguration     StaticFileConfiguration
+	CommandConfiguration        CommandConfiguration
 }
 
 func ReadConfiguration(configFile string) (*Configuration, error) {

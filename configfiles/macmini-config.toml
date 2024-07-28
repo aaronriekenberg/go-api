@@ -10,6 +10,12 @@ apiContext = "/api/v1"
 enabled = false
 #listenAddress = ":8081"
 
+[requestLoggingConfiguration]
+enabled = true
+requestLogFile = "logs/request.log"
+maxSizeMegabytes = 1
+maxBackups = 10
+
 [staticFileConfiguration]
 rootPath = "/home/aaron/aaronr.digital"
 

@@ -9,6 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/handlers/command"
 	"github.com/aaronriekenberg/go-api/handlers/connectioninfo"
 	"github.com/aaronriekenberg/go-api/handlers/requestinfo"
+	"github.com/aaronriekenberg/go-api/handlers/requestlogging"
 	"github.com/aaronriekenberg/go-api/handlers/staticfile"
 	"github.com/aaronriekenberg/go-api/handlers/versioninfo"
 )
@@ -43,5 +44,8 @@ func CreateHandlers(
 
 	mux.Handle("GET /", staticfile.NewStaticFileHandler(config.StaticFileConfiguration))
 
-	return maxRequestBodyLengthHandler(mux)
+	handler := maxRequestBodyLengthHandler(mux)
+
+	requestLogger := requestlogging.NewRequestLogger(config.RequestLoggingConfiguration)
+	return requestLogger.WrapHttpHandler(handler)
 }
