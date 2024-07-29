@@ -18,6 +18,53 @@ import (
 
 const writeChannelCapacity = 1_000
 
+type requestLogger struct {
+	channelWriter channelWriter
+}
+
+func NewRequestLogger(
+	requestLoggerConfig config.RequestLoggingConfiguration,
+	nextHandler http.Handler,
+) http.Handler {
+
+	if !requestLoggerConfig.Enabled {
+		return nextHandler
+	}
+
+	writer := &lumberjack.Logger{
+		Filename:   requestLoggerConfig.RequestLogFile,
+		MaxSize:    requestLoggerConfig.MaxSizeMegabytes,
+		MaxBackups: requestLoggerConfig.MaxBackups,
+	}
+
+	channel := make(chan []byte, writeChannelCapacity)
+
+	requestLogger := &requestLogger{
+		channelWriter: channelWriter{
+			writeChannel: channel,
+		},
+	}
+
+	go runAsyncWriter(
+		writer,
+		channel,
+	)
+
+	go requestLogger.channelWriter.runLogDropMonitor()
+
+	return newLoggingHandler(&requestLogger.channelWriter, nextHandler)
+}
+
+func runAsyncWriter(
+	writer io.Writer,
+	channel <-chan []byte,
+) {
+	for {
+		buffer := <-channel
+		writer.Write(buffer)
+	}
+}
+
 type channelWriter struct {
 	writeChannel chan<- []byte
 	numLogDrops  atomic.Uint64
@@ -60,66 +107,6 @@ func (channelWriter *channelWriter) runLogDropMonitor() {
 		}
 	}
 
-}
-
-type RequestLogger interface {
-	WrapHttpHandler(handler http.Handler) http.Handler
-}
-
-type requestLogger struct {
-	channelWriter channelWriter
-}
-
-func (requestLogger *requestLogger) WrapHttpHandler(
-	handler http.Handler,
-) http.Handler {
-	if requestLogger == nil {
-		return handler
-	}
-
-	return newLoggingHandler(&requestLogger.channelWriter, handler)
-}
-
-func NewRequestLogger(
-	requestLoggerConfig config.RequestLoggingConfiguration,
-) RequestLogger {
-
-	if !requestLoggerConfig.Enabled {
-		return (*requestLogger)(nil)
-	}
-
-	writer := &lumberjack.Logger{
-		Filename:   requestLoggerConfig.RequestLogFile,
-		MaxSize:    requestLoggerConfig.MaxSizeMegabytes,
-		MaxBackups: requestLoggerConfig.MaxBackups,
-	}
-
-	channel := make(chan []byte, writeChannelCapacity)
-
-	requestLogger := &requestLogger{
-		channelWriter: channelWriter{
-			writeChannel: channel,
-		},
-	}
-
-	go runAsyncWriter(
-		writer,
-		channel,
-	)
-
-	go requestLogger.channelWriter.runLogDropMonitor()
-
-	return requestLogger
-}
-
-func runAsyncWriter(
-	writer io.Writer,
-	channel <-chan []byte,
-) {
-	for {
-		buffer := <-channel
-		writer.Write(buffer)
-	}
 }
 
 type requestLogData struct {

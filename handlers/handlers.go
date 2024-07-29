@@ -47,6 +47,5 @@ func CreateHandlers(
 
 	handler := requestbody.EmptyRequestBodyHandler(mux)
 
-	requestLogger := requestlogging.NewRequestLogger(config.RequestLoggingConfiguration)
-	return requestLogger.WrapHttpHandler(handler)
+	return requestlogging.NewRequestLogger(config.RequestLoggingConfiguration, handler)
 }
