@@ -154,7 +154,7 @@ func newLoggingHandler(
 		requestID, _ := request.RequestIDFromContext(ctx)
 
 		logData := logData{
-			Timestamp: requestTime.Format("02/Jan/2006:15:04:05.000 -0700"),
+			Timestamp: requestTime.Format(time.RFC3339Nano),
 			RequestLogData: requestLogData{
 				ConnectionID:  uint64(connectionID),
 				RequestID:     uint64(requestID),
