@@ -18,10 +18,6 @@ import (
 
 const writeChannelCapacity = 1_000
 
-type requestLogger struct {
-	channelWriter channelWriter
-}
-
 func NewRequestLogger(
 	requestLoggerConfig config.RequestLoggingConfiguration,
 	nextHandler http.Handler,
@@ -39,10 +35,8 @@ func NewRequestLogger(
 
 	channel := make(chan []byte, writeChannelCapacity)
 
-	requestLogger := &requestLogger{
-		channelWriter: channelWriter{
-			writeChannel: channel,
-		},
+	channelWriter := &channelWriter{
+		writeChannel: channel,
 	}
 
 	go runAsyncWriter(
@@ -50,9 +44,9 @@ func NewRequestLogger(
 		channel,
 	)
 
-	go requestLogger.channelWriter.runLogDropMonitor()
+	go channelWriter.runLogDropMonitor()
 
-	return newLoggingHandler(&requestLogger.channelWriter, nextHandler)
+	return newLoggingHandler(channelWriter, nextHandler)
 }
 
 func runAsyncWriter(
