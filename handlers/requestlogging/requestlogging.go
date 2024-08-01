@@ -164,7 +164,7 @@ func newLoggingHandler(
 
 		byteBuffer, err := json.Marshal(&logData)
 		if err != nil {
-			slog.Warn("logDTO json.Marshal error",
+			slog.Warn("logData json.Marshal error",
 				"error", err,
 			)
 			return
