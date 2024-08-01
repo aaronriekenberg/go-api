@@ -40,8 +40,8 @@ func NewRequestLogger(
 	}
 
 	go runAsyncWriter(
-		fileWriter,
 		channel,
+		fileWriter,
 	)
 
 	go channelWriter.runLogDropMonitor()
@@ -50,8 +50,8 @@ func NewRequestLogger(
 }
 
 func runAsyncWriter(
-	writer io.Writer,
 	channel <-chan []byte,
+	writer io.Writer,
 ) {
 	for {
 		buffer := <-channel
