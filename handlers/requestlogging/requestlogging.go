@@ -27,7 +27,7 @@ func NewRequestLogger(
 		return nextHandler
 	}
 
-	writer := &lumberjack.Logger{
+	fileWriter := &lumberjack.Logger{
 		Filename:   requestLoggerConfig.RequestLogFile,
 		MaxSize:    requestLoggerConfig.MaxSizeMegabytes,
 		MaxBackups: requestLoggerConfig.MaxBackups,
@@ -40,7 +40,7 @@ func NewRequestLogger(
 	}
 
 	go runAsyncWriter(
-		writer,
+		fileWriter,
 		channel,
 	)
 
