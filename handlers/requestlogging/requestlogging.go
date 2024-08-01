@@ -104,16 +104,16 @@ func (channelWriter *channelWriter) runLogDropMonitor() {
 }
 
 type requestLogData struct {
-	ConnectionID  uint64      `json:"connection_id"`
-	RequestID     uint64      `json:"request_id"`
-	Close         bool        `json:"close"`
-	ContentLength int64       `json:"content_length"`
-	Headers       http.Header `json:"headers"`
-	Host          string      `json:"host"`
-	Method        string      `json:"method"`
-	Protocol      string      `json:"protocol"`
-	RemoteAddress string      `json:"remote_address"`
-	URL           string      `json:"url"`
+	ConnectionID  connection.ConnectionID `json:"connection_id"`
+	RequestID     request.RequestID       `json:"request_id"`
+	Close         bool                    `json:"close"`
+	ContentLength int64                   `json:"content_length"`
+	Headers       http.Header             `json:"headers"`
+	Host          string                  `json:"host"`
+	Method        string                  `json:"method"`
+	Protocol      string                  `json:"protocol"`
+	RemoteAddress string                  `json:"remote_address"`
+	URL           string                  `json:"url"`
 }
 
 type responseLogData struct {
@@ -140,18 +140,13 @@ func newLoggingHandler(
 
 		metrics := httpsnoop.CaptureMetrics(nextHandler, w, r)
 
-		var connectionID connection.ConnectionID
-		if connectionInfo, ok := connection.ConnectionInfoFromContext(ctx); ok {
-			connectionID = connectionInfo.ID()
-		}
-
 		requestID, _ := request.RequestIDFromContext(ctx)
 
 		logData := logData{
 			Timestamp: requestTime.Format(time.RFC3339Nano),
 			RequestLogData: requestLogData{
-				ConnectionID:  uint64(connectionID),
-				RequestID:     uint64(requestID),
+				ConnectionID:  connection.ConnectionIDFromContext(ctx),
+				RequestID:     requestID,
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Headers:       r.Header,

@@ -88,3 +88,12 @@ func ConnectionInfoFromContext(
 	connectionInfo, ok = ctx.Value(key).(ConnectionInfo)
 	return
 }
+
+func ConnectionIDFromContext(
+	ctx context.Context,
+) (connectionID ConnectionID) {
+	if connectionInfo, ok := ConnectionInfoFromContext(ctx); ok {
+		connectionID = connectionInfo.ID()
+	}
+	return
+}
