@@ -140,13 +140,11 @@ func newLoggingHandler(
 
 		metrics := httpsnoop.CaptureMetrics(nextHandler, w, r)
 
-		requestID, _ := request.RequestIDFromContext(ctx)
-
 		logData := logData{
 			Timestamp: requestTime.Format(time.RFC3339Nano),
 			RequestLogData: requestLogData{
 				ConnectionID:  connection.ConnectionIDFromContext(ctx),
-				RequestID:     requestID,
+				RequestID:     request.RequestIDFromContext(ctx),
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Headers:       r.Header,

@@ -21,10 +21,12 @@ func AddRequestIDToContext(
 
 func RequestIDFromContext(
 	ctx context.Context,
-) (requestID RequestID, ok bool) {
+) (requestID RequestID) {
 	key := requestIDContextKey{}
 
-	requestID, ok = ctx.Value(key).(RequestID)
+	if id, ok := ctx.Value(key).(RequestID); ok {
+		requestID = id
+	}
 	return
 }
 

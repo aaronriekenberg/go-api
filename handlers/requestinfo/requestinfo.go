@@ -49,12 +49,10 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			urlString = "(nil)"
 		}
 
-		requestID, _ := request.RequestIDFromContext(ctx)
-
 		response := requestInfoDTO{
 			RequestFields: requestFieldsDTO{
 				ConnectionID:  connection.ConnectionIDFromContext(ctx),
-				RequestID:     requestID,
+				RequestID:     request.RequestIDFromContext(ctx),
 				Close:         r.Close,
 				ContentLength: r.ContentLength,
 				Host:          r.Host,
