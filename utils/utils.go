@@ -18,9 +18,7 @@ const (
 )
 
 func FormatTime(t time.Time) string {
-	const timeFormat = "Mon Jan 2 15:04:05.000000 -0700 MST 2006"
-
-	return t.Format(timeFormat)
+	return t.Format(time.RFC3339Nano)
 }
 
 func RespondWithJSONDTO(
