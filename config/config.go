@@ -1,8 +1,10 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -43,9 +45,23 @@ type StaticFileConfiguration struct {
 
 type CommandConfiguration struct {
 	MaxConcurrentCommands           int64
-	RequestTimeoutDuration          string
-	SemaphoreAcquireTimeoutDuration string
+	RequestTimeoutDuration          time.Duration
+	SemaphoreAcquireTimeoutDuration time.Duration
 	Commands                        []CommandInfo
+}
+
+// Idea from https://choly.ca/post/go-json-marshalling/
+func (c *CommandConfiguration) MarshalJSON() ([]byte, error) {
+	type Alias CommandConfiguration
+	return json.Marshal(&struct {
+		RequestTimeoutDuration          string
+		SemaphoreAcquireTimeoutDuration string
+		*Alias
+	}{
+		RequestTimeoutDuration:          c.RequestTimeoutDuration.String(),
+		SemaphoreAcquireTimeoutDuration: c.SemaphoreAcquireTimeoutDuration.String(),
+		Alias:                           (*Alias)(c),
+	})
 }
 
 type Configuration struct {
@@ -72,7 +88,7 @@ func ReadConfiguration(configFile string) (*Configuration, error) {
 	}
 
 	logger.Info("end ReadConfiguration",
-		"configuration", configuration,
+		"configuration", &configuration,
 	)
 
 	return &configuration, nil

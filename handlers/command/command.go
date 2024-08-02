@@ -55,16 +55,6 @@ type runCommandsHandler struct {
 }
 
 func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
-	requestTimeout, err := time.ParseDuration(commandConfiguration.RequestTimeoutDuration)
-	if err != nil {
-		panic(fmt.Errorf("NewRunCommandsHandler error parsing RequestTimeoutDuration: %w", err))
-	}
-
-	semaphoreAcquireTimeout, err := time.ParseDuration(commandConfiguration.SemaphoreAcquireTimeoutDuration)
-	if err != nil {
-		panic(fmt.Errorf("NewRunCommandsHandler error parsing SemaphoreAcquireTimeoutDuration: %w", err))
-	}
-
 	idToCommandInfo := make(map[string]commandInfoDTO)
 	for _, commandInfo := range commandConfiguration.Commands {
 		idToCommandInfo[commandInfo.ID] = commandInfoToDTO(commandInfo)
@@ -72,8 +62,8 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 
 	return &runCommandsHandler{
 		commandSemaphore:        semaphore.NewWeighted(commandConfiguration.MaxConcurrentCommands),
-		requestTimeout:          requestTimeout,
-		semaphoreAcquireTimeout: semaphoreAcquireTimeout,
+		requestTimeout:          commandConfiguration.RequestTimeoutDuration,
+		semaphoreAcquireTimeout: commandConfiguration.SemaphoreAcquireTimeoutDuration,
 		idToCommandInfo:         idToCommandInfo,
 	}
 }
