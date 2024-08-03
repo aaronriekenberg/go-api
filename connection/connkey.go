@@ -9,29 +9,27 @@ import (
 type connKey struct {
 	tcpConn  *net.TCPConn
 	unixConn *net.UnixConn
-	network  string
 }
 
-func newConnKey(
+func buildConnKeyAndNetwork(
 	conn net.Conn,
-) (key connKey, ok bool) {
+) (key connKey, network string, ok bool) {
 	switch conn := conn.(type) {
 	case *net.TCPConn:
 		ok = true
+		network = "tcp"
 		key = connKey{
 			tcpConn: conn,
-			network: "tcp",
 		}
 	case *net.UnixConn:
 		ok = true
+		network = "unix"
 		key = connKey{
 			unixConn: conn,
-			network:  "unix",
 		}
 	default:
-		slog.Warn("newConnKey unknown conn type",
-			"type", fmt.Sprintf("%T", conn),
-			"conn", conn,
+		slog.Warn("buildConnKeyAndNetwork unknown conn type",
+			"conn", fmt.Sprintf("%T %v", conn, conn),
 		)
 		ok = false
 	}

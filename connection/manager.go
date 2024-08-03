@@ -50,13 +50,13 @@ func (cm *connectionManager) nextConnectionID() ConnectionID {
 func (cm *connectionManager) AddConnection(
 	conn net.Conn,
 ) (connectionInfo ConnectionInfo, added bool) {
-	connKey, ok := newConnKey(conn)
+	connKey, network, ok := buildConnKeyAndNetwork(conn)
 	if !ok {
 		return
 	}
 
 	connectionID := cm.nextConnectionID()
-	newConnectionInfo := newConnection(connectionID, connKey.network)
+	newConnectionInfo := newConnection(connectionID, network)
 
 	cm.idToConnection.Store(
 		connKey,
@@ -78,7 +78,7 @@ func (cm *connectionManager) AddConnection(
 }
 
 func (cm *connectionManager) RemoveConnection(conn net.Conn) {
-	connKey, ok := newConnKey(conn)
+	connKey, _, ok := buildConnKeyAndNetwork(conn)
 	if !ok {
 		return
 	}
