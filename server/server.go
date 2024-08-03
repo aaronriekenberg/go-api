@@ -17,47 +17,6 @@ import (
 	"github.com/aaronriekenberg/go-api/request"
 )
 
-type connWrapper struct {
-	net.Conn
-	connectionInfo connection.ConnectionInfo
-}
-
-func (cw *connWrapper) Close() error {
-	slog.Debug("connWrapper.Close",
-		"connectionID", cw.connectionInfo.ID(),
-	)
-
-	connection.ConnectionManagerInstance().RemoveConnection(
-		cw.connectionInfo.ID(),
-	)
-
-	return cw.Conn.Close()
-}
-
-type listenerWrapper struct {
-	net.Listener
-	network string
-}
-
-func (lw *listenerWrapper) Accept() (net.Conn, error) {
-	conn, err := lw.Listener.Accept()
-
-	if err != nil {
-		return conn, err
-	}
-
-	connectionInfo := connection.ConnectionManagerInstance().AddConnection(lw.network)
-
-	slog.Debug("listenerWrapper.Accept got new connection",
-		"connectionID", connectionInfo.ID(),
-	)
-
-	return &connWrapper{
-		Conn:           conn,
-		connectionInfo: connectionInfo,
-	}, nil
-}
-
 func createListener(
 	config config.ServerListenerConfiguration,
 ) (net.Listener, error) {
@@ -65,27 +24,31 @@ func createListener(
 		os.Remove(config.ListenAddress)
 	}
 
-	listener, err := net.Listen(config.Network, config.ListenAddress)
-	if err != nil {
-		return nil, fmt.Errorf("net.Listen error: %w", err)
-	}
-
-	listenerWrapper := &listenerWrapper{
-		Listener: listener,
-		network:  config.Network,
-	}
-
-	return listenerWrapper, nil
+	return net.Listen(config.Network, config.ListenAddress)
 }
 
-func addConnectionInfoToContext(
+func serverConnState(
+	conn net.Conn,
+	connState http.ConnState,
+) {
+	slog.Debug("serverConnState",
+		"connState", connState.String(),
+	)
+
+	switch connState {
+	case http.StateClosed:
+		connection.ConnectionManagerInstance().RemoveConnection(conn)
+	}
+}
+
+func createConnectionContext(
 	ctx context.Context,
-	c net.Conn,
+	conn net.Conn,
 ) context.Context {
-	if connWrapper, ok := c.(*connWrapper); ok {
-		connectionInfo := connWrapper.connectionInfo
+	if connectionInfo, added := connection.ConnectionManagerInstance().AddConnection(conn); added {
 		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
 	}
+
 	return ctx
 }
 
@@ -145,7 +108,8 @@ func runListener(
 		IdleTimeout:  5 * time.Minute,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
-		ConnContext:  addConnectionInfoToContext,
+		ConnState:    serverConnState,
+		ConnContext:  createConnectionContext,
 		Handler:      handler,
 	}
 

@@ -2,13 +2,44 @@ package connection
 
 import (
 	"cmp"
+	"fmt"
 	"log/slog"
+	"net"
 	"slices"
 	"sync/atomic"
 	"time"
 
 	"github.com/puzpuzpuz/xsync/v3"
 )
+
+type connKey struct {
+	tcpConn  *net.TCPConn
+	unixConn *net.UnixConn
+	network  string
+}
+
+func newConnKey(
+	conn net.Conn,
+) *connKey {
+	switch conn := conn.(type) {
+	case *net.TCPConn:
+		return &connKey{
+			tcpConn: conn,
+			network: "tcp",
+		}
+	case *net.UnixConn:
+		return &connKey{
+			unixConn: conn,
+			network:  "unix",
+		}
+	default:
+		slog.Warn("newConnKey unknown conn type",
+			"type", fmt.Sprintf("%T", conn),
+			"conn", conn,
+		)
+		return nil
+	}
+}
 
 type ConnectionManagerState struct {
 	MaxOpenConnections       int
@@ -19,22 +50,22 @@ type ConnectionManagerState struct {
 }
 
 type ConnectionManager interface {
-	AddConnection(network string) ConnectionInfo
+	AddConnection(conn net.Conn) (connectionInfo ConnectionInfo, added bool)
 
-	RemoveConnection(connectionID ConnectionID)
+	RemoveConnection(conn net.Conn)
 
 	State() ConnectionManagerState
 }
 
 type connectionManager struct {
-	idToConnection       *xsync.MapOf[ConnectionID, *connectionInfo]
+	idToConnection       *xsync.MapOf[connKey, *connectionInfo]
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
 }
 
 func newConnectionManager() *connectionManager {
 	return &connectionManager{
-		idToConnection: xsync.NewMapOf[ConnectionID, *connectionInfo](
+		idToConnection: xsync.NewMapOf[connKey, *connectionInfo](
 			xsync.WithPresize(maxConnections),
 			xsync.WithGrowOnly(),
 		),
@@ -47,49 +78,61 @@ func (cm *connectionManager) nextConnectionID() ConnectionID {
 }
 
 func (cm *connectionManager) AddConnection(
-	network string,
-) ConnectionInfo {
+	conn net.Conn,
+) (connectionInfo ConnectionInfo, added bool) {
+	connKey := newConnKey(conn)
+	if connKey == nil {
+		return
+	}
+
 	connectionID := cm.nextConnectionID()
-	connectionInfo := newConnection(connectionID, network)
+	newConnectionInfo := newConnection(connectionID, connKey.network)
 
 	cm.idToConnection.Store(
-		connectionID,
-		connectionInfo,
+		*connKey,
+		newConnectionInfo,
 	)
 
 	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
-		"network", network,
+		"network", newConnectionInfo.Network(),
 	)
 
 	numOpenConnections := cm.idToConnection.Size()
 	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
-	return connectionInfo
+	connectionInfo = newConnectionInfo
+	added = true
+
+	return
 }
 
-func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
-	connection, loaded := cm.idToConnection.LoadAndDelete(connectionID)
+func (cm *connectionManager) RemoveConnection(conn net.Conn) {
+	connKey := newConnKey(conn)
+	if connKey == nil {
+		return
+	}
+
+	connection, loaded := cm.idToConnection.LoadAndDelete(*connKey)
 	if !loaded {
 		return
 	}
 
 	slog.Debug("connectionManager.RemoveConnection",
-		"connectionID", connectionID,
+		"connectionID", connection.ID(),
 		"requests", connection.Requests(),
 	)
 
 	connection.markClosed()
 
 	cm.metricsManager.updateForClosedConnection(connection)
-
 }
 
 func (cm *connectionManager) connections() []ConnectionInfo {
 	connections := make([]ConnectionInfo, 0, cm.idToConnection.Size())
 
 	cm.idToConnection.Range(
-		func(key ConnectionID, value *connectionInfo) bool {
+		func(key connKey, value *connectionInfo) bool {
 			connections = append(connections, value)
 			return true
 		},
