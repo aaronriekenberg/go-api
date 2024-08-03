@@ -27,11 +27,11 @@ func createListener(
 	return net.Listen(config.Network, config.ListenAddress)
 }
 
-func serverConnState(
+func serverConnStateChanged(
 	conn net.Conn,
 	connState http.ConnState,
 ) {
-	slog.Debug("serverConnState",
+	slog.Debug("serverConnStateChanged",
 		"connState", connState.String(),
 	)
 
@@ -108,7 +108,7 @@ func runListener(
 		IdleTimeout:  5 * time.Minute,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
-		ConnState:    serverConnState,
+		ConnState:    serverConnStateChanged,
 		ConnContext:  createConnectionContext,
 		Handler:      handler,
 	}

@@ -2,7 +2,6 @@ package connection
 
 import (
 	"cmp"
-	"fmt"
 	"log/slog"
 	"net"
 	"slices"
@@ -11,35 +10,6 @@ import (
 
 	"github.com/puzpuzpuz/xsync/v3"
 )
-
-type connKey struct {
-	tcpConn  *net.TCPConn
-	unixConn *net.UnixConn
-	network  string
-}
-
-func newConnKey(
-	conn net.Conn,
-) *connKey {
-	switch conn := conn.(type) {
-	case *net.TCPConn:
-		return &connKey{
-			tcpConn: conn,
-			network: "tcp",
-		}
-	case *net.UnixConn:
-		return &connKey{
-			unixConn: conn,
-			network:  "unix",
-		}
-	default:
-		slog.Warn("newConnKey unknown conn type",
-			"type", fmt.Sprintf("%T", conn),
-			"conn", conn,
-		)
-		return nil
-	}
-}
 
 type ConnectionManagerState struct {
 	MaxOpenConnections       int
@@ -80,8 +50,8 @@ func (cm *connectionManager) nextConnectionID() ConnectionID {
 func (cm *connectionManager) AddConnection(
 	conn net.Conn,
 ) (connectionInfo ConnectionInfo, added bool) {
-	connKey := newConnKey(conn)
-	if connKey == nil {
+	connKey, ok := newConnKey(conn)
+	if !ok {
 		return
 	}
 
@@ -89,7 +59,7 @@ func (cm *connectionManager) AddConnection(
 	newConnectionInfo := newConnection(connectionID, connKey.network)
 
 	cm.idToConnection.Store(
-		*connKey,
+		connKey,
 		newConnectionInfo,
 	)
 
@@ -108,12 +78,12 @@ func (cm *connectionManager) AddConnection(
 }
 
 func (cm *connectionManager) RemoveConnection(conn net.Conn) {
-	connKey := newConnKey(conn)
-	if connKey == nil {
+	connKey, ok := newConnKey(conn)
+	if !ok {
 		return
 	}
 
-	connection, loaded := cm.idToConnection.LoadAndDelete(*connKey)
+	connection, loaded := cm.idToConnection.LoadAndDelete(connKey)
 	if !loaded {
 		return
 	}
