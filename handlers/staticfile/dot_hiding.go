@@ -58,5 +58,13 @@ func (fsys dotFileHidingFileSystem) Open(name string) (http.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dotFileHidingFile{file}, err
+
+	// Hack so non-directory files can use sendfile
+	// If we wrap os.File sendFile does not work, see https://github.com/golang/go/blob/master/src/net/sendfile_linux.go#L32.
+	fileInfo, err := file.Stat()
+	if err != nil || fileInfo.IsDir() {
+		return dotFileHidingFile{file}, err
+	} else {
+		return file, err
+	}
 }
