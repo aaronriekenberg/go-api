@@ -1,13 +1,12 @@
 package staticfile
 
 import (
-	"io"
 	"io/fs"
 	"net/http"
 	"strings"
 )
 
-// Based on dot hiding example: https://pkg.go.dev/net/http@latest#example-FileServer-DotFileHiding
+// dot hiding from example: https://pkg.go.dev/net/http@latest#example-FileServer-DotFileHiding
 
 // containsDotFile reports whether name contains a path element starting with a period.
 // The name is assumed to be a delimited by forward slashes, as guaranteed
@@ -27,24 +26,6 @@ func containsDotFile(name string) bool {
 // remove files and directories that start with a period from its output.
 type dotFileHidingFile struct {
 	http.File
-}
-
-func newDotHidingFile(
-	file http.File,
-) http.File {
-	fileAsWriterTo, fileIsWriterTo := file.(io.WriterTo)
-
-	if fileIsWriterTo {
-		return struct {
-			dotFileHidingFile
-			io.WriterTo
-		}{
-			dotFileHidingFile{file},
-			fileAsWriterTo,
-		}
-	} else {
-		return dotFileHidingFile{file}
-	}
 }
 
 // Readdir is a wrapper around the Readdir method of the embedded File
@@ -77,6 +58,5 @@ func (fsys dotFileHidingFileSystem) Open(name string) (http.File, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return newDotHidingFile(file), err
+	return dotFileHidingFile{file}, err
 }
