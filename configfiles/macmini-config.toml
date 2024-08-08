@@ -13,7 +13,7 @@ enabled = false
 [requestLoggingConfiguration]
 enabled = true
 requestLogFile = "logs/request.log"
-maxSizeMegabytes = 1
+maxSizeMegabytes = 10
 maxBackups = 10
 
 [staticFileConfiguration]
