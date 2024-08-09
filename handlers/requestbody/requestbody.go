@@ -14,6 +14,11 @@ func EmptyRequestBodyHandler(
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		if r.Body == http.NoBody {
+			nextHandler.ServeHTTP(w, r)
+			return
+		}
+
 		logger := slog.Default().With(
 			"handler", "emptyrequestbody",
 			"urlPath", r.URL.Path,
@@ -21,18 +26,9 @@ func EmptyRequestBodyHandler(
 			"content_length", r.ContentLength,
 		)
 
-		var err error
-
-		switch {
-		case r.Body == http.NoBody:
-			logger.Debug("r.body is http.NoBody")
-			err = nil
-
-		default:
-			logger.Debug("reading r.body")
-			bodyReader := http.MaxBytesReader(w, r.Body, 0)
-			_, err = io.ReadAll(bodyReader)
-		}
+		logger.Debug("reading r.body")
+		bodyReader := http.MaxBytesReader(w, r.Body, 0)
+		_, err := io.ReadAll(bodyReader)
 
 		if err == nil {
 			nextHandler.ServeHTTP(w, r)
