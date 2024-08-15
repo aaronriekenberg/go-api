@@ -27,6 +27,17 @@ func createListener(
 	return net.Listen(config.Network, config.ListenAddress)
 }
 
+func createConnectionContext(
+	ctx context.Context,
+	conn net.Conn,
+) context.Context {
+	if connectionInfo, added := connection.ConnectionManagerInstance().AddConnection(conn); added {
+		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
+	}
+
+	return ctx
+}
+
 func serverConnStateChanged(
 	conn net.Conn,
 	connState http.ConnState,
@@ -58,17 +69,6 @@ func updateContextForRequestHandler(
 
 		handler.ServeHTTP(w, r)
 	}
-}
-
-func createConnectionContext(
-	ctx context.Context,
-	conn net.Conn,
-) context.Context {
-	if connectionInfo, added := connection.ConnectionManagerInstance().AddConnection(conn); added {
-		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
-	}
-
-	return ctx
 }
 
 func runListener(
