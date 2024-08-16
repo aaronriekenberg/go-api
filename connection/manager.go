@@ -101,12 +101,9 @@ func (cm *connectionManager) RemoveConnection(conn net.Conn) {
 func (cm *connectionManager) connections() []ConnectionInfo {
 	connections := make([]ConnectionInfo, 0, cm.idToConnection.Size())
 
-	cm.idToConnection.Range(
-		func(key connKey, value *connectionInfo) bool {
-			connections = append(connections, value)
-			return true
-		},
-	)
+	for _, value := range cm.idToConnection.Range {
+		connections = append(connections, value)
+	}
 
 	return connections
 }
