@@ -2,6 +2,7 @@ package connection
 
 import (
 	"cmp"
+	"iter"
 	"log/slog"
 	"net"
 	"slices"
@@ -98,14 +99,14 @@ func (cm *connectionManager) RemoveConnection(conn net.Conn) {
 	cm.metricsManager.updateForClosedConnection(connection)
 }
 
-func (cm *connectionManager) connections() []ConnectionInfo {
-	connections := make([]ConnectionInfo, 0, cm.idToConnection.Size())
-
-	for _, value := range cm.idToConnection.Range {
-		connections = append(connections, value)
+func (cm *connectionManager) connections() iter.Seq[ConnectionInfo] {
+	return func(yield func(ConnectionInfo) bool) {
+		for _, v := range cm.idToConnection.Range {
+			if !yield(v) {
+				return
+			}
+		}
 	}
-
-	return connections
 }
 
 func computeMinConnectionLifetime(
@@ -128,7 +129,7 @@ func computeMinConnectionLifetime(
 }
 
 func (cm *connectionManager) State() ConnectionManagerState {
-	connections := cm.connections()
+	connectionsSlice := slices.Collect(cm.connections())
 
 	now := time.Now()
 
@@ -137,17 +138,17 @@ func (cm *connectionManager) State() ConnectionManagerState {
 	maxConnectionLifetime := connectionMetrics.pastMaxConnectionAge
 	maxRequestsPerConnection := connectionMetrics.pastMaxRequestsPerConnection
 
-	for _, c := range connections {
+	for _, c := range connectionsSlice {
 		maxConnectionLifetime = max(c.Age(now), maxConnectionLifetime)
 		maxRequestsPerConnection = max(c.Requests(), maxRequestsPerConnection)
 	}
 
 	return ConnectionManagerState{
 		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
-		MinConnectionLifetime:    computeMinConnectionLifetime(now, connections, connectionMetrics),
+		MinConnectionLifetime:    computeMinConnectionLifetime(now, connectionsSlice, connectionMetrics),
 		MaxConnectionLifetime:    maxConnectionLifetime,
 		MaxRequestsPerConnection: maxRequestsPerConnection,
-		Connections:              connections,
+		Connections:              connectionsSlice,
 	}
 }
 
