@@ -1,9 +1,8 @@
 [serverConfiguration]
 listeners = [
-    { network = "tcp", listenAddress = ":8080" },
-    { network = "unix", listenAddress = "socket" },
+    { network = "tcp", listenAddress = ":8080", h2cEnabled = false },
+    { network = "unix", listenAddress = "socket", h2cEnabled = false },
 ]
-h2cEnabled = false
 apiContext = "/api/v1"
 
 [profilingConfiguration]

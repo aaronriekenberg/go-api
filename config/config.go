@@ -12,11 +12,11 @@ import (
 type ServerListenerConfiguration struct {
 	Network       string
 	ListenAddress string
+	H2CEnabled    bool
 }
 
 type ServerConfiguration struct {
 	Listeners  []ServerListenerConfiguration
-	H2CEnabled bool
 	APIContext string
 }
 

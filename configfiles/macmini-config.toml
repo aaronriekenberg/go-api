@@ -1,9 +1,8 @@
 [serverConfiguration]
 listeners = [
-    { network = "unix", listenAddress = "/home/aaron/go-api/socket" },
-    { network = "tcp", listenAddress = ":80" },
+    { network = "unix", listenAddress = "/home/aaron/go-api/socket", "h2cEnabled" = false },
+    { network = "tcp", listenAddress = ":80", h2cEnabled = false },
 ]
-h2cEnabled = false
 apiContext = "/api/v1"
 
 [profilingConfiguration]
