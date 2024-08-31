@@ -31,13 +31,14 @@ func createConnectionContext(
 	ctx context.Context,
 	conn net.Conn,
 ) context.Context {
-	if connectionInfo, added := connection.ConnectionManagerInstance().AddConnection(conn); added {
-		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
-	}
 
 	if tcpConn, ok := conn.(*net.TCPConn); ok {
 		slog.Info("tcpConn.SetNoDelay(false)")
 		tcpConn.SetNoDelay(false)
+	}
+
+	if connectionInfo, added := connection.ConnectionManagerInstance().AddConnection(conn); added {
+		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
 	}
 
 	return ctx
