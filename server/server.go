@@ -35,6 +35,11 @@ func createConnectionContext(
 		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
 	}
 
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		slog.Info("tcpConn.SetNoDelay(false)")
+		tcpConn.SetNoDelay(false)
+	}
+
 	return ctx
 }
 
