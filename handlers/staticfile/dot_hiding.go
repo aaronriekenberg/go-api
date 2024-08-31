@@ -2,7 +2,6 @@ package staticfile
 
 import (
 	"io/fs"
-	"log/slog"
 	"net/http"
 	"strings"
 )
@@ -60,19 +59,5 @@ func (fsys dotFileHidingFileSystem) Open(name string) (http.File, error) {
 		return nil, err
 	}
 
-	// Hack so non-directory files can use sendfile
-	// If we wrap os.File sendFile does not work, see https://github.com/golang/go/blob/master/src/net/sendfile_linux.go#L32.
-	fileInfo, err := file.Stat()
-	if err != nil {
-		slog.Warn("file.Stat error",
-			"error", err,
-			"name", name)
-
-		file.Close()
-		return nil, err
-	} else if fileInfo.IsDir() {
-		return dotFileHidingFile{file}, err
-	} else {
-		return file, err
-	}
+	return dotFileHidingFile{file}, err
 }
