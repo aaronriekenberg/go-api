@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/aaronriekenberg/go-api/config"
@@ -40,6 +41,19 @@ func main() {
 	config, err := config.ReadConfiguration(configFile)
 	if err != nil {
 		panic(fmt.Errorf("main: config.ReadConfiguration error: %w", err))
+	}
+
+	if config.GoMaxProcs == -1 {
+		maxProcs := runtime.GOMAXPROCS(-1)
+		slog.Info("using default maxProcs",
+			"maxProcs", maxProcs,
+		)
+	} else {
+		runtime.GOMAXPROCS(config.GoMaxProcs)
+		maxProcs := config.GoMaxProcs
+		slog.Info("set maxProcs",
+			"maxProcs", maxProcs,
+		)
 	}
 
 	profiling.Start(config.ProfilingConfiguration)

@@ -65,6 +65,7 @@ func (c *CommandConfiguration) MarshalJSON() ([]byte, error) {
 }
 
 type Configuration struct {
+	GoMaxProcs                  int
 	ServerConfiguration         ServerConfiguration
 	ProfilingConfiguration      ProfilingConfiguration
 	RequestLoggingConfiguration RequestLoggingConfiguration
