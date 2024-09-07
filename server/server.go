@@ -7,10 +7,12 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"syscall"
 	"time"
 
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
+	"golang.org/x/sys/unix"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/connection"
@@ -24,7 +26,26 @@ func createListener(
 		os.Remove(config.ListenAddress)
 	}
 
-	return net.Listen(config.Network, config.ListenAddress)
+	if config.Network != "tcp" {
+		return net.Listen(config.Network, config.ListenAddress)
+	}
+
+	listenConfig := net.ListenConfig{
+		Control: func(network, address string, c syscall.RawConn) error {
+			var opErr error
+			if err := c.Control(func(fd uintptr) {
+				slog.Info("setting SO_REUSEPORT for socket")
+				opErr = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			}); err != nil {
+				slog.Warn("error setting SO_REUSEPORT",
+					"error", err,
+				)
+				return err
+			}
+			return opErr
+		},
+	}
+	return listenConfig.Listen(context.Background(), config.Network, config.ListenAddress)
 }
 
 func createConnectionContext(
