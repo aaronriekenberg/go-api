@@ -43,7 +43,7 @@ func main() {
 		panic(fmt.Errorf("main: config.ReadConfiguration error: %w", err))
 	}
 
-	if config.GoMaxProcs == -1 {
+	if config.GoMaxProcs <= 0 {
 		maxProcs := runtime.GOMAXPROCS(-1)
 		slog.Info("using default maxProcs",
 			"maxProcs", maxProcs,

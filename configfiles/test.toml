@@ -1,4 +1,4 @@
-goMaxProcs = -1
+#goMaxProcs = -1
 
 [serverConfiguration]
 listeners = [

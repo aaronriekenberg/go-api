@@ -1,9 +1,9 @@
-goMaxProcs = -1
+#goMaxProcs = -1
 
 [serverConfiguration]
 listeners = [
-    { network = "unix", listenAddress = "/home/aaron/go-api/socket", "h2cEnabled" = true },
-    { network = "tcp", listenAddress = ":80", h2cEnabled = true },
+    { network = "unix", listenAddress = "/home/aaron/go-api/socket", "h2cEnabled" = false },
+    { network = "tcp", listenAddress = ":80", h2cEnabled = false },
 ]
 apiContext = "/api/v1"
 
