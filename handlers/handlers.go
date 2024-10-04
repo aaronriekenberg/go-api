@@ -9,6 +9,7 @@ import (
 	"github.com/aaronriekenberg/go-api/handlers/command"
 	"github.com/aaronriekenberg/go-api/handlers/connectioninfo"
 	"github.com/aaronriekenberg/go-api/handlers/requestinfo"
+	"github.com/aaronriekenberg/go-api/handlers/requestlogging"
 	"github.com/aaronriekenberg/go-api/handlers/versioninfo"
 )
 
@@ -40,5 +41,5 @@ func CreateHandlers(
 
 	handleAPIGET("/version_info", versioninfo.NewVersionInfoHandler())
 
-	return mux
+	return requestlogging.NewRequestLogger(config.RequestLoggingConfiguration, mux)
 }
