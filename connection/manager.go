@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"iter"
 	"log/slog"
-	"net"
 	"slices"
 	"sync/atomic"
 	"time"
@@ -21,22 +20,22 @@ type ConnectionManagerState struct {
 }
 
 type ConnectionManager interface {
-	AddConnection(conn net.Conn) (connectionInfo ConnectionInfo, added bool)
+	AddConnection(network string) ConnectionInfo
 
-	RemoveConnection(conn net.Conn)
+	RemoveConnection(connectionID ConnectionID)
 
 	State() ConnectionManagerState
 }
 
 type connectionManager struct {
-	idToConnection       *xsync.MapOf[connKey, *connectionInfo]
+	idToConnection       *xsync.MapOf[ConnectionID, *connectionInfo]
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
 }
 
 func newConnectionManager() *connectionManager {
 	return &connectionManager{
-		idToConnection: xsync.NewMapOf[connKey, *connectionInfo](
+		idToConnection: xsync.NewMapOf[ConnectionID, *connectionInfo](
 			xsync.WithPresize(maxConnections),
 			xsync.WithGrowOnly(),
 		),
@@ -49,42 +48,30 @@ func (cm *connectionManager) nextConnectionID() ConnectionID {
 }
 
 func (cm *connectionManager) AddConnection(
-	conn net.Conn,
-) (connectionInfo ConnectionInfo, added bool) {
-	connKey, network, ok := buildConnKeyAndNetwork(conn)
-	if !ok {
-		return
-	}
+	network string,
+) ConnectionInfo {
 
 	connectionID := cm.nextConnectionID()
-	newConnectionInfo := newConnection(connectionID, network)
+	connectionInfo := newConnection(connectionID, network)
 
 	cm.idToConnection.Store(
-		connKey,
-		newConnectionInfo,
+		connectionID,
+		connectionInfo,
 	)
 
 	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
-		"network", newConnectionInfo.Network(),
+		"network", network,
 	)
 
 	numOpenConnections := cm.idToConnection.Size()
 	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
-	connectionInfo = newConnectionInfo
-	added = true
-
-	return
+	return connectionInfo
 }
 
-func (cm *connectionManager) RemoveConnection(conn net.Conn) {
-	connKey, _, ok := buildConnKeyAndNetwork(conn)
-	if !ok {
-		return
-	}
-
-	connection, loaded := cm.idToConnection.LoadAndDelete(connKey)
+func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
+	connection, loaded := cm.idToConnection.LoadAndDelete(connectionID)
 	if !loaded {
 		return
 	}
