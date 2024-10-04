@@ -2,8 +2,8 @@
 
 [serverConfiguration]
 listeners = [
-    { network = "unix", listenAddress = "/home/aaron/go-api/socket", "h2cEnabled" = false },
-    { network = "tcp", listenAddress = ":80", h2cEnabled = false },
+    { network = "unix", listenAddress = "/home/aaron/go-api/socket", "h2cEnabled" = true },
+    { network = "tcp", listenAddress = ":80", h2cEnabled = true },
 ]
 apiContext = "/api/v1"
 
@@ -16,9 +16,6 @@ enabled = false
 requestLogFile = "logs/request.log"
 maxSizeMegabytes = 10
 maxBackups = 10
-
-[staticFileConfiguration]
-rootPath = "/home/aaron/aaronr.digital"
 
 [commandConfiguration]
 maxConcurrentCommands = 10
