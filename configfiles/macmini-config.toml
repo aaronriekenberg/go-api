@@ -12,7 +12,7 @@ enabled = false
 #listenAddress = ":8081"
 
 [requestLoggingConfiguration]
-enabled = true
+enabled = false
 requestLogFile = "logs/request.log"
 maxSizeMegabytes = 10
 maxBackups = 10

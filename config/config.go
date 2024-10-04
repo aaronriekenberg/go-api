@@ -39,10 +39,6 @@ type CommandInfo struct {
 	Args        []string
 }
 
-type StaticFileConfiguration struct {
-	RootPath string
-}
-
 type CommandConfiguration struct {
 	MaxConcurrentCommands           int64
 	RequestTimeoutDuration          time.Duration
@@ -69,7 +65,6 @@ type Configuration struct {
 	ServerConfiguration         ServerConfiguration
 	ProfilingConfiguration      ProfilingConfiguration
 	RequestLoggingConfiguration RequestLoggingConfiguration
-	StaticFileConfiguration     StaticFileConfiguration
 	CommandConfiguration        CommandConfiguration
 }
 

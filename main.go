@@ -2,18 +2,15 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"runtime"
-	"strings"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/handlers"
 	"github.com/aaronriekenberg/go-api/profiling"
 	"github.com/aaronriekenberg/go-api/server"
 	"github.com/aaronriekenberg/go-api/version"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
@@ -74,28 +71,10 @@ func setupSlog() {
 		}
 	}
 
-	logToStdout := false
-	if logToStdoutString, ok := os.LookupEnv("DEFAULT_LOG_TO_STDOUT"); ok {
-		if strings.ToLower(logToStdoutString) == "true" {
-			logToStdout = true
-		}
-	}
-
-	var writer io.Writer
-	if logToStdout {
-		writer = os.Stdout
-	} else {
-		writer = &lumberjack.Logger{
-			Filename:   "logs/default.log",
-			MaxSize:    10,
-			MaxBackups: 10,
-		}
-	}
-
 	slog.SetDefault(
 		slog.New(
 			slog.NewJSONHandler(
-				writer,
+				os.Stdout,
 				&slog.HandlerOptions{
 					Level: level,
 				},
