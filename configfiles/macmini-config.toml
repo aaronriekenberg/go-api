@@ -3,7 +3,7 @@
 [serverConfiguration]
 listeners = [
     { network = "unix", listenAddress = "/home/aaron/go-api/socket", "h2cEnabled" = true },
-    { network = "tcp", listenAddress = ":80", h2cEnabled = true },
+    { network = "tcp", listenAddress = ":8080", h2cEnabled = true },
 ]
 apiContext = "/api/v1"
 

@@ -12,6 +12,6 @@ git pull -v
 time go test -test.v ./...
 time go build -x
 
-sudo setcap cap_net_bind_service=+ep ./go-api
+#sudo setcap cap_net_bind_service=+ep ./go-api
 
 systemctl --user restart go-api.service
