@@ -17,26 +17,8 @@ import (
 	"github.com/aaronriekenberg/go-api/request"
 )
 
-type connWrapper struct {
-	net.Conn
-	connectionInfo connection.ConnectionInfo
-}
-
-func (cw *connWrapper) Close() error {
-	slog.Debug("connWrapper.Close",
-		"connectionID", cw.connectionInfo.ID(),
-	)
-
-	connection.ConnectionManagerInstance().RemoveConnection(
-		cw.connectionInfo.ID(),
-	)
-
-	return cw.Conn.Close()
-}
-
 type listenerWrapper struct {
 	net.Listener
-	network string
 }
 
 func (lw *listenerWrapper) Accept() (net.Conn, error) {
@@ -46,16 +28,35 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 		return conn, err
 	}
 
-	connectionInfo := connection.ConnectionManagerInstance().AddConnection(lw.network)
+	switch conn := conn.(type) {
+	case *net.TCPConn:
+		connectionInfo := connection.ConnectionManagerInstance().AddConnection("tcp")
 
-	slog.Debug("listenerWrapper.Accept got new connection",
-		"connectionID", connectionInfo.ID(),
-	)
+		slog.Debug("listenerWrapper.Accept got new tcp connection",
+			"connectionID", connectionInfo.ID(),
+		)
 
-	return &connWrapper{
-		Conn:           conn,
-		connectionInfo: connectionInfo,
-	}, nil
+		return &tcpConnWrapper{
+			TCPConn:        conn,
+			connectionInfo: connectionInfo,
+		}, nil
+	case *net.UnixConn:
+		connectionInfo := connection.ConnectionManagerInstance().AddConnection("unix")
+
+		slog.Debug("listenerWrapper.Accept got new unix connection",
+			"connectionID", connectionInfo.ID(),
+		)
+
+		return &unixConnWrapper{
+			UnixConn:       conn,
+			connectionInfo: connectionInfo,
+		}, nil
+	default:
+		slog.Warn("listenerWrapper.Accept got unknown conn type",
+			"conn", conn,
+		)
+		return conn, nil
+	}
 }
 
 func createListener(
@@ -72,7 +73,6 @@ func createListener(
 
 	listenerWrapper := &listenerWrapper{
 		Listener: listener,
-		network:  config.Network,
 	}
 
 	return listenerWrapper, nil
@@ -82,8 +82,8 @@ func addConnectionInfoToContext(
 	ctx context.Context,
 	c net.Conn,
 ) context.Context {
-	if connWrapper, ok := c.(*connWrapper); ok {
-		connectionInfo := connWrapper.connectionInfo
+	if connWrapper, ok := c.(connectionInfoWrapper); ok {
+		connectionInfo := connWrapper.GetConnectionInfo()
 		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
 	}
 	return ctx
