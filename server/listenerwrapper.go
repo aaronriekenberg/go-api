@@ -29,10 +29,8 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 			"connectionID", connectionInfo.ID(),
 		)
 
-		return &tcpConnWrapper{
-			TCPConn:        conn,
-			connectionInfo: connectionInfo,
-		}, nil
+		return newTCPConnWrapper(conn, connectionInfo), nil
+
 	case *net.UnixConn:
 		connectionInfo := connection.ConnectionManagerInstance().AddConnection("unix")
 
@@ -40,10 +38,8 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 			"connectionID", connectionInfo.ID(),
 		)
 
-		return &unixConnWrapper{
-			UnixConn:       conn,
-			connectionInfo: connectionInfo,
-		}, nil
+		return newUnixConnWrapper(conn, connectionInfo), nil
+
 	default:
 		slog.Warn("listenerWrapper.Accept got unknown conn type",
 			"conn", conn,

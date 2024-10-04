@@ -20,6 +20,16 @@ type tcpConnWrapper struct {
 var _ io.ReaderFrom = (*tcpConnWrapper)(nil)
 var _ io.WriterTo = (*tcpConnWrapper)(nil)
 
+func newTCPConnWrapper(
+	conn *net.TCPConn,
+	connectionInfo connection.ConnectionInfo,
+) *tcpConnWrapper {
+	return &tcpConnWrapper{
+		TCPConn:        conn,
+		connectionInfo: connectionInfo,
+	}
+}
+
 func (tcw *tcpConnWrapper) Close() error {
 	slog.Debug("tcpConnWrapper.Close",
 		"connectionID", tcw.connectionInfo.ID(),
@@ -39,6 +49,16 @@ func (tcw *tcpConnWrapper) GetConnectionInfo() connection.ConnectionInfo {
 type unixConnWrapper struct {
 	*net.UnixConn
 	connectionInfo connection.ConnectionInfo
+}
+
+func newUnixConnWrapper(
+	conn *net.UnixConn,
+	connectionInfo connection.ConnectionInfo,
+) *unixConnWrapper {
+	return &unixConnWrapper{
+		UnixConn:       conn,
+		connectionInfo: connectionInfo,
+	}
 }
 
 func (ucw *unixConnWrapper) Close() error {
