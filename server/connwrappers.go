@@ -9,80 +9,83 @@ import (
 )
 
 type connectionInfoWrapper interface {
-	GetConnectionInfo() connection.ConnectionInfo
+	connectionInfo() connection.ConnectionInfo
 }
 
 type tcpConnWrapper struct {
 	*net.TCPConn
-	connectionInfo connection.ConnectionInfo
+	connInfo connection.ConnectionInfo
 }
 
 var _ io.ReaderFrom = (*tcpConnWrapper)(nil)
 var _ io.WriterTo = (*tcpConnWrapper)(nil)
+var _ connectionInfoWrapper = (*tcpConnWrapper)(nil)
 
 func newTCPConnWrapper(
 	conn *net.TCPConn,
 ) *tcpConnWrapper {
-	connectionInfo := connection.ConnectionManagerInstance().AddConnection("tcp")
+	connInfo := connection.ConnectionManagerInstance().AddConnection("tcp")
 
 	slog.Debug("newTCPConnWrapper",
-		"connectionID", connectionInfo.ID(),
+		"connectionID", connInfo.ID(),
 	)
 
 	return &tcpConnWrapper{
-		TCPConn:        conn,
-		connectionInfo: connectionInfo,
+		TCPConn:  conn,
+		connInfo: connInfo,
 	}
 }
 
 func (tcw *tcpConnWrapper) Close() error {
 	slog.Debug("tcpConnWrapper.Close",
-		"connectionID", tcw.connectionInfo.ID(),
+		"connectionID", tcw.connInfo.ID(),
 	)
 
 	connection.ConnectionManagerInstance().RemoveConnection(
-		tcw.connectionInfo.ID(),
+		tcw.connInfo.ID(),
 	)
 
 	return tcw.TCPConn.Close()
 }
 
-func (tcw *tcpConnWrapper) GetConnectionInfo() connection.ConnectionInfo {
-	return tcw.connectionInfo
+func (tcw *tcpConnWrapper) connectionInfo() connection.ConnectionInfo {
+	return tcw.connInfo
 }
 
 type unixConnWrapper struct {
 	*net.UnixConn
-	connectionInfo connection.ConnectionInfo
+	connInfo connection.ConnectionInfo
 }
+
+var _ connectionInfoWrapper = (*unixConnWrapper)(nil)
 
 func newUnixConnWrapper(
 	conn *net.UnixConn,
 ) *unixConnWrapper {
-	connectionInfo := connection.ConnectionManagerInstance().AddConnection("unix")
+	connInfo := connection.ConnectionManagerInstance().AddConnection("unix")
 
 	slog.Debug("newUnixConnWrapper",
-		"connectionID", connectionInfo.ID(),
+		"connectionID", connInfo.ID(),
 	)
 
 	return &unixConnWrapper{
-		UnixConn:       conn,
-		connectionInfo: connectionInfo,
+		UnixConn: conn,
+		connInfo: connInfo,
 	}
 }
 
 func (ucw *unixConnWrapper) Close() error {
 	slog.Debug("unixConnWrapper.Close",
-		"connectionID", ucw.connectionInfo.ID(),
+		"connectionID", ucw.connInfo.ID(),
 	)
 
 	connection.ConnectionManagerInstance().RemoveConnection(
-		ucw.connectionInfo.ID(),
+		ucw.connInfo.ID(),
 	)
 
 	return ucw.UnixConn.Close()
 }
 
-func (ucw *unixConnWrapper) GetConnectionInfo() connection.ConnectionInfo {
-	return ucw.connectionInfo
+func (ucw *unixConnWrapper) connectionInfo() connection.ConnectionInfo {
+	return ucw.connInfo
 }

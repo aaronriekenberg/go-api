@@ -21,7 +21,7 @@ func addConnectionInfoToContext(
 	c net.Conn,
 ) context.Context {
 	if connWrapper, ok := c.(connectionInfoWrapper); ok {
-		connectionInfo := connWrapper.GetConnectionInfo()
+		connectionInfo := connWrapper.connectionInfo()
 		return connection.AddConnectionInfoToContext(ctx, connectionInfo)
 	}
 	return ctx
