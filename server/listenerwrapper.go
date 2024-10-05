@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/aaronriekenberg/go-api/config"
-	"github.com/aaronriekenberg/go-api/connection"
 )
 
 type listenerWrapper struct {
@@ -23,22 +22,10 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 
 	switch conn := conn.(type) {
 	case *net.TCPConn:
-		connectionInfo := connection.ConnectionManagerInstance().AddConnection("tcp")
-
-		slog.Debug("listenerWrapper.Accept got new tcp connection",
-			"connectionID", connectionInfo.ID(),
-		)
-
-		return newTCPConnWrapper(conn, connectionInfo), nil
+		return newTCPConnWrapper(conn), nil
 
 	case *net.UnixConn:
-		connectionInfo := connection.ConnectionManagerInstance().AddConnection("unix")
-
-		slog.Debug("listenerWrapper.Accept got new unix connection",
-			"connectionID", connectionInfo.ID(),
-		)
-
-		return newUnixConnWrapper(conn, connectionInfo), nil
+		return newUnixConnWrapper(conn), nil
 
 	default:
 		slog.Warn("listenerWrapper.Accept got unknown conn type",

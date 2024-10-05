@@ -22,8 +22,13 @@ var _ io.WriterTo = (*tcpConnWrapper)(nil)
 
 func newTCPConnWrapper(
 	conn *net.TCPConn,
-	connectionInfo connection.ConnectionInfo,
 ) *tcpConnWrapper {
+	connectionInfo := connection.ConnectionManagerInstance().AddConnection("tcp")
+
+	slog.Debug("newTCPConnWrapper",
+		"connectionID", connectionInfo.ID(),
+	)
+
 	return &tcpConnWrapper{
 		TCPConn:        conn,
 		connectionInfo: connectionInfo,
@@ -53,8 +58,13 @@ type unixConnWrapper struct {
 
 func newUnixConnWrapper(
 	conn *net.UnixConn,
-	connectionInfo connection.ConnectionInfo,
 ) *unixConnWrapper {
+	connectionInfo := connection.ConnectionManagerInstance().AddConnection("unix")
+
+	slog.Debug("newUnixConnWrapper",
+		"connectionID", connectionInfo.ID(),
+	)
+
 	return &unixConnWrapper{
 		UnixConn:       conn,
 		connectionInfo: connectionInfo,
