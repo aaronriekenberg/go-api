@@ -17,6 +17,9 @@ func (lw *listenerWrapper) Accept() (net.Conn, error) {
 	conn, err := lw.Listener.Accept()
 
 	if err != nil {
+		slog.Warn("listenerWrapper.Accept error",
+			"error", err,
+		)
 		return conn, err
 	}
 
