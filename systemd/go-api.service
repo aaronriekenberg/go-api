@@ -4,8 +4,8 @@
 AssertPathExists=%h/go-api/go-api
 
 [Service]
-Environment=GOGC=off
-Environment=GOMEMLIMIT=2GiB
+Environment=GOGC=1000
+Environment=GOMEMLIMIT=1GiB
 WorkingDirectory=%h/go-api
 ExecStart=%h/go-api/go-api ./configfiles/%H-config.toml
 Restart=always

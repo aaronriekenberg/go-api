@@ -8,8 +8,8 @@ listeners = [
 apiContext = "/api/v1"
 
 [profilingConfiguration]
-enabled = false
-#listenAddress = ":8081"
+enabled = true
+listenAddress = ":8081"
 
 [requestLoggingConfiguration]
 enabled = false
