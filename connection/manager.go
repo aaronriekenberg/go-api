@@ -86,7 +86,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 	cm.metricsManager.updateForClosedConnection(connection)
 }
 
-func (cm *connectionManager) connections() iter.Seq[ConnectionInfo] {
+func (cm *connectionManager) connectionInfoSeq() iter.Seq[ConnectionInfo] {
 	return func(yield func(ConnectionInfo) bool) {
 		for _, v := range cm.idToConnection.Range {
 			if !yield(v) {
@@ -116,7 +116,7 @@ func computeMinConnectionLifetime(
 }
 
 func (cm *connectionManager) State() ConnectionManagerState {
-	connectionsSlice := slices.Collect(cm.connections())
+	connectionsSlice := slices.Collect(cm.connectionInfoSeq())
 
 	now := time.Now()
 
