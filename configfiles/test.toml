@@ -1,5 +1,3 @@
-#goMaxProcs = -1
-
 [serverConfiguration]
 listeners = [
     { network = "tcp", listenAddress = ":8080", h2cEnabled = true },

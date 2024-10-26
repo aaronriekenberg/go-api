@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"runtime"
+	"strings"
 
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/handlers"
@@ -27,6 +27,7 @@ func main() {
 
 	slog.Info("begin main",
 		"buildInfoMap", version.BuildInfoMap(),
+		"goEnvironVariables", goEnvironVariables(),
 	)
 
 	if len(os.Args) != 2 {
@@ -38,19 +39,6 @@ func main() {
 	config, err := config.ReadConfiguration(configFile)
 	if err != nil {
 		panic(fmt.Errorf("main: config.ReadConfiguration error: %w", err))
-	}
-
-	if config.GoMaxProcs <= 0 {
-		maxProcs := runtime.GOMAXPROCS(-1)
-		slog.Info("using default maxProcs",
-			"maxProcs", maxProcs,
-		)
-	} else {
-		runtime.GOMAXPROCS(config.GoMaxProcs)
-		maxProcs := config.GoMaxProcs
-		slog.Info("set maxProcs",
-			"maxProcs", maxProcs,
-		)
 	}
 
 	profiling.Start(config.ProfilingConfiguration)
@@ -85,4 +73,14 @@ func setupSlog() {
 	slog.Info("setupSlog",
 		"configuredLevel", level,
 	)
+}
+
+func goEnvironVariables() []string {
+	var goVars []string
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, "GO") {
+			goVars = append(goVars, env)
+		}
+	}
+	return goVars
 }

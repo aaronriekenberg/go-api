@@ -1,5 +1,3 @@
-#goMaxProcs = -1
-
 [serverConfiguration]
 listeners = [
     { network = "unix", listenAddress = "/var/www/run/api/socket", "h2cEnabled" = true },
