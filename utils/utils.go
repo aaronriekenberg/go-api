@@ -12,6 +12,7 @@ import (
 const (
 	ContentTypeHeaderKey       = "Content-Type"
 	ContentTypeApplicationJSON = "application/json"
+	ContentTypeTextPlain       = "text/plain; charset=utf-8"
 )
 
 func FormatTime(t time.Time) string {
