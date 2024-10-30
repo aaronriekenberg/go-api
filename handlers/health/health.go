@@ -1,6 +1,8 @@
 package health
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 
 	"github.com/aaronriekenberg/go-api/utils"
@@ -17,7 +19,7 @@ func healthHandlerFunc() http.HandlerFunc {
 
 		w.Header().Set(utils.ContentTypeHeaderKey, utils.ContentTypeTextPlain)
 
-		w.Write(responseBodyBytes)
+		io.Copy(w, bytes.NewReader(responseBodyBytes))
 	}
 }
 
