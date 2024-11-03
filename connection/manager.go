@@ -11,7 +11,7 @@ import (
 	"github.com/puzpuzpuz/xsync/v3"
 )
 
-type ConnectionManagerState struct {
+type ConnectionManagerStateSnapshot struct {
 	MaxOpenConnections       int
 	MinConnectionLifetime    time.Duration
 	MaxConnectionLifetime    time.Duration
@@ -24,7 +24,7 @@ type ConnectionManager interface {
 
 	RemoveConnection(connectionID ConnectionID)
 
-	State() ConnectionManagerState
+	StateSnapshot() ConnectionManagerStateSnapshot
 }
 
 type connectionManager struct {
@@ -115,7 +115,7 @@ func computeMinConnectionLifetime(
 	return 0
 }
 
-func (cm *connectionManager) State() ConnectionManagerState {
+func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
 	connectionsSlice := slices.Collect(cm.connectionInfoSeq())
 
 	now := time.Now()
@@ -130,7 +130,7 @@ func (cm *connectionManager) State() ConnectionManagerState {
 		maxRequestsPerConnection = max(c.Requests(), maxRequestsPerConnection)
 	}
 
-	return ConnectionManagerState{
+	return ConnectionManagerStateSnapshot{
 		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
 		MinConnectionLifetime:    computeMinConnectionLifetime(now, connectionsSlice, connectionMetrics),
 		MaxConnectionLifetime:    maxConnectionLifetime,

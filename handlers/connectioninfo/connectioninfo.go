@@ -48,15 +48,15 @@ type connectionInfoDTO struct {
 func connectionInfoHandlerFunc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		connectionManagerState := connection.ConnectionManagerInstance().State()
+		connectionManagerStateSnapshot := connection.ConnectionManagerInstance().StateSnapshot()
 
-		connectionDTOs := make([]connectionDTO, 0, len(connectionManagerState.Connections))
+		connectionDTOs := make([]connectionDTO, 0, len(connectionManagerStateSnapshot.Connections))
 
 		numCurrentConnectionsByNetwork := make(map[string]int)
 
 		now := time.Now()
 
-		for _, connection := range connectionManagerState.Connections {
+		for _, connection := range connectionManagerStateSnapshot.Connections {
 			connectionDTO := connectionInfoToDTO(connection, now)
 			numCurrentConnectionsByNetwork[connectionDTO.Network]++
 			connectionDTOs = append(connectionDTOs, connectionDTO)
@@ -72,10 +72,10 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 				Total:     len(connectionDTOs),
 				ByNetwork: numCurrentConnectionsByNetwork,
 			},
-			MaxOpenConnections:       connectionManagerState.MaxOpenConnections,
-			MinConnectionLifetime:    connectionManagerState.MinConnectionLifetime.Truncate(time.Millisecond).String(),
-			MaxConnectionLifetime:    connectionManagerState.MaxConnectionLifetime.Truncate(time.Millisecond).String(),
-			MaxRequestsPerConnection: connectionManagerState.MaxRequestsPerConnection,
+			MaxOpenConnections:       connectionManagerStateSnapshot.MaxOpenConnections,
+			MinConnectionLifetime:    connectionManagerStateSnapshot.MinConnectionLifetime.Truncate(time.Millisecond).String(),
+			MaxConnectionLifetime:    connectionManagerStateSnapshot.MaxConnectionLifetime.Truncate(time.Millisecond).String(),
+			MaxRequestsPerConnection: connectionManagerStateSnapshot.MaxRequestsPerConnection,
 			Connections:              connectionDTOs,
 		}
 
