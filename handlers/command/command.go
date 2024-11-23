@@ -36,10 +36,11 @@ type commandInfoDTO struct {
 
 func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 	return commandInfoDTO{
-		ID:          commandInfo.ID,
-		Description: commandInfo.Description,
-		Command:     commandInfo.Command,
-		Args:        slices.Clone(commandInfo.Args),
+		ID:           commandInfo.ID,
+		Description:  commandInfo.Description,
+		Command:      commandInfo.Command,
+		Args:         slices.Clone(commandInfo.Args),
+		InternalOnly: commandInfo.InternalOnly,
 	}
 }
 
