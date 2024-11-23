@@ -31,7 +31,7 @@ type commandInfoDTO struct {
 	Description  string   `json:"description"`
 	Command      string   `json:"command"`
 	Args         []string `json:"args"`
-	InternalOnly bool     `json:"internal_only"`
+	internalOnly bool
 }
 
 func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
@@ -40,7 +40,7 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 		Description:  commandInfo.Description,
 		Command:      commandInfo.Command,
 		Args:         slices.Clone(commandInfo.Args),
-		InternalOnly: commandInfo.InternalOnly,
+		internalOnly: commandInfo.InternalOnly,
 	}
 }
 
@@ -118,7 +118,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 		return
 	}
 
-	if commandInfo.InternalOnly && requestIsExternal(r) {
+	if commandInfo.internalOnly && requestIsExternal(r) {
 		slog.Warn("RunCommandsHandler external request for internal only command",
 			"id", id,
 		)
