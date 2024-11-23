@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os/exec"
+	"regexp"
 	"slices"
 	"time"
 
@@ -17,11 +18,20 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
+var externalHostRegex = regexp.MustCompile(`^aaronr.digital|.*\.aaronr.digital$`)
+
+func requestIsExternal(
+	r *http.Request,
+) bool {
+	return externalHostRegex.MatchString(r.Host)
+}
+
 type commandInfoDTO struct {
-	ID          string   `json:"id"`
-	Description string   `json:"description"`
-	Command     string   `json:"command"`
-	Args        []string `json:"args"`
+	ID           string   `json:"id"`
+	Description  string   `json:"description"`
+	Command      string   `json:"command"`
+	Args         []string `json:"args"`
+	InternalOnly bool     `json:"internal_only"`
 }
 
 func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
@@ -35,16 +45,41 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 
 func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
 	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
+
+	externalCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
+
 	for _, command := range commandConfiguration.Commands {
-		allCommandDTOs = append(allCommandDTOs, commandInfoToDTO(command))
+		commandDTO := commandInfoToDTO(command)
+		allCommandDTOs = append(allCommandDTOs, commandDTO)
+		if !command.InternalOnly {
+			externalCommandDTOs = append(externalCommandDTOs, commandDTO)
+		}
 	}
 
-	jsonBytes, err := json.Marshal(allCommandDTOs)
+	allCommandsJsonBytes, err := json.Marshal(allCommandDTOs)
 	if err != nil {
 		panic(fmt.Errorf("NewAllCommandsHandler json.Marshal error: %w", err))
 	}
+	allHandlerFunc := utils.JSONBytesHandlerFunc(allCommandsJsonBytes)
 
-	return utils.JSONBytesHandlerFunc(jsonBytes)
+	externalCommandsJsonBytes, err := json.Marshal(externalCommandDTOs)
+	if err != nil {
+		panic(fmt.Errorf("NewAllCommandsHandler json.Marshal error: %w", err))
+	}
+	externalHandlerFunc := utils.JSONBytesHandlerFunc(externalCommandsJsonBytes)
+
+	return http.HandlerFunc(
+		func(
+			w http.ResponseWriter,
+			r *http.Request,
+		) {
+			if requestIsExternal(r) {
+				externalHandlerFunc.ServeHTTP(w, r)
+			} else {
+				allHandlerFunc.ServeHTTP(w, r)
+			}
+		},
+	)
 }
 
 type runCommandsHandler struct {
@@ -76,6 +111,14 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r
 
 	if !ok {
 		slog.Warn("RunCommandsHandler unable to find comand",
+			"id", id,
+		)
+		utils.HTTPErrorStatusCode(w, http.StatusNotFound)
+		return
+	}
+
+	if commandInfo.InternalOnly && requestIsExternal(r) {
+		slog.Warn("RunCommandsHandler external request for internal only command",
 			"id", id,
 		)
 		utils.HTTPErrorStatusCode(w, http.StatusNotFound)

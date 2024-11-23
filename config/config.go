@@ -33,10 +33,11 @@ type RequestLoggingConfiguration struct {
 }
 
 type CommandInfo struct {
-	ID          string
-	Description string
-	Command     string
-	Args        []string
+	ID           string
+	Description  string
+	Command      string
+	Args         []string
+	InternalOnly bool
 }
 
 type CommandConfiguration struct {

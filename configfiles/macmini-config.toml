@@ -40,7 +40,7 @@ commands = [
     ] },
     { id = "ip_addr", description = "ip addr", command = "/usr/sbin/ip", args = [
         "addr",
-    ] },
+    ], "internalOnly" = true },
     { id = "lscpu", description = "lscpu", command = "/usr/bin/lscpu" },
     { id = "lscpu_e", description = "lscpu -e", command = "/usr/bin/lscpu", args = [
         "-e",
@@ -48,7 +48,7 @@ commands = [
     { id = "netstat_an", description = "netstat -an", command = "/usr/bin/netstat", args = [
         "-a",
         "-n",
-    ] },
+    ], "internalOnly" = true },
     { id = "sensors", description = "sensors", command = "/usr/bin/sensors" },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
