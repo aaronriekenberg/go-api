@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -17,6 +18,16 @@ const (
 
 func FormatTime(t time.Time) string {
 	return t.Format(time.RFC3339Nano)
+}
+
+func MustMarshalJSON(
+	dto any,
+) []byte {
+	jsonBytes, err := json.Marshal(dto)
+	if err != nil {
+		panic(fmt.Errorf("utils.MustMarshalJSON: json.Marshal error: %w", err))
+	}
+	return jsonBytes
 }
 
 func RespondWithJSONDTO(

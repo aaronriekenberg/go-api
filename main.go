@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/aaronriekenberg/go-api/config"
@@ -19,6 +20,7 @@ func main() {
 			slog.Error("panic in main",
 				"error", err,
 			)
+			fmt.Fprintf(os.Stderr, "stack trace:\n%v", string(debug.Stack()))
 			os.Exit(1)
 		}
 	}()

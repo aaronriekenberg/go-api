@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -51,23 +50,17 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 
 	for _, command := range commandConfiguration.Commands {
 		commandDTO := commandInfoToDTO(command)
+
 		allCommandDTOs = append(allCommandDTOs, commandDTO)
-		if !command.InternalOnly {
+
+		if !commandDTO.internalOnly {
 			externalCommandDTOs = append(externalCommandDTOs, commandDTO)
 		}
 	}
 
-	allCommandsJsonBytes, err := json.Marshal(allCommandDTOs)
-	if err != nil {
-		panic(fmt.Errorf("NewAllCommandsHandler json.Marshal error: %w", err))
-	}
-	allHandlerFunc := utils.JSONBytesHandlerFunc(allCommandsJsonBytes)
+	allHandlerFunc := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(allCommandDTOs))
 
-	externalCommandsJsonBytes, err := json.Marshal(externalCommandDTOs)
-	if err != nil {
-		panic(fmt.Errorf("NewAllCommandsHandler json.Marshal error: %w", err))
-	}
-	externalHandlerFunc := utils.JSONBytesHandlerFunc(externalCommandsJsonBytes)
+	externalHandlerFunc := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(externalCommandDTOs))
 
 	return http.HandlerFunc(
 		func(
@@ -104,7 +97,10 @@ func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 	}
 }
 
-func (runCommandsHandler *runCommandsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (runCommandsHandler *runCommandsHandler) ServeHTTP(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	ctx := r.Context()
 
 	id := r.PathValue("id")

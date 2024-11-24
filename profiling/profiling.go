@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"os"
+	"runtime/debug"
 
 	"github.com/aaronriekenberg/go-api/config"
 )
@@ -24,6 +25,7 @@ func runPprofServer(config config.ProfilingConfiguration) {
 			slog.Error("panic in runPprofServer",
 				"error", err,
 			)
+			fmt.Fprintf(os.Stderr, "stack trace:\n%v", string(debug.Stack()))
 			os.Exit(1)
 		}
 	}()

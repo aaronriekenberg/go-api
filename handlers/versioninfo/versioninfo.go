@@ -1,8 +1,6 @@
 package versioninfo
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/aaronriekenberg/go-api/utils"
@@ -10,12 +8,7 @@ import (
 )
 
 func versionInfoHandlerFunc() http.HandlerFunc {
-	jsonBytes, err := json.Marshal(version.BuildInfoMap())
-	if err != nil {
-		panic(fmt.Errorf("versionInfoHandlerFunc json.Marshal error: %w", err))
-	}
-
-	return utils.JSONBytesHandlerFunc(jsonBytes)
+	return utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(version.BuildInfoMap()))
 }
 
 func NewVersionInfoHandler() http.Handler {
