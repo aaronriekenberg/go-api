@@ -7,23 +7,15 @@ import (
 	"log/slog"
 	"net/http"
 	"os/exec"
-	"regexp"
 	"slices"
 	"time"
 
 	"golang.org/x/sync/semaphore"
 
 	"github.com/aaronriekenberg/go-api/config"
+	"github.com/aaronriekenberg/go-api/request"
 	"github.com/aaronriekenberg/go-api/utils"
 )
-
-var externalHostRegex = regexp.MustCompile(`^aaronr.digital|.*\.aaronr.digital$`)
-
-func requestIsExternal(
-	r *http.Request,
-) bool {
-	return externalHostRegex.MatchString(r.Host)
-}
 
 type commandInfoDTO struct {
 	ID           string   `json:"id"`
@@ -67,7 +59,7 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 			w http.ResponseWriter,
 			r *http.Request,
 		) {
-			if requestIsExternal(r) {
+			if request.RequestIsExternal(r) {
 				externalHandlerFunc.ServeHTTP(w, r)
 			} else {
 				allHandlerFunc.ServeHTTP(w, r)
@@ -114,7 +106,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(
 		return
 	}
 
-	if commandInfo.internalOnly && requestIsExternal(r) {
+	if commandInfo.internalOnly && request.RequestIsExternal(r) {
 		slog.Warn("RunCommandsHandler external request for internal only command",
 			"id", id,
 		)
