@@ -34,10 +34,10 @@ type RequestLoggingConfiguration struct {
 
 type CommandInfo struct {
 	ID           string
+	InternalOnly bool
 	Description  string
 	Command      string
 	Args         []string
-	InternalOnly bool
 }
 
 type CommandConfiguration struct {

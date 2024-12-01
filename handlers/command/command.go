@@ -18,20 +18,20 @@ import (
 )
 
 type commandInfoDTO struct {
-	ID           string   `json:"id"`
+	ID           string `json:"id"`
+	internalOnly bool
 	Description  string   `json:"description"`
 	Command      string   `json:"command"`
 	Args         []string `json:"args"`
-	internalOnly bool
 }
 
 func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 	return commandInfoDTO{
 		ID:           commandInfo.ID,
+		internalOnly: commandInfo.InternalOnly,
 		Description:  commandInfo.Description,
 		Command:      commandInfo.Command,
 		Args:         slices.Clone(commandInfo.Args),
-		internalOnly: commandInfo.InternalOnly,
 	}
 }
 
