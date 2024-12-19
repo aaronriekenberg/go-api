@@ -35,6 +35,11 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 	}
 }
 
+type allCommandsHandler struct {
+	allHandler      http.Handler
+	externalHandler http.Handler
+}
+
 func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
 	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 
@@ -50,22 +55,25 @@ func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) htt
 		}
 	}
 
-	allHandlerFunc := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(allCommandDTOs))
+	allHandler := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(allCommandDTOs))
 
-	externalHandlerFunc := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(externalCommandDTOs))
+	externalHandler := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(externalCommandDTOs))
 
-	return http.HandlerFunc(
-		func(
-			w http.ResponseWriter,
-			r *http.Request,
-		) {
-			if request.RequestIsExternal(r) {
-				externalHandlerFunc.ServeHTTP(w, r)
-			} else {
-				allHandlerFunc.ServeHTTP(w, r)
-			}
-		},
-	)
+	return &allCommandsHandler{
+		allHandler:      allHandler,
+		externalHandler: externalHandler,
+	}
+}
+
+func (allCommandsHandler *allCommandsHandler) ServeHTTP(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	if request.RequestIsExternal(r) {
+		allCommandsHandler.externalHandler.ServeHTTP(w, r)
+	} else {
+		allCommandsHandler.allHandler.ServeHTTP(w, r)
+	}
 }
 
 type runCommandsHandler struct {
