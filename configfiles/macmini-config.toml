@@ -62,5 +62,5 @@ commands = [
     ] },
     { id = "uptime", description = "uptime", command = "/usr/bin/uptime" },
     { id = "vmstat", description = "vmstat", command = "/usr/bin/vmstat" },
-    { id = "w", description = "w", command = "/usr/bin/w" },
+    { id = "w", "internalOnly" = true, description = "w", command = "/usr/bin/w" },
 ]
