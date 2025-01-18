@@ -1,6 +1,6 @@
 [serverConfiguration]
 listeners = [
-    { network = "unix", listenAddress = "socket", "h2cEnabled" = true },
+    { network = "unix", listenAddress = "unix/socket", "h2cEnabled" = true },
     { network = "tcp", listenAddress = ":8080", h2cEnabled = true },
 ]
 apiContext = "/api/v1"
