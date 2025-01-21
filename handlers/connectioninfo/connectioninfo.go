@@ -11,11 +11,11 @@ import (
 )
 
 type connectionDTO struct {
-	ID           uint64 `json:"id"`
-	Network      string `json:"network"`
-	Age          string `json:"age"`
-	CreationTime string `json:"creation_time"`
-	Requests     uint64 `json:"requests"`
+	ID           uint64    `json:"id"`
+	Network      string    `json:"network"`
+	Age          string    `json:"age"`
+	CreationTime time.Time `json:"creation_time"`
+	Requests     uint64    `json:"requests"`
 }
 
 func connectionInfoToDTO(
@@ -26,7 +26,7 @@ func connectionInfoToDTO(
 		ID:           uint64(connectionInfo.ID()),
 		Network:      connectionInfo.Network(),
 		Age:          connectionInfo.Age(now).Truncate(time.Millisecond).String(),
-		CreationTime: utils.FormatTime(connectionInfo.CreationTime()),
+		CreationTime: connectionInfo.CreationTime(),
 		Requests:     connectionInfo.Requests(),
 	}
 }

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"time"
 )
 
 const (
@@ -15,10 +14,6 @@ const (
 	ContentTypeApplicationJSON = "application/json"
 	ContentTypeTextPlain       = "text/plain; charset=utf-8"
 )
-
-func FormatTime(t time.Time) string {
-	return t.Format(time.RFC3339Nano)
-}
 
 func MustMarshalJSON(
 	dto any,

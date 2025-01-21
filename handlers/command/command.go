@@ -171,7 +171,7 @@ func (runCommandsHandler *runCommandsHandler) releaseCommandSemaphore() {
 
 type commandAPIResponse struct {
 	CommandInfo                 commandInfoDTO `json:"command_info"`
-	Now                         string         `json:"now"`
+	Now                         time.Time      `json:"now"`
 	CommandDurationMilliseconds int64          `json:"command_duration_ms"`
 	CommandOutput               string         `json:"command_output"`
 }
@@ -202,7 +202,7 @@ func (runCommandsHandler *runCommandsHandler) runCommand(
 
 	response = commandAPIResponse{
 		CommandInfo:                 commandInfo,
-		Now:                         utils.FormatTime(commandEndTime),
+		Now:                         commandEndTime,
 		CommandDurationMilliseconds: commandDuration.Milliseconds(),
 		CommandOutput:               commandOutput,
 	}
