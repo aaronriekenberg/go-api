@@ -17,6 +17,22 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
+type commandInfoDTO struct {
+	ID          string   `json:"id"`
+	Description string   `json:"description"`
+	Command     string   `json:"command"`
+	Args        []string `json:"args"`
+}
+
+func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
+	return commandInfoDTO{
+		ID:          commandInfo.ID,
+		Description: commandInfo.Description,
+		Command:     commandInfo.Command,
+		Args:        slices.Clone(commandInfo.Args),
+	}
+}
+
 type allCommandsHandler struct {
 	allHandler      http.Handler
 	externalHandler http.Handler
@@ -24,16 +40,16 @@ type allCommandsHandler struct {
 
 func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
 
-	allCommandDTOs := make([]config.CommandInfo, 0, len(commandConfiguration.Commands))
+	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 
-	externalCommandDTOs := make([]config.CommandInfo, 0, len(commandConfiguration.Commands))
+	externalCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 
 	for _, commandInfo := range commandConfiguration.Commands {
 
-		allCommandDTOs = append(allCommandDTOs, commandInfo)
+		allCommandDTOs = append(allCommandDTOs, commandInfoToDTO(commandInfo))
 
 		if !commandInfo.InternalOnly {
-			externalCommandDTOs = append(externalCommandDTOs, commandInfo)
+			externalCommandDTOs = append(externalCommandDTOs, commandInfoToDTO(commandInfo))
 		}
 	}
 
@@ -149,22 +165,6 @@ func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx contex
 
 func (runCommandsHandler *runCommandsHandler) releaseCommandSemaphore() {
 	runCommandsHandler.commandSemaphore.Release(1)
-}
-
-type commandInfoDTO struct {
-	ID          string   `json:"id"`
-	Description string   `json:"description"`
-	Command     string   `json:"command"`
-	Args        []string `json:"args"`
-}
-
-func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
-	return commandInfoDTO{
-		ID:          commandInfo.ID,
-		Description: commandInfo.Description,
-		Command:     commandInfo.Command,
-		Args:        slices.Clone(commandInfo.Args),
-	}
 }
 
 type commandAPIResponse struct {
