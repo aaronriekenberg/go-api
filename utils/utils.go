@@ -29,17 +29,17 @@ func RespondWithJSONDTO(
 	dto any,
 	w http.ResponseWriter,
 ) {
-	jsonBytes, err := json.Marshal(dto)
+	w.Header().Set(ContentTypeHeaderKey, ContentTypeApplicationJSON)
+
+	err := json.NewEncoder(w).Encode(dto)
 	if err != nil {
-		slog.Warn("utils.RespondWithJSONDTO: json.Marshal error",
+		slog.Warn("utils.RespondWithJSONDTO: json.Encode error",
 			"error", err,
 		)
 		HTTPErrorStatusCode(w, http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set(ContentTypeHeaderKey, ContentTypeApplicationJSON)
-	io.Copy(w, bytes.NewReader(jsonBytes))
 }
 
 func JSONBytesHandlerFunc(
