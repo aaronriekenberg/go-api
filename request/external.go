@@ -7,7 +7,7 @@ import (
 
 var externalHostRegex = regexp.MustCompile(`^aaronr.digital|.*\.aaronr.digital$`)
 
-func RequestIsExternal(
+func IsExternal(
 	r *http.Request,
 ) bool {
 	return externalHostRegex.MatchString(r.Host)

@@ -69,7 +69,7 @@ func (allCommandsHandler *allCommandsHandler) ServeHTTP(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	if request.RequestIsExternal(r) {
+	if request.IsExternal(r) {
 		allCommandsHandler.externalHandler.ServeHTTP(w, r)
 	} else {
 		allCommandsHandler.allHandler.ServeHTTP(w, r)
@@ -114,7 +114,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(
 		return
 	}
 
-	if commandInfo.internalOnly && request.RequestIsExternal(r) {
+	if commandInfo.internalOnly && request.IsExternal(r) {
 		slog.Warn("RunCommandsHandler external request for internal only command",
 			"id", id,
 		)
