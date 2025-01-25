@@ -20,7 +20,7 @@ maxConcurrentCommands = 10
 requestTimeoutDuration = "2s"
 semaphoreAcquireTimeoutDuration = "200ms"
 commands = [
-    { id = "w", description = "w", command = "/usr/bin/w" },
+    { id = "w", "internalOnly" = true, description = "w", command = "/usr/bin/w" },
     { id = "sleep", description = "sleep .5", command = "/bin/sleep", Args = [
         "5",
     ] },

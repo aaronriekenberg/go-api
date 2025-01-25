@@ -17,41 +17,23 @@ import (
 	"github.com/aaronriekenberg/go-api/utils"
 )
 
-type commandInfoDTO struct {
-	ID           string `json:"id"`
-	internalOnly bool
-	Description  string   `json:"description"`
-	Command      string   `json:"command"`
-	Args         []string `json:"args"`
-}
-
-func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
-	return commandInfoDTO{
-		ID:           commandInfo.ID,
-		internalOnly: commandInfo.InternalOnly,
-		Description:  commandInfo.Description,
-		Command:      commandInfo.Command,
-		Args:         slices.Clone(commandInfo.Args),
-	}
-}
-
 type allCommandsHandler struct {
 	allHandler      http.Handler
 	externalHandler http.Handler
 }
 
 func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
-	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 
-	externalCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
+	allCommandDTOs := make([]config.CommandInfo, 0, len(commandConfiguration.Commands))
 
-	for _, command := range commandConfiguration.Commands {
-		commandDTO := commandInfoToDTO(command)
+	externalCommandDTOs := make([]config.CommandInfo, 0, len(commandConfiguration.Commands))
 
-		allCommandDTOs = append(allCommandDTOs, commandDTO)
+	for _, commandInfo := range commandConfiguration.Commands {
 
-		if !commandDTO.internalOnly {
-			externalCommandDTOs = append(externalCommandDTOs, commandDTO)
+		allCommandDTOs = append(allCommandDTOs, commandInfo)
+
+		if !commandInfo.InternalOnly {
+			externalCommandDTOs = append(externalCommandDTOs, commandInfo)
 		}
 	}
 
@@ -80,13 +62,13 @@ type runCommandsHandler struct {
 	commandSemaphore        *semaphore.Weighted
 	requestTimeout          time.Duration
 	semaphoreAcquireTimeout time.Duration
-	idToCommandInfo         map[string]commandInfoDTO
+	idToCommandInfo         map[string]config.CommandInfo
 }
 
 func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
-	idToCommandInfo := make(map[string]commandInfoDTO)
+	idToCommandInfo := make(map[string]config.CommandInfo)
 	for _, commandInfo := range commandConfiguration.Commands {
-		idToCommandInfo[commandInfo.ID] = commandInfoToDTO(commandInfo)
+		idToCommandInfo[commandInfo.ID] = commandInfo
 	}
 
 	return &runCommandsHandler{
@@ -114,7 +96,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(
 		return
 	}
 
-	if commandInfo.internalOnly && request.IsExternal(r) {
+	if commandInfo.InternalOnly && request.IsExternal(r) {
 		slog.Warn("RunCommandsHandler external request for internal only command",
 			"id", id,
 		)
@@ -127,7 +109,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(
 
 func (runCommandsHandler *runCommandsHandler) handleRunCommandRequest(
 	ctx context.Context,
-	commandInfo commandInfoDTO,
+	commandInfo config.CommandInfo,
 	w http.ResponseWriter,
 ) {
 	ctx, cancel := context.WithTimeout(ctx, runCommandsHandler.requestTimeout)
@@ -169,6 +151,22 @@ func (runCommandsHandler *runCommandsHandler) releaseCommandSemaphore() {
 	runCommandsHandler.commandSemaphore.Release(1)
 }
 
+type commandInfoDTO struct {
+	ID          string   `json:"id"`
+	Description string   `json:"description"`
+	Command     string   `json:"command"`
+	Args        []string `json:"args"`
+}
+
+func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
+	return commandInfoDTO{
+		ID:          commandInfo.ID,
+		Description: commandInfo.Description,
+		Command:     commandInfo.Command,
+		Args:        slices.Clone(commandInfo.Args),
+	}
+}
+
 type commandAPIResponse struct {
 	CommandInfo                 commandInfoDTO `json:"command_info"`
 	Now                         time.Time      `json:"now"`
@@ -178,7 +176,7 @@ type commandAPIResponse struct {
 
 func (runCommandsHandler *runCommandsHandler) runCommand(
 	ctx context.Context,
-	commandInfo commandInfoDTO,
+	commandInfo config.CommandInfo,
 ) (response commandAPIResponse, err error) {
 	err = runCommandsHandler.acquireCommandSemaphore(ctx)
 	if err != nil {
@@ -201,7 +199,7 @@ func (runCommandsHandler *runCommandsHandler) runCommand(
 	}
 
 	response = commandAPIResponse{
-		CommandInfo:                 commandInfo,
+		CommandInfo:                 commandInfoToDTO(commandInfo),
 		Now:                         commandEndTime,
 		CommandDurationMilliseconds: commandDuration.Milliseconds(),
 		CommandOutput:               commandOutput,
