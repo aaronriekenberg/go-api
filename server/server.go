@@ -8,9 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-
 	"github.com/aaronriekenberg/go-api/config"
 	"github.com/aaronriekenberg/go-api/connection"
 	"github.com/aaronriekenberg/go-api/request"
@@ -70,20 +67,25 @@ func runListener(
 
 	handler = updateContextForRequestHandler(handler)
 
+	protocols := new(http.Protocols)
+	protocols.SetHTTP1(true)
+
 	if listenerConfig.H2CEnabled {
 		logger.Info("server.runListener enabling h2c")
-		h2Server := &http2.Server{
-			IdleTimeout: 5 * time.Minute,
-		}
-		handler = h2c.NewHandler(handler, h2Server)
+
+		protocols.SetUnencryptedHTTP2(true)
 	}
 
+	slog.Info("creating httpServer",
+		"protocols", protocols.String(),
+	)
 	httpServer := &http.Server{
 		IdleTimeout:  5 * time.Minute,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 1 * time.Minute,
 		ConnContext:  addConnectionInfoToContext,
 		Handler:      handler,
+		Protocols:    protocols,
 	}
 
 	err = httpServer.Serve(listener)
