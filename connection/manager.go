@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/puzpuzpuz/xsync/v3"
+	"github.com/aaronriekenberg/go-api/utils"
 )
 
 type ConnectionManagerStateSnapshot struct {
-	MaxOpenConnections       int
+	MaxOpenConnections       int32
 	MinConnectionLifetime    time.Duration
 	MaxConnectionLifetime    time.Duration
 	MaxRequestsPerConnection uint64
@@ -28,17 +28,14 @@ type ConnectionManager interface {
 }
 
 type connectionManager struct {
-	idToConnection       *xsync.MapOf[ConnectionID, *connectionInfo]
+	idToConnection       utils.GenericSyncMap[ConnectionID, *connectionInfo]
+	numOpenConnections   atomic.Int32
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
 }
 
 func newConnectionManager() *connectionManager {
 	return &connectionManager{
-		idToConnection: xsync.NewMapOf[ConnectionID, *connectionInfo](
-			xsync.WithPresize(maxConnections),
-			xsync.WithGrowOnly(),
-		),
 		metricsManager: newConnectionMetricsManager(),
 	}
 }
@@ -59,12 +56,14 @@ func (cm *connectionManager) AddConnection(
 		connectionInfo,
 	)
 
+	numOpenConnections := cm.numOpenConnections.Add(1)
+
 	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
 		"network", network,
+		"numOpenConnections", numOpenConnections,
 	)
 
-	numOpenConnections := cm.idToConnection.Size()
 	cm.metricsManager.updateForNewConnection(numOpenConnections)
 
 	return connectionInfo
@@ -76,9 +75,12 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 		return
 	}
 
+	numOpenConnections := cm.numOpenConnections.Add(-1)
+
 	slog.Debug("connectionManager.RemoveConnection",
 		"connectionID", connection.ID(),
 		"requests", connection.Requests(),
+		"numOpenConnections", numOpenConnections,
 	)
 
 	connection.markClosed()
@@ -88,7 +90,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 
 func (cm *connectionManager) connectionInfoSeq() iter.Seq[ConnectionInfo] {
 	return func(yield func(ConnectionInfo) bool) {
-		for _, v := range cm.idToConnection.Range {
+		for v := range cm.idToConnection.ValueRange() {
 			if !yield(v) {
 				return
 			}

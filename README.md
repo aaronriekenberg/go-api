@@ -4,7 +4,6 @@ Playing with:
 * h2c server configured with [go 1.24 http.Protocols](https://pkg.go.dev/net/http@go1.24.0#Protocols)
 * [go 1.22 ServeMux](https://go.dev/blog/routing-enhancements)
 * [slog](https://pkg.go.dev/log/slog@latest)
-* [xsync.MapOf](https://github.com/puzpuzpuz/xsync)
 
 Handy command for log file viewing:
 
