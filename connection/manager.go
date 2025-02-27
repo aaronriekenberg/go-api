@@ -90,7 +90,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 
 func (cm *connectionManager) connectionInfoSeq() iter.Seq[ConnectionInfo] {
 	return func(yield func(ConnectionInfo) bool) {
-		for v := range cm.idToConnection.ValueRange() {
+		for v := range cm.idToConnection.ValueRange {
 			if !yield(v) {
 				return
 			}
