@@ -17,7 +17,7 @@ type newConnectionMessage struct {
 }
 
 type closedConnectionMessage struct {
-	closedConnection *connectionInfo
+	closedConnection ConnectionInfo
 }
 
 type connectionMetricsManager struct {
@@ -82,7 +82,7 @@ func (cmm *connectionMetricsManager) updateForNewConnection(
 }
 
 func (cmm *connectionMetricsManager) updateForClosedConnection(
-	closedConnection *connectionInfo,
+	closedConnection ConnectionInfo,
 ) {
 	cmm.updateForClosedConnectionChannel <- closedConnectionMessage{
 		closedConnection: closedConnection,

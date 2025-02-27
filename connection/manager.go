@@ -2,7 +2,6 @@ package connection
 
 import (
 	"cmp"
-	"iter"
 	"log/slog"
 	"slices"
 	"sync/atomic"
@@ -28,7 +27,7 @@ type ConnectionManager interface {
 }
 
 type connectionManager struct {
-	idToConnection       utils.GenericSyncMap[ConnectionID, *connectionInfo]
+	idToConnection       utils.GenericSyncMap[ConnectionID, ConnectionInfo]
 	numOpenConnections   atomic.Int32
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
@@ -88,16 +87,6 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 	cm.metricsManager.updateForClosedConnection(connection)
 }
 
-func (cm *connectionManager) connectionInfoSeq() iter.Seq[ConnectionInfo] {
-	return func(yield func(ConnectionInfo) bool) {
-		for v := range cm.idToConnection.ValueRange {
-			if !yield(v) {
-				return
-			}
-		}
-	}
-}
-
 func computeMinConnectionLifetime(
 	now time.Time,
 	connections []ConnectionInfo,
@@ -118,7 +107,7 @@ func computeMinConnectionLifetime(
 }
 
 func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
-	connectionsSlice := slices.Collect(cm.connectionInfoSeq())
+	connectionsSlice := slices.Collect(cm.idToConnection.Values())
 
 	now := time.Now()
 

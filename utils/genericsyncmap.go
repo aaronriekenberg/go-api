@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"iter"
 	"sync"
 )
 
@@ -44,25 +45,31 @@ func (gsm *GenericSyncMap[K, V]) LoadAndDelete(
 	return
 }
 
-func (gsm *GenericSyncMap[K, V]) Range(yield func(key K, value V) bool) {
+func (gsm *GenericSyncMap[K, V]) Range() iter.Seq2[K, V] {
 
-	for anyKey, anyValue := range gsm.syncMap.Range {
-		key := anyKey.(K)
-		value := anyValue.(V)
+	return func(yield func(K, V) bool) {
 
-		if !yield(key, value) {
-			break
+		for anyKey, anyValue := range gsm.syncMap.Range {
+			key := anyKey.(K)
+			value := anyValue.(V)
+
+			if !yield(key, value) {
+				break
+			}
 		}
 	}
 }
 
-func (gsm *GenericSyncMap[K, V]) ValueRange(yield func(value V) bool) {
+func (gsm *GenericSyncMap[K, V]) Values() iter.Seq[V] {
 
-	for _, anyValue := range gsm.syncMap.Range {
-		value := anyValue.(V)
+	return func(yield func(V) bool) {
 
-		if !yield(value) {
-			break
+		for _, anyValue := range gsm.syncMap.Range {
+			value := anyValue.(V)
+
+			if !yield(value) {
+				break
+			}
 		}
 	}
 }

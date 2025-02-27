@@ -15,6 +15,8 @@ type ConnectionInfo interface {
 	Age(now time.Time) time.Duration
 	Requests() uint64
 	IncrementRequests()
+	markClosed()
+	openDuration() time.Duration
 }
 
 type connectionInfo struct {
@@ -28,7 +30,7 @@ type connectionInfo struct {
 func newConnection(
 	id ConnectionID,
 	network string,
-) *connectionInfo {
+) ConnectionInfo {
 	return &connectionInfo{
 		id:           id,
 		network:      network,
