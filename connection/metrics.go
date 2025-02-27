@@ -6,14 +6,14 @@ import (
 )
 
 type connectionMetrics struct {
-	maxOpenConnections           int32
+	maxOpenConnections           uint64
 	pastMinConnectionAge         *time.Duration
 	pastMaxConnectionAge         time.Duration
 	pastMaxRequestsPerConnection uint64
 }
 
 type newConnectionMessage struct {
-	currentOpenConnections int32
+	currentOpenConnections uint64
 }
 
 type closedConnectionMessage struct {
@@ -74,7 +74,7 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 }
 
 func (cmm *connectionMetricsManager) updateForNewConnection(
-	currentOpenConnections int32,
+	currentOpenConnections uint64,
 ) {
 	cmm.updateForNewConnectionChannel <- newConnectionMessage{
 		currentOpenConnections: currentOpenConnections,

@@ -38,7 +38,7 @@ type currentConnectionsDTO struct {
 
 type connectionInfoDTO struct {
 	CurrentConnections       currentConnectionsDTO `json:"current_connections"`
-	MaxOpenConnections       int32                 `json:"max_open_connections"`
+	MaxOpenConnections       uint64                `json:"max_open_connections"`
 	MinConnectionLifetime    string                `json:"min_connection_lifetime"`
 	MaxConnectionLifetime    string                `json:"max_connection_lifetime"`
 	MaxRequestsPerConnection uint64                `json:"max_requests_per_connection"`

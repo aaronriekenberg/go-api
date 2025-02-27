@@ -11,7 +11,7 @@ import (
 )
 
 type ConnectionManagerStateSnapshot struct {
-	MaxOpenConnections       int32
+	MaxOpenConnections       uint64
 	MinConnectionLifetime    time.Duration
 	MaxConnectionLifetime    time.Duration
 	MaxRequestsPerConnection uint64
@@ -28,7 +28,7 @@ type ConnectionManager interface {
 
 type connectionManager struct {
 	idToConnection       utils.GenericSyncMap[ConnectionID, ConnectionInfo]
-	numOpenConnections   atomic.Int32
+	numOpenConnections   atomic.Uint64
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
 }
@@ -74,7 +74,8 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 		return
 	}
 
-	numOpenConnections := cm.numOpenConnections.Add(-1)
+	// Idea from https://pkg.go.dev/sync/atomic@go1.24.0#AddUint64
+	numOpenConnections := cm.numOpenConnections.Add(^uint64(0))
 
 	slog.Debug("connectionManager.RemoveConnection",
 		"connectionID", connection.ID(),
