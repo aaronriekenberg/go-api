@@ -74,7 +74,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 		return
 	}
 
-	// Idea from https://pkg.go.dev/sync/atomic@go1.24.0#AddUint64
+	// Decrement idea from https://pkg.go.dev/sync/atomic@go1.24.0#AddUint64
 	numOpenConnections := cm.numOpenConnections.Add(^uint64(0))
 
 	slog.Debug("connectionManager.RemoveConnection",
