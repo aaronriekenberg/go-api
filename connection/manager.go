@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/aaronriekenberg/go-api/utils"
+	"github.com/aaronriekenberg/genericsyncmap"
 )
 
 type ConnectionManagerStateSnapshot struct {
@@ -27,7 +27,7 @@ type ConnectionManager interface {
 }
 
 type connectionManager struct {
-	idToConnection       utils.GenericSyncMap[ConnectionID, ConnectionInfo]
+	idToConnection       genericsyncmap.GenericSyncMap[ConnectionID, ConnectionInfo]
 	numOpenConnections   atomic.Uint64
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
