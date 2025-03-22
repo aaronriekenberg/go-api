@@ -10,10 +10,6 @@ const (
 	responseBodyString = "all good"
 )
 
-func healthHandlerFunc() http.HandlerFunc {
-	return utils.PlainTextHandlerFunc(responseBodyString)
-}
-
 func NewHealthHandler() http.Handler {
-	return healthHandlerFunc()
+	return utils.PlainTextHandlerFunc(responseBodyString)
 }
