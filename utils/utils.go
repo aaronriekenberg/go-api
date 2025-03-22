@@ -51,6 +51,19 @@ func JSONBytesHandlerFunc(
 	}
 }
 
+func PlainTextHandlerFunc(
+	textString string,
+) http.HandlerFunc {
+	textBytes := []byte(textString)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set(ContentTypeHeaderKey, ContentTypeTextPlain)
+
+		io.Copy(w, bytes.NewReader(textBytes))
+	}
+}
+
 func HTTPErrorStatusCode(
 	w http.ResponseWriter,
 	statusCode int,

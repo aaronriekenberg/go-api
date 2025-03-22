@@ -1,8 +1,6 @@
 package health
 
 import (
-	"bytes"
-	"io"
 	"net/http"
 
 	"github.com/aaronriekenberg/go-api/utils"
@@ -13,14 +11,7 @@ const (
 )
 
 func healthHandlerFunc() http.HandlerFunc {
-	responseBodyBytes := []byte(responseBodyString)
-
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		w.Header().Set(utils.ContentTypeHeaderKey, utils.ContentTypeTextPlain)
-
-		io.Copy(w, bytes.NewReader(responseBodyBytes))
-	}
+	return utils.PlainTextHandlerFunc(responseBodyString)
 }
 
 func NewHealthHandler() http.Handler {
