@@ -93,8 +93,8 @@ func computeMinConnectionLifetime(
 	connections []ConnectionInfo,
 	connectionMetrics connectionMetrics,
 ) time.Duration {
-	if connectionMetrics.pastMinConnectionAge != nil {
-		return *connectionMetrics.pastMinConnectionAge
+	if connectionMetrics.pastMinConnectionAgeExists {
+		return connectionMetrics.pastMinConnectionAge
 	}
 
 	if len(connections) > 0 {

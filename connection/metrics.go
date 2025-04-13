@@ -7,7 +7,8 @@ import (
 
 type connectionMetrics struct {
 	maxOpenConnections           uint64
-	pastMinConnectionAge         *time.Duration
+	pastMinConnectionAgeExists   bool
+	pastMinConnectionAge         time.Duration
 	pastMaxConnectionAge         time.Duration
 	pastMaxRequestsPerConnection uint64
 }
@@ -58,11 +59,11 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 
 			closedConnection := closedConnectionMessage.closedConnection
 
-			if metricsCopy.pastMinConnectionAge == nil {
-				metricsCopy.pastMinConnectionAge = new(time.Duration)
-				*metricsCopy.pastMinConnectionAge = closedConnection.openDuration()
+			if !metricsCopy.pastMinConnectionAgeExists {
+				metricsCopy.pastMinConnectionAgeExists = true
+				metricsCopy.pastMinConnectionAge = closedConnection.openDuration()
 			} else {
-				*metricsCopy.pastMinConnectionAge = min(closedConnection.openDuration(), *metricsCopy.pastMinConnectionAge)
+				metricsCopy.pastMinConnectionAge = min(closedConnection.openDuration(), metricsCopy.pastMinConnectionAge)
 			}
 
 			metricsCopy.pastMaxConnectionAge = max(closedConnection.openDuration(), metricsCopy.pastMaxConnectionAge)
