@@ -7,10 +7,24 @@ import (
 
 type connectionMetrics struct {
 	maxOpenConnections           uint64
-	pastMinConnectionAgeExists   bool
-	pastMinConnectionAge         time.Duration
+	pastMinConnectionAge         *time.Duration
 	pastMaxConnectionAge         time.Duration
 	pastMaxRequestsPerConnection uint64
+}
+
+func (cm *connectionMetrics) clone() *connectionMetrics {
+	if cm == nil {
+		return new(connectionMetrics)
+	}
+
+	cmClone := *cm
+
+	if cm.pastMinConnectionAge != nil {
+		cmClone.pastMinConnectionAge = new(time.Duration)
+		cmClone.pastMinConnectionAge = cm.pastMinConnectionAge
+	}
+
+	return &cmClone
 }
 
 type newConnectionMessage struct {
@@ -21,55 +35,65 @@ type closedConnectionMessage struct {
 	closedConnection ConnectionInfo
 }
 
+type updateMetricsMessage struct {
+	newConnectionMessage    *newConnectionMessage
+	closedConnectionMessage *closedConnectionMessage
+}
+
 type connectionMetricsManager struct {
-	atomicConnectionMetrics          atomic.Pointer[connectionMetrics]
-	updateForNewConnectionChannel    chan newConnectionMessage
-	updateForClosedConnectionChannel chan closedConnectionMessage
+	atomicConnectionMetrics atomic.Pointer[connectionMetrics]
+	updateChannel           chan updateMetricsMessage
 }
 
 func newConnectionMetricsManager() *connectionMetricsManager {
 	cmm := &connectionMetricsManager{
-		updateForNewConnectionChannel:    make(chan newConnectionMessage, maxConnections),
-		updateForClosedConnectionChannel: make(chan closedConnectionMessage, maxConnections),
+		updateChannel: make(chan updateMetricsMessage, maxConnections),
 	}
-
-	cmm.atomicConnectionMetrics.Store(new(connectionMetrics))
 
 	go cmm.runUpdateMetricsTask()
 
 	return cmm
 }
 
-func (cmm *connectionMetricsManager) connectionMetrics() connectionMetrics {
-	return *cmm.atomicConnectionMetrics.Load()
+func (cmm *connectionMetricsManager) connectionMetrics() *connectionMetrics {
+	return cmm.atomicConnectionMetrics.Load().clone()
 }
 
 func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
+
 	for {
-		select {
-		case newConnectionMessage := <-cmm.updateForNewConnectionChannel:
-			metricsCopy := cmm.connectionMetrics()
+		updateMessage := <-cmm.updateChannel
 
-			metricsCopy.maxOpenConnections = max(metricsCopy.maxOpenConnections, newConnectionMessage.currentOpenConnections)
+		newConnectionMessage := updateMessage.newConnectionMessage
 
-			cmm.atomicConnectionMetrics.Store(&metricsCopy)
+		if newConnectionMessage != nil {
 
-		case closedConnectionMessage := <-cmm.updateForClosedConnectionChannel:
-			metricsCopy := cmm.connectionMetrics()
+			metricsClone := cmm.connectionMetrics()
+
+			metricsClone.maxOpenConnections = max(metricsClone.maxOpenConnections, newConnectionMessage.currentOpenConnections)
+
+			cmm.atomicConnectionMetrics.Store(metricsClone)
+		}
+
+		closedConnectionMessage := updateMessage.closedConnectionMessage
+
+		if updateMessage.closedConnectionMessage != nil {
+
+			metricsClone := cmm.connectionMetrics()
 
 			closedConnection := closedConnectionMessage.closedConnection
 
-			if !metricsCopy.pastMinConnectionAgeExists {
-				metricsCopy.pastMinConnectionAgeExists = true
-				metricsCopy.pastMinConnectionAge = closedConnection.openDuration()
+			if metricsClone.pastMinConnectionAge == nil {
+				metricsClone.pastMinConnectionAge = new(time.Duration)
+				*metricsClone.pastMinConnectionAge = closedConnection.openDuration()
 			} else {
-				metricsCopy.pastMinConnectionAge = min(closedConnection.openDuration(), metricsCopy.pastMinConnectionAge)
+				*metricsClone.pastMinConnectionAge = min(closedConnection.openDuration(), *metricsClone.pastMinConnectionAge)
 			}
 
-			metricsCopy.pastMaxConnectionAge = max(closedConnection.openDuration(), metricsCopy.pastMaxConnectionAge)
-			metricsCopy.pastMaxRequestsPerConnection = max(closedConnection.Requests(), metricsCopy.pastMaxRequestsPerConnection)
+			metricsClone.pastMaxConnectionAge = max(closedConnection.openDuration(), metricsClone.pastMaxConnectionAge)
+			metricsClone.pastMaxRequestsPerConnection = max(closedConnection.Requests(), metricsClone.pastMaxRequestsPerConnection)
 
-			cmm.atomicConnectionMetrics.Store(&metricsCopy)
+			cmm.atomicConnectionMetrics.Store(metricsClone)
 		}
 	}
 }
@@ -77,15 +101,20 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 func (cmm *connectionMetricsManager) updateForNewConnection(
 	currentOpenConnections uint64,
 ) {
-	cmm.updateForNewConnectionChannel <- newConnectionMessage{
-		currentOpenConnections: currentOpenConnections,
+	cmm.updateChannel <- updateMetricsMessage{
+		newConnectionMessage: &newConnectionMessage{
+			currentOpenConnections: currentOpenConnections,
+		},
 	}
+
 }
 
 func (cmm *connectionMetricsManager) updateForClosedConnection(
 	closedConnection ConnectionInfo,
 ) {
-	cmm.updateForClosedConnectionChannel <- closedConnectionMessage{
-		closedConnection: closedConnection,
+	cmm.updateChannel <- updateMetricsMessage{
+		closedConnectionMessage: &closedConnectionMessage{
+			closedConnection: closedConnection,
+		},
 	}
 }

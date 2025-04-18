@@ -91,10 +91,10 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 func computeMinConnectionLifetime(
 	now time.Time,
 	connections []ConnectionInfo,
-	connectionMetrics connectionMetrics,
+	connectionMetrics *connectionMetrics,
 ) time.Duration {
-	if connectionMetrics.pastMinConnectionAgeExists {
-		return connectionMetrics.pastMinConnectionAge
+	if connectionMetrics.pastMinConnectionAge != nil {
+		return *connectionMetrics.pastMinConnectionAge
 	}
 
 	if len(connections) > 0 {
