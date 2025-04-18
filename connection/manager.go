@@ -11,11 +11,13 @@ import (
 )
 
 type ConnectionManagerStateSnapshot struct {
-	MaxOpenConnections       uint64
-	MinConnectionLifetime    time.Duration
-	MaxConnectionLifetime    time.Duration
-	MaxRequestsPerConnection uint64
-	Connections              []ConnectionInfo
+	TotalConnections          uint64
+	TotalConnectionsByNetwork map[string]uint64
+	MaxOpenConnections        uint64
+	MinConnectionLifetime     time.Duration
+	MaxConnectionLifetime     time.Duration
+	MaxRequestsPerConnection  uint64
+	CurrentConnections        []ConnectionInfo
 }
 
 type ConnectionManager interface {
@@ -63,7 +65,10 @@ func (cm *connectionManager) AddConnection(
 		"numOpenConnections", numOpenConnections,
 	)
 
-	cm.metricsManager.updateForNewConnection(numOpenConnections)
+	cm.metricsManager.updateForNewConnection(
+		connectionInfo,
+		numOpenConnections,
+	)
 
 	return connectionInfo
 }
@@ -123,11 +128,13 @@ func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
 	}
 
 	return ConnectionManagerStateSnapshot{
-		MaxOpenConnections:       connectionMetrics.maxOpenConnections,
-		MinConnectionLifetime:    computeMinConnectionLifetime(now, connectionsSlice, connectionMetrics),
-		MaxConnectionLifetime:    maxConnectionLifetime,
-		MaxRequestsPerConnection: maxRequestsPerConnection,
-		Connections:              connectionsSlice,
+		TotalConnections:          connectionMetrics.totalConnections,
+		TotalConnectionsByNetwork: connectionMetrics.totalConnectionsByNetwork,
+		MaxOpenConnections:        connectionMetrics.maxOpenConnections,
+		MinConnectionLifetime:     computeMinConnectionLifetime(now, connectionsSlice, connectionMetrics),
+		MaxConnectionLifetime:     maxConnectionLifetime,
+		MaxRequestsPerConnection:  maxRequestsPerConnection,
+		CurrentConnections:        connectionsSlice,
 	}
 }
 

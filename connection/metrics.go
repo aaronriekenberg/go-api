@@ -1,23 +1,34 @@
 package connection
 
 import (
+	"maps"
 	"sync/atomic"
 	"time"
 )
 
 type connectionMetrics struct {
+	totalConnections             uint64
+	totalConnectionsByNetwork    map[string]uint64
 	maxOpenConnections           uint64
 	pastMinConnectionAge         *time.Duration
 	pastMaxConnectionAge         time.Duration
 	pastMaxRequestsPerConnection uint64
 }
 
+func newConnectionMetrics() *connectionMetrics {
+	return &connectionMetrics{
+		totalConnectionsByNetwork: make(map[string]uint64),
+	}
+}
+
 func (cm *connectionMetrics) clone() *connectionMetrics {
 	if cm == nil {
-		return new(connectionMetrics)
+		return newConnectionMetrics()
 	}
 
 	cmClone := *cm
+
+	cmClone.totalConnectionsByNetwork = maps.Clone(cm.totalConnectionsByNetwork)
 
 	if cm.pastMinConnectionAge != nil {
 		cmClone.pastMinConnectionAge = new(time.Duration)
@@ -28,6 +39,7 @@ func (cm *connectionMetrics) clone() *connectionMetrics {
 }
 
 type newConnectionMessage struct {
+	newConnection          ConnectionInfo
 	currentOpenConnections uint64
 }
 
@@ -50,6 +62,8 @@ func newConnectionMetricsManager() *connectionMetricsManager {
 		updateChannel: make(chan updateMetricsMessage, maxConnections),
 	}
 
+	cmm.atomicConnectionMetrics.Store(newConnectionMetrics())
+
 	go cmm.runUpdateMetricsTask()
 
 	return cmm
@@ -69,6 +83,10 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 		if newConnectionMessage != nil {
 
 			metricsClone := cmm.connectionMetrics()
+
+			metricsClone.totalConnections++
+
+			metricsClone.totalConnectionsByNetwork[newConnectionMessage.newConnection.Network()]++
 
 			metricsClone.maxOpenConnections = max(metricsClone.maxOpenConnections, newConnectionMessage.currentOpenConnections)
 
@@ -99,10 +117,12 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 }
 
 func (cmm *connectionMetricsManager) updateForNewConnection(
+	newConnection ConnectionInfo,
 	currentOpenConnections uint64,
 ) {
 	cmm.updateChannel <- updateMetricsMessage{
 		newConnectionMessage: &newConnectionMessage{
+			newConnection:          newConnection,
 			currentOpenConnections: currentOpenConnections,
 		},
 	}

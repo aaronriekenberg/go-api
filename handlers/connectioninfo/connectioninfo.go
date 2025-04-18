@@ -31,18 +31,19 @@ func connectionInfoToDTO(
 	}
 }
 
-type currentConnectionsDTO struct {
-	Total     int            `json:"total"`
-	ByNetwork map[string]int `json:"by_network"`
+type connectionCountsDTO struct {
+	Total     uint64            `json:"total"`
+	ByNetwork map[string]uint64 `json:"by_network"`
 }
 
 type connectionInfoDTO struct {
-	CurrentConnections       currentConnectionsDTO `json:"current_connections"`
-	MaxOpenConnections       uint64                `json:"max_open_connections"`
-	MinConnectionLifetime    string                `json:"min_connection_lifetime"`
-	MaxConnectionLifetime    string                `json:"max_connection_lifetime"`
-	MaxRequestsPerConnection uint64                `json:"max_requests_per_connection"`
-	Connections              []connectionDTO       `json:"connections"`
+	MaxOpenConnections       uint64              `json:"max_open_connections"`
+	MinConnectionLifetime    string              `json:"min_connection_lifetime"`
+	MaxConnectionLifetime    string              `json:"max_connection_lifetime"`
+	MaxRequestsPerConnection uint64              `json:"max_requests_per_connection"`
+	CurrentConnectionCounts  connectionCountsDTO `json:"current_connection_counts"`
+	TotalConnectionCounts    connectionCountsDTO `json:"total_connection_counts"`
+	CurrentConnections       []connectionDTO     `json:"current_connections"`
 }
 
 func connectionInfoHandlerFunc() http.HandlerFunc {
@@ -50,13 +51,13 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 
 		connectionManagerStateSnapshot := connection.ConnectionManagerInstance().StateSnapshot()
 
-		connectionDTOs := make([]connectionDTO, 0, len(connectionManagerStateSnapshot.Connections))
+		connectionDTOs := make([]connectionDTO, 0, len(connectionManagerStateSnapshot.CurrentConnections))
 
-		numCurrentConnectionsByNetwork := make(map[string]int)
+		numCurrentConnectionsByNetwork := make(map[string]uint64)
 
 		now := time.Now()
 
-		for _, connection := range connectionManagerStateSnapshot.Connections {
+		for _, connection := range connectionManagerStateSnapshot.CurrentConnections {
 			connectionDTO := connectionInfoToDTO(connection, now)
 			numCurrentConnectionsByNetwork[connectionDTO.Network]++
 			connectionDTOs = append(connectionDTOs, connectionDTO)
@@ -68,15 +69,19 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 		})
 
 		response := connectionInfoDTO{
-			CurrentConnections: currentConnectionsDTO{
-				Total:     len(connectionDTOs),
-				ByNetwork: numCurrentConnectionsByNetwork,
-			},
 			MaxOpenConnections:       connectionManagerStateSnapshot.MaxOpenConnections,
 			MinConnectionLifetime:    connectionManagerStateSnapshot.MinConnectionLifetime.Truncate(time.Millisecond).String(),
 			MaxConnectionLifetime:    connectionManagerStateSnapshot.MaxConnectionLifetime.Truncate(time.Millisecond).String(),
 			MaxRequestsPerConnection: connectionManagerStateSnapshot.MaxRequestsPerConnection,
-			Connections:              connectionDTOs,
+			CurrentConnectionCounts: connectionCountsDTO{
+				Total:     uint64(len(connectionDTOs)),
+				ByNetwork: numCurrentConnectionsByNetwork,
+			},
+			TotalConnectionCounts: connectionCountsDTO{
+				Total:     connectionManagerStateSnapshot.TotalConnections,
+				ByNetwork: connectionManagerStateSnapshot.TotalConnectionsByNetwork,
+			},
+			CurrentConnections: connectionDTOs,
 		}
 
 		utils.RespondWithJSONDTO(&response, w)
