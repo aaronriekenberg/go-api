@@ -62,8 +62,6 @@ func newConnectionMetricsManager() *connectionMetricsManager {
 		updateChannel: make(chan updateMetricsMessage, maxConnections),
 	}
 
-	cmm.atomicConnectionMetrics.Store(newConnectionMetrics())
-
 	go cmm.runUpdateMetricsTask()
 
 	return cmm
