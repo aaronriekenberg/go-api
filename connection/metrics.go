@@ -78,9 +78,9 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 	for {
 		updateMessage := <-cmm.updateChannel
 
-		newConnectionMessage := updateMessage.newConnectionMessage
+		if updateMessage.newConnectionMessage != nil {
 
-		if newConnectionMessage != nil {
+			newConnectionMessage := updateMessage.newConnectionMessage
 
 			metricsClone := cmm.connectionMetrics()
 
@@ -93,9 +93,9 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 			cmm.atomicConnectionMetrics.Store(metricsClone)
 		}
 
-		closedConnectionMessage := updateMessage.closedConnectionMessage
-
 		if updateMessage.closedConnectionMessage != nil {
+
+			closedConnectionMessage := updateMessage.closedConnectionMessage
 
 			metricsClone := cmm.connectionMetrics()
 
