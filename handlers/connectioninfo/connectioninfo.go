@@ -53,13 +53,10 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 
 		connectionDTOs := make([]connectionDTO, 0, len(connectionManagerStateSnapshot.CurrentConnections))
 
-		numCurrentConnectionsByNetwork := make(map[string]uint64)
-
 		now := time.Now()
 
 		for _, connection := range connectionManagerStateSnapshot.CurrentConnections {
 			connectionDTO := connectionInfoToDTO(connection, now)
-			numCurrentConnectionsByNetwork[connectionDTO.Network]++
 			connectionDTOs = append(connectionDTOs, connectionDTO)
 		}
 
@@ -75,7 +72,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 			MaxRequestsPerConnection: connectionManagerStateSnapshot.MaxRequestsPerConnection,
 			CurrentConnectionCounts: connectionCountsDTO{
 				Total:     uint64(len(connectionDTOs)),
-				ByNetwork: numCurrentConnectionsByNetwork,
+				ByNetwork: connectionManagerStateSnapshot.CurrentConnectionsByNetwork,
 			},
 			TotalConnectionCounts: connectionCountsDTO{
 				Total:     connectionManagerStateSnapshot.TotalConnections,

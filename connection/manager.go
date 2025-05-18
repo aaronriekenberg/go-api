@@ -11,13 +11,14 @@ import (
 )
 
 type ConnectionManagerStateSnapshot struct {
-	TotalConnections          uint64
-	TotalConnectionsByNetwork map[string]uint64
-	MaxOpenConnections        uint64
-	MinConnectionLifetime     time.Duration
-	MaxConnectionLifetime     time.Duration
-	MaxRequestsPerConnection  uint64
-	CurrentConnections        []ConnectionInfo
+	TotalConnections            uint64
+	TotalConnectionsByNetwork   map[string]uint64
+	MaxOpenConnections          uint64
+	MinConnectionLifetime       time.Duration
+	MaxConnectionLifetime       time.Duration
+	MaxRequestsPerConnection    uint64
+	CurrentConnections          []ConnectionInfo
+	CurrentConnectionsByNetwork map[string]uint64
 }
 
 type ConnectionManager interface {
@@ -119,22 +120,25 @@ func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
 
 	connectionMetrics := cm.metricsManager.connectionMetrics()
 
+	currentConnectionsByNetwork := make(map[string]uint64)
 	maxConnectionLifetime := connectionMetrics.pastMaxConnectionAge
 	maxRequestsPerConnection := connectionMetrics.pastMaxRequestsPerConnection
 
 	for _, c := range connectionsSlice {
 		maxConnectionLifetime = max(c.Age(now), maxConnectionLifetime)
 		maxRequestsPerConnection = max(c.Requests(), maxRequestsPerConnection)
+		currentConnectionsByNetwork[c.Network()]++
 	}
 
 	return ConnectionManagerStateSnapshot{
-		TotalConnections:          connectionMetrics.totalConnections,
-		TotalConnectionsByNetwork: connectionMetrics.totalConnectionsByNetwork,
-		MaxOpenConnections:        connectionMetrics.maxOpenConnections,
-		MinConnectionLifetime:     computeMinConnectionLifetime(now, connectionsSlice, connectionMetrics),
-		MaxConnectionLifetime:     maxConnectionLifetime,
-		MaxRequestsPerConnection:  maxRequestsPerConnection,
-		CurrentConnections:        connectionsSlice,
+		TotalConnections:            connectionMetrics.totalConnections,
+		TotalConnectionsByNetwork:   connectionMetrics.totalConnectionsByNetwork,
+		MaxOpenConnections:          connectionMetrics.maxOpenConnections,
+		MinConnectionLifetime:       computeMinConnectionLifetime(now, connectionsSlice, connectionMetrics),
+		MaxConnectionLifetime:       maxConnectionLifetime,
+		MaxRequestsPerConnection:    maxRequestsPerConnection,
+		CurrentConnections:          connectionsSlice,
+		CurrentConnectionsByNetwork: currentConnectionsByNetwork,
 	}
 }
 
