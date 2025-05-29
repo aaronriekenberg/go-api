@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-var externalHostRegex = regexp.MustCompile(`^aaronr.digital|.*\.aaronr.digital$`)
+var externalHostRegex = regexp.MustCompile(`(?i)^aaronr.digital|.*\.aaronr.digital$`)
 
 func IsExternal(
 	r *http.Request,
