@@ -20,7 +20,7 @@ func TestIsExternal(
 		"notaaronr.digital":        {host: "notaaronr.digital", wantValue: false},
 		"www.aaronr.digital":       {host: "www.aaronr.digital", wantValue: true},
 		"stuff.www.aaronr.digital": {host: "stuff.www.aaronr.digital", wantValue: true},
-		".www.aaronr.digital":      {host: ".www.aaronr.digital", wantValue: true},
+		".aaronr.digital":          {host: ".aaronr.digital", wantValue: true},
 		"Aaronr.Digital":           {host: "Aaronr.Digital", wantValue: true},
 		"NotAaronr.Digital":        {host: "NotAaronr.Digital", wantValue: false},
 		"Www.Aaronr.Digital":       {host: "Www.Aaronr.Digital", wantValue: true},
