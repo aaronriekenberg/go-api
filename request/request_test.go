@@ -22,17 +22,15 @@ func TestIsExternal(
 		"stuff.www.aaronr.digital": {host: "stuff.www.aaronr.digital", wantValue: true},
 		".aaronr.digital":          {host: ".aaronr.digital", wantValue: true},
 		"Aaronr.Digital":           {host: "Aaronr.Digital", wantValue: true},
+		"Notaaronr.Digital":        {host: "Notaaronr.Digital", wantValue: false},
+		"WWW.AARONR.DIGITAL":       {host: "WWW.AARONR.DIGITAL", wantValue: true},
 		"Aaronr.Digital.Com":       {host: "Aaronr.Digital.Com", wantValue: false},
-		"Www.Aaronr.Digital.Com":   {host: "Www.Aaronr.Digital.Com", wantValue: false},
-		"NotAaronr.Digital":        {host: "NotAaronr.Digital", wantValue: false},
-		"Www.Aaronr.Digital":       {host: "Www.Aaronr.Digital", wantValue: true},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			if name != tc.host {
 				t.Fatalf("test name: %q host: %q name != tc.host", name, tc.host)
-
 			}
 
 			r := http.Request{
