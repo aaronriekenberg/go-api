@@ -186,7 +186,10 @@ func (runCommandsHandler *runCommandsHandler) runCommand(
 
 	commandStartTime := time.Now()
 	rawCommandOutput, err := exec.CommandContext(
-		ctx, commandInfo.Command, commandInfo.Args...).CombinedOutput()
+		ctx,
+		commandInfo.Command,
+		commandInfo.Args...,
+	).CombinedOutput()
 	commandEndTime := time.Now()
 
 	commandDuration := commandEndTime.Sub(commandStartTime)
