@@ -76,9 +76,10 @@ func runListener(
 		protocols.SetUnencryptedHTTP2(true)
 	}
 
-	slog.Info("creating httpServer",
+	logger.Info("creating httpServer",
 		"protocols", protocols.String(),
 	)
+
 	httpServer := &http.Server{
 		IdleTimeout:  5 * time.Minute,
 		ReadTimeout:  1 * time.Minute,
