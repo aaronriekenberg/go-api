@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 	"runtime/debug"
 	"strings"
 
@@ -30,6 +31,8 @@ func main() {
 	slog.Info("begin main",
 		"buildInfoMap", version.BuildInfoMap(),
 		"goEnvironVariables", goEnvironVariables(),
+		"GOMAXPROCS", runtime.GOMAXPROCS(0),
+		"NumCPU", runtime.NumCPU(),
 	)
 
 	if len(os.Args) != 2 {
