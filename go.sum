@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg=
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/aaronriekenberg/gsm v0.2.0 h1:ogMpEiVFcHMWIVApXj1CPc+BXMtJlXDmJapIw/wZ8og=
-github.com/aaronriekenberg/gsm v0.2.0/go.mod h1:kZIqIB1EQhas77oFBkHqhujCqF9WzTRC5bCb1eo3y3s=
+github.com/aaronriekenberg/gsm v0.3.0 h1:mqLhFbH1R74cqdo43HTJ1vKB0ZvpyoY/W4pya9Y5omE=
+github.com/aaronriekenberg/gsm v0.3.0/go.mod h1:8VNcTYdboK9iHcU32bAqjDI4f/LaT97XaZi+u8EIFJ0=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
