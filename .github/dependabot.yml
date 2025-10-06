@@ -5,6 +5,13 @@
 
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "all"
+
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
