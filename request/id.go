@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 )
 
-type RequestID uint
+type RequestID int
 
 type requestIDContextKey struct{}
 
@@ -30,7 +30,7 @@ func RequestIDFromContext(
 	return
 }
 
-var previousRequestID atomic.Uint64
+var previousRequestID atomic.Int64
 
 func NextRequestID() RequestID {
 	id := previousRequestID.Add(1)

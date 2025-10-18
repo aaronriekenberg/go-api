@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type ConnectionID uint
+type ConnectionID int
 
 type ConnectionInfo interface {
 	ID() ConnectionID

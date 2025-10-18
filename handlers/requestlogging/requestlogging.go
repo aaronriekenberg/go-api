@@ -61,7 +61,7 @@ func runAsyncWriter(
 
 type channelWriter struct {
 	writeChannel chan<- []byte
-	numLogDrops  atomic.Uint64
+	numLogDrops  atomic.Int64
 }
 
 func (channelWriter *channelWriter) Write(p []byte) (n int, err error) {
@@ -80,12 +80,12 @@ func (channelWriter *channelWriter) Write(p []byte) (n int, err error) {
 func (channelWriter *channelWriter) runLogDropMonitor() {
 	ticker := time.NewTicker(5 * time.Second)
 
-	var previousLogDrops uint64 = 0
+	var previousLogDrops = 0
 
 	for {
 		<-ticker.C
 
-		currentLogDrops := channelWriter.numLogDrops.Load()
+		currentLogDrops := int(channelWriter.numLogDrops.Load())
 
 		if previousLogDrops != currentLogDrops {
 			slog.Warn("log drops increased",

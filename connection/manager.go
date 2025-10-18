@@ -32,7 +32,7 @@ type ConnectionManager interface {
 type connectionManager struct {
 	idToConnection       gsm.GenericSyncMap[ConnectionID, ConnectionInfo]
 	numOpenConnections   atomic.Int64
-	previousConnectionID atomic.Uint64
+	previousConnectionID atomic.Int64
 	metricsManager       *connectionMetricsManager
 }
 
