@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-type ConnectionID uint64
+type ConnectionID uint
 
 type ConnectionInfo interface {
 	ID() ConnectionID
 	Network() string
 	CreationTime() time.Time
 	Age(now time.Time) time.Duration
-	Requests() uint64
+	Requests() int
 	IncrementRequests()
 	markClosed()
 	openDuration() time.Duration
@@ -23,7 +23,7 @@ type connectionInfo struct {
 	id           ConnectionID
 	network      string
 	creationTime time.Time
-	requests     atomic.Uint64
+	requests     atomic.Int64
 	closeTime    time.Time
 }
 
@@ -54,8 +54,8 @@ func (ci *connectionInfo) Age(now time.Time) time.Duration {
 	return now.Sub(ci.creationTime)
 }
 
-func (ci *connectionInfo) Requests() uint64 {
-	return ci.requests.Load()
+func (ci *connectionInfo) Requests() int {
+	return int(ci.requests.Load())
 }
 
 func (ci *connectionInfo) IncrementRequests() {

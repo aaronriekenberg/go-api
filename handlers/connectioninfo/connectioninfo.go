@@ -11,11 +11,11 @@ import (
 )
 
 type connectionDTO struct {
-	ID           uint64    `json:"id"`
-	Network      string    `json:"network"`
-	Age          string    `json:"age"`
-	CreationTime time.Time `json:"creation_time"`
-	Requests     uint64    `json:"requests"`
+	ID           connection.ConnectionID `json:"id"`
+	Network      string                  `json:"network"`
+	Age          string                  `json:"age"`
+	CreationTime time.Time               `json:"creation_time"`
+	Requests     int                     `json:"requests"`
 }
 
 func connectionInfoToDTO(
@@ -23,7 +23,7 @@ func connectionInfoToDTO(
 	now time.Time,
 ) connectionDTO {
 	return connectionDTO{
-		ID:           uint64(connectionInfo.ID()),
+		ID:           connectionInfo.ID(),
 		Network:      connectionInfo.Network(),
 		Age:          connectionInfo.Age(now).Truncate(time.Millisecond).String(),
 		CreationTime: connectionInfo.CreationTime(),
@@ -32,15 +32,15 @@ func connectionInfoToDTO(
 }
 
 type connectionCountsDTO struct {
-	Total     uint64            `json:"total"`
-	ByNetwork map[string]uint64 `json:"by_network"`
+	Total     int            `json:"total"`
+	ByNetwork map[string]int `json:"by_network"`
 }
 
 type connectionInfoDTO struct {
-	MaxOpenConnections       uint64              `json:"max_open_connections"`
+	MaxOpenConnections       int                 `json:"max_open_connections"`
 	MinConnectionLifetime    string              `json:"min_connection_lifetime"`
 	MaxConnectionLifetime    string              `json:"max_connection_lifetime"`
-	MaxRequestsPerConnection uint64              `json:"max_requests_per_connection"`
+	MaxRequestsPerConnection int                 `json:"max_requests_per_connection"`
 	CurrentConnectionCounts  connectionCountsDTO `json:"current_connection_counts"`
 	TotalConnectionCounts    connectionCountsDTO `json:"total_connection_counts"`
 	CurrentConnections       []connectionDTO     `json:"current_connections"`
@@ -71,7 +71,7 @@ func connectionInfoHandlerFunc() http.HandlerFunc {
 			MaxConnectionLifetime:    connectionManagerStateSnapshot.MaxConnectionLifetime.Truncate(time.Millisecond).String(),
 			MaxRequestsPerConnection: connectionManagerStateSnapshot.MaxRequestsPerConnection,
 			CurrentConnectionCounts: connectionCountsDTO{
-				Total:     uint64(len(connectionDTOs)),
+				Total:     len(connectionDTOs),
 				ByNetwork: connectionManagerStateSnapshot.CurrentConnectionsByNetwork,
 			},
 			TotalConnectionCounts: connectionCountsDTO{

@@ -7,17 +7,17 @@ import (
 )
 
 type connectionMetrics struct {
-	totalConnections             uint64
-	totalConnectionsByNetwork    map[string]uint64
-	maxOpenConnections           uint64
+	totalConnections             int
+	totalConnectionsByNetwork    map[string]int
+	maxOpenConnections           int
 	pastMinConnectionAge         *time.Duration
 	pastMaxConnectionAge         time.Duration
-	pastMaxRequestsPerConnection uint64
+	pastMaxRequestsPerConnection int
 }
 
 func newConnectionMetrics() *connectionMetrics {
 	return &connectionMetrics{
-		totalConnectionsByNetwork: make(map[string]uint64),
+		totalConnectionsByNetwork: make(map[string]int),
 	}
 }
 
@@ -40,7 +40,7 @@ func (cm *connectionMetrics) clone() *connectionMetrics {
 
 type newConnectionMessage struct {
 	newConnection          ConnectionInfo
-	currentOpenConnections uint64
+	currentOpenConnections int
 }
 
 type closedConnectionMessage struct {
@@ -116,7 +116,7 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 
 func (cmm *connectionMetricsManager) updateForNewConnection(
 	newConnection ConnectionInfo,
-	currentOpenConnections uint64,
+	currentOpenConnections int,
 ) {
 	cmm.updateChannel <- updateMetricsMessage{
 		newConnectionMessage: &newConnectionMessage{

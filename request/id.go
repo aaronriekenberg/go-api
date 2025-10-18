@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 )
 
-type RequestID uint64
+type RequestID uint
 
 type requestIDContextKey struct{}
 

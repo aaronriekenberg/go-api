@@ -11,14 +11,14 @@ import (
 )
 
 type ConnectionManagerStateSnapshot struct {
-	TotalConnections            uint64
-	TotalConnectionsByNetwork   map[string]uint64
-	MaxOpenConnections          uint64
+	TotalConnections            int
+	TotalConnectionsByNetwork   map[string]int
+	MaxOpenConnections          int
 	MinConnectionLifetime       time.Duration
 	MaxConnectionLifetime       time.Duration
-	MaxRequestsPerConnection    uint64
+	MaxRequestsPerConnection    int
 	CurrentConnections          []ConnectionInfo
-	CurrentConnectionsByNetwork map[string]uint64
+	CurrentConnectionsByNetwork map[string]int
 }
 
 type ConnectionManager interface {
@@ -31,7 +31,7 @@ type ConnectionManager interface {
 
 type connectionManager struct {
 	idToConnection       gsm.GenericSyncMap[ConnectionID, ConnectionInfo]
-	numOpenConnections   atomic.Uint64
+	numOpenConnections   atomic.Int64
 	previousConnectionID atomic.Uint64
 	metricsManager       *connectionMetricsManager
 }
@@ -58,7 +58,7 @@ func (cm *connectionManager) AddConnection(
 		connectionInfo,
 	)
 
-	numOpenConnections := cm.numOpenConnections.Add(1)
+	numOpenConnections := int(cm.numOpenConnections.Add(1))
 
 	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
@@ -80,8 +80,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 		return
 	}
 
-	// Decrement idea from https://pkg.go.dev/sync/atomic@go1.24.0#AddUint64
-	numOpenConnections := cm.numOpenConnections.Add(^uint64(0))
+	numOpenConnections := cm.numOpenConnections.Add(-1)
 
 	slog.Debug("connectionManager.RemoveConnection",
 		"connectionID", connection.ID(),
@@ -120,7 +119,7 @@ func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
 
 	connectionMetrics := cm.metricsManager.connectionMetrics()
 
-	currentConnectionsByNetwork := make(map[string]uint64)
+	currentConnectionsByNetwork := make(map[string]int)
 	maxConnectionLifetime := connectionMetrics.pastMaxConnectionAge
 	maxRequestsPerConnection := connectionMetrics.pastMaxRequestsPerConnection
 
