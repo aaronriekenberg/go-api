@@ -80,7 +80,7 @@ func (channelWriter *channelWriter) Write(p []byte) (n int, err error) {
 func (channelWriter *channelWriter) runLogDropMonitor() {
 	ticker := time.NewTicker(5 * time.Second)
 
-	var previousLogDrops = 0
+	previousLogDrops := 0
 
 	for {
 		<-ticker.C
