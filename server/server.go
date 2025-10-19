@@ -24,11 +24,11 @@ func addConnectionInfoToContext(
 	return ctx
 }
 
+var nextRequestID func() request.RequestID = request.RequestIDFactory()
+
 func updateContextForRequestHandler(
 	handler http.Handler,
 ) http.HandlerFunc {
-	nextRequestID := request.RequestIDFactory()
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		requestID := nextRequestID()
