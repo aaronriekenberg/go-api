@@ -7,6 +7,14 @@ import (
 
 type RequestID uint64
 
+func RequestIDFactory() func() RequestID {
+	var previousRequestID atomic.Uint64
+
+	return func() RequestID {
+		return RequestID(previousRequestID.Add(1))
+	}
+}
+
 type requestIDContextKey struct{}
 
 func AddRequestIDToContext(
@@ -28,11 +36,4 @@ func RequestIDFromContext(
 		requestID = id
 	}
 	return
-}
-
-var previousRequestID atomic.Uint64
-
-func NextRequestID() RequestID {
-	id := previousRequestID.Add(1)
-	return RequestID(id)
 }

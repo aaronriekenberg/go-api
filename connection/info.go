@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-type ConnectionID uint64
-
 type ConnectionInfo interface {
 	ID() ConnectionID
 	Network() string

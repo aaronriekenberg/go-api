@@ -27,9 +27,11 @@ func addConnectionInfoToContext(
 func updateContextForRequestHandler(
 	handler http.Handler,
 ) http.HandlerFunc {
+	nextRequestID := request.RequestIDFactory()
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		requestID := request.NextRequestID()
+		requestID := nextRequestID()
 
 		if connectionInfo, ok := connection.ConnectionInfoFromContext(ctx); ok {
 			connectionInfo.IncrementRequests()
