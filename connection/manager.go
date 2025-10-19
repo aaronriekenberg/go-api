@@ -31,9 +31,9 @@ type ConnectionManager interface {
 
 type connectionManager struct {
 	idToConnection     gsm.GenericSyncMap[ConnectionID, ConnectionInfo]
-	numOpenConnections atomic.Int64
-	nextConnectionID   func() ConnectionID
 	metricsManager     *connectionMetricsManager
+	nextConnectionID   func() ConnectionID
+	numOpenConnections atomic.Int64
 }
 
 func newConnectionManager() *connectionManager {
