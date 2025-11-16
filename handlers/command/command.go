@@ -158,7 +158,7 @@ func (runCommandsHandler *runCommandsHandler) acquireCommandSemaphore(ctx contex
 
 	err := runCommandsHandler.commandSemaphore.Acquire(ctx, 1)
 	if err != nil {
-		return errors.Join(errorAcquiringCommandSemaphore, err)
+		return fmt.Errorf("%w: %w", errorAcquiringCommandSemaphore, err)
 	}
 	return nil
 }

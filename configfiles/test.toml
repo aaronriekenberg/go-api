@@ -16,12 +16,12 @@ maxSizeMegabytes = 1
 maxBackups = 10
 
 [commandConfiguration]
-maxConcurrentCommands = 10
+maxConcurrentCommands = 1
 requestTimeoutDuration = "2s"
 semaphoreAcquireTimeoutDuration = "200ms"
 commands = [
     { id = "w", "internalOnly" = true, description = "w", command = "/usr/bin/w" },
-    { id = "sleep", description = "sleep .5", command = "/bin/sleep", Args = [
+    { id = "sleep", description = "sleep 5", command = "/bin/sleep", Args = [
         "5",
     ] },
 ]
