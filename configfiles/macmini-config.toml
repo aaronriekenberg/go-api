@@ -20,17 +20,6 @@ maxConcurrentCommands = 10
 requestTimeoutDuration = "2s"
 semaphoreAcquireTimeoutDuration = "200ms"
 commands = [
-    { id = "chronyc_sources", description = "chronyc sources", command = "/usr/bin/chronyc", args = [
-        "-n",
-        "sources",
-        "-v",
-    ] },
-    { id = "chronyc_sourcestats", description = "chronyc sourcestats", command = "/usr/bin/chronyc", args = [
-        "-a",
-        "-n",
-        "sourcestats",
-        "-v",
-    ] },
     { id = "df", description = "df", command = "/usr/bin/df", args = [
         "-h",
     ] },
@@ -50,6 +39,9 @@ commands = [
         "-n",
     ] },
     { id = "sensors", description = "sensors", command = "/usr/bin/sensors" },
+    { id = "timedatectl_timesync_status", description = "timedatectl timesync-status", command = "/usr/bin/timedatectl", args = [
+        "timesync-status",
+    ] },
     { id = "top", description = "top", command = "/usr/bin/top", args = [
         "-b",
         "-n1",
