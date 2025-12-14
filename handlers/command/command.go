@@ -34,8 +34,9 @@ func commandInfoToDTO(commandInfo config.CommandInfo) commandInfoDTO {
 }
 
 type allCommandsHandler struct {
-	allHandler      http.Handler
-	externalHandler http.Handler
+	requestIsExternal request.IsExternal
+	allHandler        http.Handler
+	externalHandler   http.Handler
 }
 
 func NewAllCommandsHandler() http.Handler {
@@ -60,8 +61,9 @@ func NewAllCommandsHandler() http.Handler {
 	externalHandler := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(externalCommandDTOs))
 
 	return &allCommandsHandler{
-		allHandler:      allHandler,
-		externalHandler: externalHandler,
+		requestIsExternal: request.ExternalCheck(),
+		allHandler:        allHandler,
+		externalHandler:   externalHandler,
 	}
 }
 
@@ -69,7 +71,7 @@ func (allCommandsHandler *allCommandsHandler) ServeHTTP(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	if request.IsExternal(r) {
+	if allCommandsHandler.requestIsExternal(r) {
 		allCommandsHandler.externalHandler.ServeHTTP(w, r)
 	} else {
 		allCommandsHandler.allHandler.ServeHTTP(w, r)
@@ -77,6 +79,7 @@ func (allCommandsHandler *allCommandsHandler) ServeHTTP(
 }
 
 type runCommandsHandler struct {
+	requestIsExternal       request.IsExternal
 	commandSemaphore        *semaphore.Weighted
 	requestTimeout          time.Duration
 	semaphoreAcquireTimeout time.Duration
@@ -93,6 +96,7 @@ func NewRunCommandsHandler() http.Handler {
 	}
 
 	return &runCommandsHandler{
+		requestIsExternal:       request.ExternalCheck(),
 		commandSemaphore:        semaphore.NewWeighted(commandConfiguration.MaxConcurrentCommands),
 		requestTimeout:          commandConfiguration.RequestTimeoutDuration,
 		semaphoreAcquireTimeout: commandConfiguration.SemaphoreAcquireTimeoutDuration,
@@ -117,7 +121,7 @@ func (runCommandsHandler *runCommandsHandler) ServeHTTP(
 		return
 	}
 
-	if commandInfo.InternalOnly && request.IsExternal(r) {
+	if commandInfo.InternalOnly && runCommandsHandler.requestIsExternal(r) {
 		slog.Warn("RunCommandsHandler external request for internal only command",
 			"id", id,
 		)

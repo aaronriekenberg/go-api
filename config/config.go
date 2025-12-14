@@ -22,6 +22,10 @@ type ServerConfiguration struct {
 	APIContext string
 }
 
+type RequestConfiguration struct {
+	ExternalHost string
+}
+
 type ProfilingConfiguration struct {
 	Enabled       bool
 	ListenAddress string
@@ -65,6 +69,7 @@ func (c *CommandConfiguration) MarshalJSON() ([]byte, error) {
 
 type Configuration struct {
 	ServerConfiguration         ServerConfiguration
+	RequestConfiguration        RequestConfiguration
 	ProfilingConfiguration      ProfilingConfiguration
 	RequestLoggingConfiguration RequestLoggingConfiguration
 	CommandConfiguration        CommandConfiguration

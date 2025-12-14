@@ -1,15 +1,16 @@
-package request_test
+package request
 
 import (
 	"net/http"
 	"testing"
-
-	"github.com/aaronriekenberg/go-api/request"
 )
 
 func TestIsExternal(
 	t *testing.T,
 ) {
+
+	isExternal := newExternalCheck("aaronr.digital")
+
 	tests := map[string]struct {
 		wantValue bool
 	}{
@@ -34,7 +35,7 @@ func TestIsExternal(
 			r := http.Request{
 				Host: name,
 			}
-			value := request.IsExternal(&r)
+			value := isExternal(&r)
 
 			if value != tc.wantValue {
 				t.Fatalf("test: %q got value: %v want value %v", name, value, tc.wantValue)

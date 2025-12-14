@@ -1,17 +1,41 @@
 package request
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
+
+	"github.com/aaronriekenberg/go-api/config"
 )
 
-func IsExternal(
+type IsExternal func(
 	r *http.Request,
-) bool {
-	const externalHost = "aaronr.digital"
-	const dotExternalHost = "." + externalHost
+) (external bool)
 
-	requestHost := strings.ToLower(r.Host)
+func newExternalCheck(
+	externalHost string,
+) IsExternal {
 
-	return (requestHost == externalHost) || (strings.HasSuffix(requestHost, dotExternalHost))
+	dotExternalHost := "." + externalHost
+
+	return func(
+		r *http.Request,
+	) (external bool) {
+
+		requestHost := strings.ToLower(r.Host)
+
+		external = (requestHost == externalHost) || (strings.HasSuffix(requestHost, dotExternalHost))
+		return
+	}
 }
+
+var ExternalCheck = sync.OnceValue(func() IsExternal {
+	externalHost := config.ConfigurationInstance().RequestConfiguration.ExternalHost
+
+	slog.Info("Calling newExternalCheck",
+		"externalHost", externalHost,
+	)
+
+	return newExternalCheck(externalHost)
+})

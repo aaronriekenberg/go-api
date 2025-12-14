@@ -5,6 +5,9 @@ listeners = [
 ]
 apiContext = "/api/v1"
 
+[requestConfiguration]
+externalHost = "aaronr.digital"
+
 [profilingConfiguration]
 enabled = false
 #listenAddress = ":8081"
