@@ -38,7 +38,9 @@ type allCommandsHandler struct {
 	externalHandler http.Handler
 }
 
-func NewAllCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
+func NewAllCommandsHandler() http.Handler {
+
+	commandConfiguration := config.ConfigurationInstance().CommandConfiguration
 
 	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 
@@ -81,7 +83,10 @@ type runCommandsHandler struct {
 	idToCommandInfo         map[string]config.CommandInfo
 }
 
-func NewRunCommandsHandler(commandConfiguration config.CommandConfiguration) http.Handler {
+func NewRunCommandsHandler() http.Handler {
+
+	commandConfiguration := config.ConfigurationInstance().CommandConfiguration
+
 	idToCommandInfo := make(map[string]config.CommandInfo)
 	for _, commandInfo := range commandConfiguration.Commands {
 		idToCommandInfo[commandInfo.ID] = commandInfo

@@ -19,9 +19,10 @@ import (
 const writeChannelCapacity = 1_000
 
 func NewRequestLogger(
-	requestLoggerConfig config.RequestLoggingConfiguration,
 	nextHandler http.Handler,
 ) http.Handler {
+
+	requestLoggerConfig := config.ConfigurationInstance().RequestLoggingConfiguration
 
 	if !requestLoggerConfig.Enabled {
 		return nextHandler

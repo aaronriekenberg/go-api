@@ -100,9 +100,10 @@ func runListener(
 }
 
 func Run(
-	serverConfig config.ServerConfiguration,
 	handler http.Handler,
 ) error {
+
+	serverConfig := config.ConfigurationInstance().ServerConfiguration
 
 	slog.Info("begin server.Run")
 

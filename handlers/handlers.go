@@ -14,10 +14,11 @@ import (
 	"github.com/aaronriekenberg/go-api/handlers/versioninfo"
 )
 
-func CreateHandlers(
-	config config.Configuration,
-) http.Handler {
+func CreateHandlers() http.Handler {
+
 	mux := http.NewServeMux()
+
+	config := config.ConfigurationInstance()
 
 	apiContext := config.ServerConfiguration.APIContext
 
@@ -34,9 +35,9 @@ func CreateHandlers(
 		mux.Handle("GET "+path.Join(apiContext, relativePath), handler)
 	}
 
-	handleAPIGET("/commands", command.NewAllCommandsHandler(config.CommandConfiguration))
+	handleAPIGET("/commands", command.NewAllCommandsHandler())
 
-	handleAPIGET("/commands/{id}", command.NewRunCommandsHandler(config.CommandConfiguration))
+	handleAPIGET("/commands/{id}", command.NewRunCommandsHandler())
 
 	handleAPIGET("/connection_info", connectioninfo.NewConnectionInfoHandler())
 
@@ -44,5 +45,5 @@ func CreateHandlers(
 
 	handleAPIGET("/version_info", versioninfo.NewVersionInfoHandler())
 
-	return requestlogging.NewRequestLogger(config.RequestLoggingConfiguration, mux)
+	return requestlogging.NewRequestLogger(mux)
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"os"
+	"sync"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -68,11 +70,17 @@ type Configuration struct {
 	CommandConfiguration        CommandConfiguration
 }
 
-func ReadConfiguration(configFile string) (*Configuration, error) {
+func readConfiguration() *Configuration {
+
+	if len(os.Args) != 2 {
+		panic("config file required as command line arument")
+	}
+
+	configFile := os.Args[1]
 
 	logger := slog.Default().With("configFile", configFile)
 
-	logger.Info("begin ReadConfiguration")
+	logger.Info("begin readConfiguration")
 
 	var configuration Configuration
 	_, err := toml.DecodeFile(configFile, &configuration)
@@ -80,12 +88,18 @@ func ReadConfiguration(configFile string) (*Configuration, error) {
 		logger.Error("toml.DecodeFile error",
 			"error", err,
 		)
-		return nil, fmt.Errorf("ReadConfiguration error: %w", err)
+		panic(fmt.Errorf("readConfiguration error: %w", err))
 	}
 
-	logger.Info("end ReadConfiguration",
+	logger.Info("end readConfiguration",
 		"configuration", &configuration,
 	)
 
-	return &configuration, nil
+	return &configuration
+}
+
+var readConfigurationOnce = sync.OnceValue(readConfiguration)
+
+func ConfigurationInstance() *Configuration {
+	return readConfigurationOnce()
 }

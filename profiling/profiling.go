@@ -11,7 +11,9 @@ import (
 	"github.com/aaronriekenberg/go-api/config"
 )
 
-func Start(config config.ProfilingConfiguration) {
+func Start() {
+	config := config.ConfigurationInstance().ProfilingConfiguration
+
 	if !config.Enabled {
 		return
 	}
