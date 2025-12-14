@@ -28,6 +28,7 @@ func main() {
 	setupSlog()
 
 	slog.Info("begin main",
+		"os.Args", os.Args,
 		"buildInfoMap", version.BuildInfoMap(),
 		"goEnvironVariables", goEnvironVariables(),
 		"GOMAXPROCS", runtime.GOMAXPROCS(0),
