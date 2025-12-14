@@ -2,13 +2,16 @@ package request
 
 import (
 	"net/http"
-	"regexp"
+	"strings"
 )
-
-var externalHostRegex = regexp.MustCompile(`(?i)^aaronr.digital$|^.*\.aaronr.digital$`)
 
 func IsExternal(
 	r *http.Request,
 ) bool {
-	return externalHostRegex.MatchString(r.Host)
+	const externalHost = "aaronr.digital"
+	const dotExternalHost = "." + externalHost
+
+	requestHost := strings.ToLower(r.Host)
+
+	return (requestHost == externalHost) || (strings.HasSuffix(requestHost, dotExternalHost))
 }
