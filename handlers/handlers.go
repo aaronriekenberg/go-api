@@ -18,9 +18,7 @@ func CreateHandlers() http.Handler {
 
 	mux := http.NewServeMux()
 
-	config := config.Instance()
-
-	apiContext := config.ServerConfiguration.APIContext
+	apiContext := config.Instance().ServerConfiguration.APIContext
 
 	slog.Info("CreateHandlers",
 		"apiContext", apiContext,
