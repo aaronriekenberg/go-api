@@ -12,7 +12,7 @@ import (
 )
 
 func Start() {
-	config := config.ConfigurationInstance().ProfilingConfiguration
+	config := config.Instance().ProfilingConfiguration
 
 	if !config.Enabled {
 		return

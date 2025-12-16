@@ -41,7 +41,7 @@ type allCommandsHandler struct {
 
 func NewAllCommandsHandler() http.Handler {
 
-	commandConfiguration := config.ConfigurationInstance().CommandConfiguration
+	commandConfiguration := config.Instance().CommandConfiguration
 
 	allCommandDTOs := make([]commandInfoDTO, 0, len(commandConfiguration.Commands))
 
@@ -61,7 +61,7 @@ func NewAllCommandsHandler() http.Handler {
 	externalHandler := utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(externalCommandDTOs))
 
 	return &allCommandsHandler{
-		requestIsExternal: request.ExternalCheck(),
+		requestIsExternal: request.ExternalCheckInstance(),
 		allHandler:        allHandler,
 		externalHandler:   externalHandler,
 	}
@@ -88,7 +88,7 @@ type runCommandsHandler struct {
 
 func NewRunCommandsHandler() http.Handler {
 
-	commandConfiguration := config.ConfigurationInstance().CommandConfiguration
+	commandConfiguration := config.Instance().CommandConfiguration
 
 	idToCommandInfo := make(map[string]config.CommandInfo)
 	for _, commandInfo := range commandConfiguration.Commands {
@@ -96,7 +96,7 @@ func NewRunCommandsHandler() http.Handler {
 	}
 
 	return &runCommandsHandler{
-		requestIsExternal:       request.ExternalCheck(),
+		requestIsExternal:       request.ExternalCheckInstance(),
 		commandSemaphore:        semaphore.NewWeighted(commandConfiguration.MaxConcurrentCommands),
 		requestTimeout:          commandConfiguration.RequestTimeoutDuration,
 		semaphoreAcquireTimeout: commandConfiguration.SemaphoreAcquireTimeoutDuration,

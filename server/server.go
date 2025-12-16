@@ -103,7 +103,7 @@ func Run(
 	handler http.Handler,
 ) error {
 
-	serverConfig := config.ConfigurationInstance().ServerConfiguration
+	serverConfig := config.Instance().ServerConfiguration
 
 	slog.Info("begin server.Run")
 

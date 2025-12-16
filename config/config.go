@@ -103,8 +103,4 @@ func readConfiguration() *Configuration {
 	return &configuration
 }
 
-var readConfigurationOnce = sync.OnceValue(readConfiguration)
-
-func ConfigurationInstance() *Configuration {
-	return readConfigurationOnce()
-}
+var Instance = sync.OnceValue(readConfiguration)

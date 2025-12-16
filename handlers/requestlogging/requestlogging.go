@@ -22,7 +22,7 @@ func NewRequestLogger(
 	nextHandler http.Handler,
 ) http.Handler {
 
-	requestLoggerConfig := config.ConfigurationInstance().RequestLoggingConfiguration
+	requestLoggerConfig := config.Instance().RequestLoggingConfiguration
 
 	if !requestLoggerConfig.Enabled {
 		return nextHandler
