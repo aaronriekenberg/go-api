@@ -9,7 +9,8 @@ func TestIsExternal(
 	t *testing.T,
 ) {
 
-	isExternal := newExternalCheck("aaronr.digital")
+	isExternalLower := newExternalCheck("aaronr.digital")
+	isExternalUpper := newExternalCheck("Aaronr.Digital")
 
 	tests := map[string]struct {
 		wantValue bool
@@ -35,10 +36,16 @@ func TestIsExternal(
 			r := http.Request{
 				Host: name,
 			}
-			value := isExternal(&r)
+			value := isExternalLower(&r)
 
 			if value != tc.wantValue {
-				t.Fatalf("test: %q got value: %v want value %v", name, value, tc.wantValue)
+				t.Fatalf("test: %q isExternalLower got value: %v want value %v", name, value, tc.wantValue)
+			}
+
+			value = isExternalUpper(&r)
+
+			if value != tc.wantValue {
+				t.Fatalf("test: %q isExternalUpper got value: %v want value %v", name, value, tc.wantValue)
 			}
 		})
 	}

@@ -17,6 +17,7 @@ func newExternalCheck(
 	externalHost string,
 ) IsExternal {
 
+	externalHost = strings.ToLower(externalHost)
 	dotExternalHost := "." + externalHost
 
 	return func(
