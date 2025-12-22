@@ -34,7 +34,7 @@ func newExternalCheck(
 var ExternalCheckInstance = sync.OnceValue(func() IsExternal {
 	externalHost := config.Instance().RequestConfiguration.ExternalHost
 
-	slog.Info("Calling newExternalCheck",
+	slog.Info("calling newExternalCheck",
 		"externalHost", externalHost,
 	)
 

@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"log/slog"
 	"slices"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -138,8 +139,8 @@ func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
 	}
 }
 
-var connectionManagerInstance = newConnectionManager()
+var ConnectionManagerInstance = sync.OnceValue(func() ConnectionManager {
+	slog.Info("calling newConnectionManager")
 
-func ConnectionManagerInstance() ConnectionManager {
-	return connectionManagerInstance
-}
+	return newConnectionManager()
+})
