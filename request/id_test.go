@@ -136,8 +136,8 @@ func TestMultipleFactories(t *testing.T) {
 	id2a := factory2()
 	id2b := factory2()
 
-	if id1a == 0 || id2a == 0 {
-		t.Error("Request IDs should not be 0")
+	if id1a != 1 || id2a != 1 {
+		t.Error("Request IDs should be 1")
 	}
 
 	// IDs from different factories may overlap, which is fine
