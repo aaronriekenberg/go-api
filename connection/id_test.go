@@ -21,20 +21,12 @@ func TestConnectionIDFactory(t *testing.T) {
 		t.Error("First connection ID should be 1")
 	}
 
-	if id2 <= id1 {
-		t.Errorf("Second ID (%d) should be greater than first (%d)", id2, id1)
-	}
-
-	if id3 <= id2 {
-		t.Errorf("Third ID (%d) should be greater than second (%d)", id3, id2)
-	}
-
 	// Verify that IDs increment by 1
-	if id2 != id1+1 {
+	if id2 != 2 {
 		t.Errorf("Expected ID to increment by 1, got %d to %d", id1, id2)
 	}
 
-	if id3 != id2+1 {
+	if id3 != 3 {
 		t.Errorf("Expected ID to increment by 1, got %d to %d", id2, id3)
 	}
 }
