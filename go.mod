@@ -1,10 +1,10 @@
 module github.com/aaronriekenberg/go-api
 
-go 1.25.5
+go 1.25.6
 
 require (
 	github.com/BurntSushi/toml v1.6.0
-	github.com/aaronriekenberg/gsm v1.0.6
+	github.com/aaronriekenberg/gsm v1.0.7
 	github.com/felixge/httpsnoop v1.0.4
 	golang.org/x/sync v0.19.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
