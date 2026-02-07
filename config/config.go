@@ -9,6 +9,8 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+var Instance = sync.OnceValue(readConfiguration)
+
 func readConfiguration() *Configuration {
 
 	if len(os.Args) != 2 {
@@ -36,5 +38,3 @@ func readConfiguration() *Configuration {
 
 	return &configuration
 }
-
-var Instance = sync.OnceValue(readConfiguration)
