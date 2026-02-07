@@ -11,6 +11,12 @@ import (
 	"github.com/aaronriekenberg/gsm"
 )
 
+var ConnectionManagerInstance = sync.OnceValue(func() ConnectionManager {
+	slog.Info("calling newConnectionManager")
+
+	return newConnectionManager()
+})
+
 type ConnectionManagerStateSnapshot struct {
 	TotalConnections            int
 	TotalConnectionsByNetwork   map[string]int
@@ -138,9 +144,3 @@ func (cm *connectionManager) StateSnapshot() ConnectionManagerStateSnapshot {
 		CurrentConnectionsByNetwork: currentConnectionsByNetwork,
 	}
 }
-
-var ConnectionManagerInstance = sync.OnceValue(func() ConnectionManager {
-	slog.Info("calling newConnectionManager")
-
-	return newConnectionManager()
-})
