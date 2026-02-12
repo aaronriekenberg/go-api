@@ -100,8 +100,7 @@ func (cmm *connectionMetricsManager) runUpdateMetricsTask() {
 			closedConnection := closedConnectionMessage.closedConnection
 
 			if metricsClone.pastMinConnectionAge == nil {
-				metricsClone.pastMinConnectionAge = new(time.Duration)
-				*metricsClone.pastMinConnectionAge = closedConnection.openDuration()
+				metricsClone.pastMinConnectionAge = new(closedConnection.openDuration())
 			} else {
 				*metricsClone.pastMinConnectionAge = min(closedConnection.openDuration(), *metricsClone.pastMinConnectionAge)
 			}
