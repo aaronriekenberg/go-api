@@ -36,9 +36,9 @@ func TestConnectionIDFactoryConcurrency(t *testing.T) {
 	idsChan := make(chan ConnectionID, 100)
 
 	// Launch multiple goroutines to get IDs concurrently
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go func() {
-			for j := 0; j < 10; j++ {
+			for range 10 {
 				idsChan <- factory()
 			}
 		}()
@@ -46,7 +46,7 @@ func TestConnectionIDFactoryConcurrency(t *testing.T) {
 
 	// Collect all IDs
 	ids := make([]ConnectionID, 0, 100)
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		ids = append(ids, <-idsChan)
 	}
 
