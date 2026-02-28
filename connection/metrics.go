@@ -31,8 +31,7 @@ func (cm *connectionMetrics) clone() *connectionMetrics {
 	cmClone.totalConnectionsByNetwork = maps.Clone(cm.totalConnectionsByNetwork)
 
 	if cm.pastMinConnectionAge != nil {
-		cmClone.pastMinConnectionAge = new(time.Duration)
-		cmClone.pastMinConnectionAge = cm.pastMinConnectionAge
+		cmClone.pastMinConnectionAge = new(*cm.pastMinConnectionAge)
 	}
 
 	return &cmClone
