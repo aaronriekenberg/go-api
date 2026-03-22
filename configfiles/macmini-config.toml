@@ -34,6 +34,10 @@ commands = [
         "sourcestats",
         "-v",
     ] },
+    { id = "chronyc_tracking", description = "chronyc tracking", command = "/usr/bin/chronyc", args = [
+        "-n",
+        "tracking",
+    ] },
     { id = "df", description = "df", command = "/usr/bin/df", args = [
         "-h",
     ] },
