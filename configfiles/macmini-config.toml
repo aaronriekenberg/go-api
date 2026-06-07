@@ -24,18 +24,18 @@ requestTimeoutDuration = "2s"
 semaphoreAcquireTimeoutDuration = "200ms"
 commands = [
     { id = "chronyc_sources", description = "chronyc sources", command = "/usr/bin/chronyc", args = [
-        "-n",
+        "-N",
         "sources",
         "-v",
     ] },
     { id = "chronyc_sourcestats", description = "chronyc sourcestats", command = "/usr/bin/chronyc", args = [
         "-a",
-        "-n",
+        "-N",
         "sourcestats",
         "-v",
     ] },
     { id = "chronyc_tracking", description = "chronyc tracking", command = "/usr/bin/chronyc", args = [
-        "-n",
+        "-N",
         "tracking",
     ] },
     { id = "df", description = "df", command = "/usr/bin/df", args = [
