@@ -1,6 +1,7 @@
 package requestinfo
 
 import (
+	"encoding/json/v2"
 	"net/http"
 	"strings"
 
@@ -64,7 +65,7 @@ func requestInfoHandlerFunc() http.HandlerFunc {
 			RequestHeaders: httpHeaderToRequestHeaders(r.Header),
 		}
 
-		utils.RespondWithJSONDTO(&response, w)
+		utils.RespondWithJSONDTO(&response, w, json.Deterministic(true))
 	}
 }
 

@@ -17,8 +17,9 @@ const (
 
 func MustMarshalJSON(
 	dto any,
+	opts ...json.Options,
 ) []byte {
-	jsonBytes, err := json.Marshal(dto)
+	jsonBytes, err := json.Marshal(dto, opts...)
 	if err != nil {
 		panic(fmt.Errorf("utils.MustMarshalJSON: json.Marshal error: %w", err))
 	}
@@ -28,10 +29,11 @@ func MustMarshalJSON(
 func RespondWithJSONDTO(
 	dto any,
 	w http.ResponseWriter,
+	opts ...json.Options,
 ) {
 	w.Header().Set(ContentTypeHeaderKey, ContentTypeApplicationJSON)
 
-	err := json.MarshalWrite(w, dto)
+	err := json.MarshalWrite(w, dto, opts...)
 	if err != nil {
 		slog.Warn("utils.RespondWithJSONDTO: json.MarshalWrite error",
 			"error", err,
