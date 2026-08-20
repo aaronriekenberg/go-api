@@ -1,7 +1,8 @@
 package config
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"time"
 )
 
@@ -48,9 +49,10 @@ type CommandConfiguration struct {
 }
 
 // Idea from https://choly.ca/post/go-json-marshalling/
-func (c *CommandConfiguration) MarshalJSON() ([]byte, error) {
+// Updated for encoding/json/v2 using MarshalJSONTo for better performance
+func (c *CommandConfiguration) MarshalJSONTo(enc *jsontext.Encoder) error {
 	type Alias CommandConfiguration
-	return json.Marshal(&struct {
+	return json.MarshalEncode(enc, &struct {
 		RequestTimeoutDuration          string
 		SemaphoreAcquireTimeoutDuration string
 		*Alias

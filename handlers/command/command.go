@@ -98,8 +98,8 @@ func NewRunCommandsHandler() http.Handler {
 	return &runCommandsHandler{
 		requestIsExternal:       request.ExternalCheckInstance(),
 		commandSemaphore:        semaphore.NewWeighted(commandConfiguration.MaxConcurrentCommands),
-		requestTimeout:          commandConfiguration.RequestTimeoutDuration,
-		semaphoreAcquireTimeout: commandConfiguration.SemaphoreAcquireTimeoutDuration,
+		requestTimeout:          time.Duration(commandConfiguration.RequestTimeoutDuration),
+		semaphoreAcquireTimeout: time.Duration(commandConfiguration.SemaphoreAcquireTimeoutDuration),
 		idToCommandInfo:         idToCommandInfo,
 	}
 }

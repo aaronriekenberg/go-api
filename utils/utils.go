@@ -2,7 +2,7 @@ package utils
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"log/slog"
@@ -31,9 +31,9 @@ func RespondWithJSONDTO(
 ) {
 	w.Header().Set(ContentTypeHeaderKey, ContentTypeApplicationJSON)
 
-	err := json.NewEncoder(w).Encode(dto)
+	err := json.MarshalWrite(w, dto)
 	if err != nil {
-		slog.Warn("utils.RespondWithJSONDTO: json.Encode error",
+		slog.Warn("utils.RespondWithJSONDTO: json.MarshalWrite error",
 			"error", err,
 		)
 		HTTPErrorStatusCode(w, http.StatusInternalServerError)
