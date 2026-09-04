@@ -1,6 +1,7 @@
 package versioninfo
 
 import (
+	"encoding/json/v2"
 	"net/http"
 
 	"github.com/aaronriekenberg/go-api/utils"
@@ -8,5 +9,10 @@ import (
 )
 
 func NewVersionInfoHandler() http.Handler {
-	return utils.JSONBytesHandlerFunc(utils.MustMarshalJSON(version.BuildInfoMap()))
+	return utils.JSONBytesHandlerFunc(
+		utils.MustMarshalJSON(
+			version.BuildInfoMap(),
+			json.Deterministic(true),
+		),
+	)
 }
