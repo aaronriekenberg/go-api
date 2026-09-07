@@ -61,7 +61,7 @@ func (cm *connectionManager) AddConnection(
 
 	numOpenConnections := int(cm.numOpenConnections.Add(1))
 
-	slog.Info("connectionManager.AddConnection",
+	slog.Debug("connectionManager.AddConnection",
 		"connectionID", connectionID,
 		"network", network,
 		"numOpenConnections", numOpenConnections,
@@ -83,7 +83,7 @@ func (cm *connectionManager) RemoveConnection(connectionID ConnectionID) {
 
 	numOpenConnections := cm.numOpenConnections.Add(-1)
 
-	slog.Info("connectionManager.RemoveConnection",
+	slog.Debug("connectionManager.RemoveConnection",
 		"connectionID", connection.ID(),
 		"requests", connection.Requests(),
 		"numOpenConnections", numOpenConnections,
