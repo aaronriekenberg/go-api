@@ -9,6 +9,8 @@ systemctl --user stop go-api.service
 
 git pull -v
 
+export CGO_ENABLED=0
+
 time go test -test.v ./...
 time go build -x
 
