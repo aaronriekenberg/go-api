@@ -4,7 +4,7 @@ go 1.27.2
 
 require (
 	github.com/BurntSushi/toml v1.6.0
-	github.com/aaronriekenberg/gsm v1.2.0
+	github.com/aaronriekenberg/gsm v1.2.2
 	github.com/felixge/httpsnoop v1.1.0
 	golang.org/x/sync v0.24.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
