@@ -2,8 +2,8 @@ name: Update Dependencies
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Run daily at midnight UTC
-  workflow_dispatch: # Allow manual triggering
+    - cron: "0 0 * * *"  # Run daily at midnight UTC
+  workflow_dispatch:  # Allow manual triggering
 
 permissions:
   contents: write
@@ -13,7 +13,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -37,30 +38,33 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit changes
+      - name: Create branch and commit
         if: steps.verify-changed-files.outputs.changed == 'true'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git checkout -b chore/update-dependencies
           git add go.mod go.sum
           git commit -m "chore: update Go dependencies"
+          git push origin chore/update-dependencies --force
 
       - name: Create Pull Request
         if: steps.verify-changed-files.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: "chore: update Go dependencies"
-          title: "chore: update Go dependencies"
-          body: |
-            ## Automated Dependency Update
+        run: |
+          gh pr create \
+            --title "chore: update Go dependencies" \
+            --body "## Automated Dependency Update
 
-            This PR updates Go dependencies to their latest versions.
+This PR updates Go dependencies to their latest versions.
 
-            - Updated `go.mod` and `go.sum` using:
-              - `go get go@latest`
-              - `go get -u ./...`
-              - `go mod tidy`
+- Updated \`go.mod\` and \`go.sum\` using:
+  - \`go get go@latest\`
+  - \`go get -u ./...\`
+  - \`go mod tidy\`
 
-            Please review the changes and merge if they look good.
-          branch: "chore/update-dependencies"
-          delete-branch: true
+Please review the changes and merge if they look good." \
+            --base main \
+            --head chore/update-dependencies \
+            || echo "PR already exists"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
