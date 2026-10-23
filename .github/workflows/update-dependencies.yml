@@ -53,15 +53,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cat > /tmp/pr_body.txt << 'EOF'
+          Automated Dependency Update
+
+          This PR updates Go dependencies to their latest versions using:
+          - go get go@latest
+          - go get -u ./...
+          - go mod tidy
+
+          Please review and merge if the changes look good.
+          EOF
           gh pr create \
             --title "chore: update Go dependencies" \
-            --body "Automated Dependency Update
-
-This PR updates Go dependencies to their latest versions using:
-- go get go@latest
-- go get -u ./...
-- go mod tidy
-
-Please review and merge if the changes look good." \
+            --body-file /tmp/pr_body.txt \
             --base main \
             --head chore/update-dependencies || true
