@@ -41,8 +41,8 @@ jobs:
       - name: Create branch and commit
         if: steps.verify-changed-files.outputs.changed == 'true'
         run: |
-          git config --local user.email "aaron.riekenberg@gmail.com"
-          git config --local user.name "Aaron Riekenberg"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git checkout -b chore/update-dependencies
           git add go.mod go.sum
           git commit -m "chore: update Go dependencies"
