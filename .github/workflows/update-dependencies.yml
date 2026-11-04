@@ -2,8 +2,7 @@ name: Update Dependencies
 
 on:
   schedule:
-    - cron: "0 5 * * *"   # daily, builds only if the nginx base image changed
-      timezone: "America/Chicago"
+    - cron: "0 10 * * *"
   workflow_dispatch:
 
 permissions:
